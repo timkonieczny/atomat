@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/source_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="SourceTitle" />
+    <TextView
+        android:id="@+id/source_icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="SourceIcon" />
+    <TextView
+        android:id="@+id/source_link"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="SourceLink" />
+    <TextView
+        android:id="@+id/source_id"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="SourceId" />
+    <TextView
+        android:id="@+id/source_updated"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="SourceUpdated" />
+    <TextView
+        android:id="@+id/entry_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="EntryTitle" />
+    <TextView
+        android:id="@+id/entry_link"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="EntryLink" />
+    <TextView
+        android:id="@+id/entry_id"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="EntryId" />
+    <TextView
+        android:id="@+id/entry_updated"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="EntryUpdated" />
+    <TextView
+        android:id="@+id/entry_published"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="EntryPublished" />
+    <TextView
+        android:id="@+id/entry_author"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="EntryAuthor" />
+    <TextView
+        android:id="@+id/entry_content"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="EntryContent" />
+
+</LinearLayout>

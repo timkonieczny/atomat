@@ -4,7 +4,6 @@ import android.icu.text.SimpleDateFormat;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.util.Xml;
-import android.widget.TextView;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -25,13 +24,7 @@ class Feed extends AsyncTask<URL, Void, ArrayList<Source>> {
 
     private SimpleDateFormat dateFormat;
 
-    public boolean isDoneLoading = false;
-
-    private TextView textView;
-
-    public Feed(TextView textView){
-        this.textView = textView;
-    }
+    public FeedListener feedListener;
 
     @Override
     protected ArrayList<Source> doInBackground(URL... params) {
@@ -105,7 +98,7 @@ class Feed extends AsyncTask<URL, Void, ArrayList<Source>> {
                         break;
                     case "icon":
                         if(parseNextTag(parser) == XmlPullParser.TEXT)
-                            source.iconURL = parser.getText();
+                            source.icon = parser.getText();
                         parseNextTag(parser);
                         break;
                     case "updated":
@@ -119,11 +112,11 @@ class Feed extends AsyncTask<URL, Void, ArrayList<Source>> {
                         break;
                     case "id":
                         if(parseNextTag(parser) == XmlPullParser.TEXT)
-                            source.idURL = parser.getText();
+                            source.id = parser.getText();
                         parseNextTag(parser);
                         break;
                     case "link":
-                        source.websiteURL = parser.getAttributeValue(null, "href");
+                        source.link = parser.getAttributeValue(null, "href");
                         parseNextTag(parser);
                         break;
                 }
@@ -141,7 +134,7 @@ class Feed extends AsyncTask<URL, Void, ArrayList<Source>> {
                     case "published":
                         if(parseNextTag(parser) == XmlPullParser.TEXT && !parser.isWhitespace())
                             try {
-                                entry.publishedDate = dateFormat.parse(parser.getText());
+                                entry.published = dateFormat.parse(parser.getText());
                             } catch (ParseException e) {
                                 e.printStackTrace();
                             }
@@ -155,7 +148,7 @@ class Feed extends AsyncTask<URL, Void, ArrayList<Source>> {
                     case "updated":
                         if(parseNextTag(parser) == XmlPullParser.TEXT && !parser.isWhitespace())
                             try {
-                                entry.updatedDate = dateFormat.parse(parser.getText());
+                                entry.updated = dateFormat.parse(parser.getText());
                             } catch (ParseException e) {
                                 e.printStackTrace();
                             }
@@ -163,11 +156,11 @@ class Feed extends AsyncTask<URL, Void, ArrayList<Source>> {
                         break;
                     case "id":
                         if(parseNextTag(parser) == XmlPullParser.TEXT && !parser.isWhitespace())
-                            entry.idURL = parser.getText();
+                            entry.id = parser.getText();
                         parseNextTag(parser);
                         break;
                     case "link":
-                        entry.linkURL = parser.getAttributeValue(null, "href");
+                        entry.link = parser.getAttributeValue(null, "href");
                         parseNextTag(parser);
                         break;
                     case "content":
@@ -201,27 +194,6 @@ class Feed extends AsyncTask<URL, Void, ArrayList<Source>> {
     @Override
     protected void onPostExecute(ArrayList<Source> sources) {
         super.onPostExecute(sources);
-        isDoneLoading = true;
-
-        String debugText = "";
-        debugText +=
-                "\nTitle: "+source.title+
-                "\nIcon: "+source.iconURL+
-                "\nUpdated: "+source.updated.toString()+
-                "\nID: "+source.idURL+
-                "\nLink: "+source.websiteURL+"\n\n\n";
-
-        for(int i = 0; i < source.entries.size(); i++){
-            debugText +=
-                    "\nPublished: "+source.entries.get(i).publishedDate+
-                    "\nTitle: "+source.entries.get(i).title+
-                    "\nUpdated: "+source.entries.get(i).updatedDate+
-                    "\nID: "+source.entries.get(i).idURL+
-                    "\nLink: "+source.entries.get(i).linkURL+
-                    "\nContent: "+source.entries.get(i).content+
-                    "\nAuthor: "+source.entries.get(i).author+"\n\n";
-        }
-
-        textView.setText(debugText);
+        feedListener.onSourcesUpdated(source);
     }
 }
