@@ -11,11 +11,8 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
-/**
- * Created by timko on 14.05.2017.
- */
-
 public class FeedAdapter extends ArrayAdapter<Entry> {
+
     public FeedAdapter(Context context, int view, ArrayList<Entry> objects) {
         super(context, view, objects);
     }

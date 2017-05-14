@@ -14,6 +14,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.HashSet;
 
 class Feed extends AsyncTask<URL, Void, ArrayList<Entry>> {
 
@@ -21,13 +22,16 @@ class Feed extends AsyncTask<URL, Void, ArrayList<Entry>> {
 
 //    private Source source;
     private ArrayList<Entry> entries;
+    private HashSet<String> existingIds;
 
     private SimpleDateFormat dateFormat;
 
     public FeedListener feedListener;
 
-    public Feed(){
+    public Feed(FeedListener feedListener, ArrayList<Entry> existingEntries){
         dateFormat = new SimpleDateFormat("yyyy-mm-dd'T'HH:mm:ssX");
+        this.feedListener = feedListener;
+        existingIds = getExistingEntryIds(existingEntries);
     }
 
     @Override
@@ -57,6 +61,10 @@ class Feed extends AsyncTask<URL, Void, ArrayList<Entry>> {
         for(int i = 0; i < entries.size(); i++){
             entry = entries.get(i);
             entry.uniqueId = entry.source.id + "_" + entry.id;
+            if(existingIds.contains(entry.uniqueId)){
+                entries.remove(i);
+                i--;
+            }
         }
 
         return entries;
@@ -205,4 +213,13 @@ class Feed extends AsyncTask<URL, Void, ArrayList<Entry>> {
         super.onPostExecute(entries);
         feedListener.onSourcesUpdated(entries);
     }
+
+    private HashSet<String> getExistingEntryIds(ArrayList<Entry> existingEntries){
+        HashSet<String> ids = new HashSet<String>();
+        for(int i = 0; i < existingEntries.size(); i++){
+            ids.add(existingEntries.get(i).uniqueId);
+        }
+        return ids;
+    }
+
 }
