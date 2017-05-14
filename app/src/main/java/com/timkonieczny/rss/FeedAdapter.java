@@ -9,19 +9,21 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+
 /**
  * Created by timko on 14.05.2017.
  */
 
-public class FeedAdapter extends ArrayAdapter<Source> {
-    public FeedAdapter(Context context, int view, Source[] objects) {
+public class FeedAdapter extends ArrayAdapter<Entry> {
+    public FeedAdapter(Context context, int view, ArrayList<Entry> objects) {
         super(context, view, objects);
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         // Get the data item for this position
-        Source source = getItem(position);
+        Entry entry = getItem(position);
         // Check if an existing view is being reused, otherwise inflate the view
         if (convertView == null) {
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.article_list_item, parent, false);
@@ -42,19 +44,19 @@ public class FeedAdapter extends ArrayAdapter<Source> {
         TextView entryContent = (TextView) convertView.findViewById(R.id.entry_content);
 
         // Populate the data into the template view using the data object
-        sourceTitle.setText(source.title);
-        sourceIcon.setText(source.icon);
-        sourceLink.setText(source.link);
-        sourceId.setText(source.id);
-        sourceUpdated.setText(source.updated.toString());
+        sourceTitle.setText(entry.source.title);
+        sourceIcon.setText(entry.source.icon);
+        sourceLink.setText(entry.source.link);
+        sourceId.setText(entry.source.id);
+        sourceUpdated.setText(entry.source.updated.toString());
 
-        entryTitle.setText(source.entries.get(position).title);
-        entryLink.setText(source.entries.get(position).link);
-        entryId.setText(source.entries.get(position).id);
-        entryUpdated.setText(source.entries.get(position).updated.toString());
-        entryPublished.setText(source.entries.get(position).published.toString());
-        entryAuthor.setText(source.entries.get(position).author);
-        entryContent.setText(source.entries.get(position).content);
+        entryTitle.setText(entry.title);
+        entryLink.setText(entry.link);
+        entryId.setText(entry.id);
+        entryUpdated.setText(entry.updated.toString());
+        entryPublished.setText(entry.published.toString());
+        entryAuthor.setText(entry.author);
+        entryContent.setText(entry.content);
         // Return the completed view to render on screen
         return convertView;
     }

@@ -30,10 +30,8 @@ public class MainActivity extends ListActivity implements FeedListener {
     }
 
     @Override
-    public void onSourcesUpdated(Source source) {
-        Log.d("updatedSource", source.toString());
-
-        FeedAdapter adapter = new FeedAdapter(this, R.layout.article_list_item, new Source[]{source});
+    public void onSourcesUpdated(ArrayList<Entry> entries) {
+        FeedAdapter adapter = new FeedAdapter(this, R.layout.article_list_item, entries);
         this.setListAdapter(adapter);
     }
 }

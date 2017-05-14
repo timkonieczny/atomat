@@ -1,5 +1,7 @@
 package com.timkonieczny.rss;
 
+import java.util.ArrayList;
+
 public interface FeedListener {
-    public void onSourcesUpdated(Source source);
+    public void onSourcesUpdated(ArrayList<Entry> entries);
 }

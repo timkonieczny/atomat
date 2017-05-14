@@ -4,13 +4,9 @@ import java.util.Date;
 
 public class Entry {
 
-    public Date published,
-    updated;
-    public String title,
-    content,
-    link,
-    id,
-    author;
+    public Date published, updated;
+    public String title, content, link, id, author, uniqueId;
+    public Source source;
 
     public String toString(){
         return title + " by " + author;

@@ -15,26 +15,28 @@ import java.net.URL;
 import java.text.ParseException;
 import java.util.ArrayList;
 
-class Feed extends AsyncTask<URL, Void, ArrayList<Source>> {
+class Feed extends AsyncTask<URL, Void, ArrayList<Entry>> {
 
     private static final String ns = null;
 
-    private Source source;
-    private ArrayList<Source> sources;
+//    private Source source;
+    private ArrayList<Entry> entries;
 
     private SimpleDateFormat dateFormat;
 
     public FeedListener feedListener;
 
-    @Override
-    protected ArrayList<Source> doInBackground(URL... params) {
+    public Feed(){
+        dateFormat = new SimpleDateFormat("yyyy-mm-dd'T'HH:mm:ssX");
+    }
 
-        sources = new ArrayList<>();
+    @Override
+    protected ArrayList<Entry> doInBackground(URL... params) {
+
+        entries = new ArrayList<>();
 
         for(URL url : params){
             try {
-                source = new Source();
-                dateFormat = new SimpleDateFormat("yyyy-mm-dd'T'HH:mm:ssX");
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 
                 connection.setReadTimeout(10000);
@@ -45,14 +47,19 @@ class Feed extends AsyncTask<URL, Void, ArrayList<Source>> {
                 InputStream stream = connection.getInputStream();
 
                 parse(stream);
-                sources.add(source);
 
             } catch (IOException | XmlPullParserException e) {
                 e.printStackTrace();
             }
         }
 
-        return sources;
+        Entry entry;
+        for(int i = 0; i < entries.size(); i++){
+            entry = entries.get(i);
+            entry.uniqueId = entry.source.id + "_" + entry.id;
+        }
+
+        return entries;
     }
 
 
@@ -65,7 +72,7 @@ class Feed extends AsyncTask<URL, Void, ArrayList<Source>> {
             parser.require(XmlPullParser.START_TAG, ns, "feed");
 
             //parseNextTag(parser);
-            readTag(parser);
+            readSource(parser);
             //return readFeed(parser);
         } finally {
             in.close();
@@ -84,12 +91,13 @@ class Feed extends AsyncTask<URL, Void, ArrayList<Source>> {
         }
     }
 
-    private void readTag(XmlPullParser parser) throws IOException, XmlPullParserException {
+    private void readSource(XmlPullParser parser) throws IOException, XmlPullParserException {
+        Source source = new Source();
         while(parseNextTag(parser) != XmlPullParser.END_TAG){
             if(parser.getEventType() == XmlPullParser.START_TAG){
                 switch (parser.getName()){
                     case "entry":
-                        readEntry(parser);
+                        readEntry(parser, source);
                         break;
                     case "title":
                         if(parseNextTag(parser) == XmlPullParser.TEXT)
@@ -126,8 +134,9 @@ class Feed extends AsyncTask<URL, Void, ArrayList<Source>> {
         }
     }
 
-    private void readEntry(XmlPullParser parser) throws IOException, XmlPullParserException {
+    private void readEntry(XmlPullParser parser, Source source) throws IOException, XmlPullParserException {
         Entry entry = new Entry();
+        entry.source = source;
         while(parseNextTag(parser) != XmlPullParser.END_TAG){
             if(parser.getEventType() == XmlPullParser.START_TAG){
                 switch (parser.getName()){
@@ -181,7 +190,7 @@ class Feed extends AsyncTask<URL, Void, ArrayList<Source>> {
                 parseNextTag(parser);
             }
         }
-        source.entries.add(entry);
+        entries.add(entry);
     }
 
     private int parseNextTag(XmlPullParser parser) throws IOException, XmlPullParserException {
@@ -192,8 +201,8 @@ class Feed extends AsyncTask<URL, Void, ArrayList<Source>> {
     }
 
     @Override
-    protected void onPostExecute(ArrayList<Source> sources) {
-        super.onPostExecute(sources);
-        feedListener.onSourcesUpdated(source);
+    protected void onPostExecute(ArrayList<Entry> entries) {
+        super.onPostExecute(entries);
+        feedListener.onSourcesUpdated(entries);
     }
 }
