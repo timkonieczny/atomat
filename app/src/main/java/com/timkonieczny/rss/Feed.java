@@ -15,6 +15,8 @@ import java.net.URL;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 class Feed extends AsyncTask<URL, Void, ArrayList<Entry>> {
 
@@ -28,8 +30,16 @@ class Feed extends AsyncTask<URL, Void, ArrayList<Entry>> {
 
     public FeedListener feedListener;
 
+    private Pattern imgWithWhitespace;
+    private Pattern img;
+    private Matcher matcher;
+
+
     public Feed(FeedListener feedListener, ArrayList<Entry> existingEntries){
         dateFormat = new SimpleDateFormat("yyyy-mm-dd'T'HH:mm:ssX");
+        imgWithWhitespace = Pattern.compile("\\s*<img(.*?)/>\\s*");
+        img = Pattern.compile("<img(?:.*?)src=\"(.*?)\"(?:.*?)/>");
+
         this.feedListener = feedListener;
         existingIds = getExistingEntryIds(existingEntries);
     }
@@ -91,7 +101,7 @@ class Feed extends AsyncTask<URL, Void, ArrayList<Entry>> {
         try {
             switch (parser.getEventType()){
                 case XmlPullParser.START_TAG: Log.d(debugTag, "start ("+parser.getName()+")"); break;
-                case XmlPullParser.TEXT: if(parser.getText() == null) Log.d(debugTag, "text (null)"); else Log.d(debugTag, "text ("+parser.getText()+")") ; break;
+                case XmlPullParser.TEXT: if(parser.getText() == null) Log.d(debugTag, "text (null)"); else Log.d(debugTag, "text ("+parser.getText().trim()+")") ; break;
                 case XmlPullParser.END_TAG: Log.d(debugTag, "end ("+parser.getName()+")"); break;
             }
         } catch (XmlPullParserException e) {
@@ -109,18 +119,18 @@ class Feed extends AsyncTask<URL, Void, ArrayList<Entry>> {
                         break;
                     case "title":
                         if(parseNextTag(parser) == XmlPullParser.TEXT)
-                            source.title = parser.getText();
+                            source.title = parser.getText().trim();
                         parseNextTag(parser);
                         break;
                     case "icon":
                         if(parseNextTag(parser) == XmlPullParser.TEXT)
-                            source.icon = parser.getText();
+                            source.icon = parser.getText().trim();
                         parseNextTag(parser);
                         break;
                     case "updated":
                         if(parseNextTag(parser) == XmlPullParser.TEXT)
                             try {
-                                source.updated = dateFormat.parse(parser.getText());
+                                source.updated = dateFormat.parse(parser.getText().trim());
                             } catch (ParseException e) {
                                 e.printStackTrace();
                             }
@@ -128,7 +138,7 @@ class Feed extends AsyncTask<URL, Void, ArrayList<Entry>> {
                         break;
                     case "id":
                         if(parseNextTag(parser) == XmlPullParser.TEXT)
-                            source.id = parser.getText();
+                            source.id = parser.getText().trim();
                         parseNextTag(parser);
                         break;
                     case "link":
@@ -149,31 +159,31 @@ class Feed extends AsyncTask<URL, Void, ArrayList<Entry>> {
             if(parser.getEventType() == XmlPullParser.START_TAG){
                 switch (parser.getName()){
                     case "published":
-                        if(parseNextTag(parser) == XmlPullParser.TEXT && !parser.isWhitespace())
+                        if(parseNextTag(parser) == XmlPullParser.TEXT)
                             try {
-                                entry.published = dateFormat.parse(parser.getText());
+                                entry.published = dateFormat.parse(parser.getText().trim());
                             } catch (ParseException e) {
                                 e.printStackTrace();
                             }
                         parseNextTag(parser);
                         break;
                     case "title":
-                        if(parseNextTag(parser) == XmlPullParser.TEXT && !parser.isWhitespace())
-                            entry.title = parser.getText();
+                        if(parseNextTag(parser) == XmlPullParser.TEXT)
+                            entry.title = parser.getText().trim();
                         parseNextTag(parser);
                         break;
                     case "updated":
-                        if(parseNextTag(parser) == XmlPullParser.TEXT && !parser.isWhitespace())
+                        if(parseNextTag(parser) == XmlPullParser.TEXT)
                             try {
-                                entry.updated = dateFormat.parse(parser.getText());
+                                entry.updated = dateFormat.parse(parser.getText().trim());
                             } catch (ParseException e) {
                                 e.printStackTrace();
                             }
                         parseNextTag(parser);
                         break;
                     case "id":
-                        if(parseNextTag(parser) == XmlPullParser.TEXT && !parser.isWhitespace())
-                            entry.id = parser.getText();
+                        if(parseNextTag(parser) == XmlPullParser.TEXT)
+                            entry.id = parser.getText().trim();
                         parseNextTag(parser);
                         break;
                     case "link":
@@ -181,14 +191,22 @@ class Feed extends AsyncTask<URL, Void, ArrayList<Entry>> {
                         parseNextTag(parser);
                         break;
                     case "content":
-                        if(parseNextTag(parser) == XmlPullParser.TEXT && !parser.isWhitespace())
+                        if(parseNextTag(parser) == XmlPullParser.TEXT) {
                             entry.content = parser.getText();
+                            matcher = img.matcher(entry.content);
+                            if (matcher.find()){
+                                for(int i = 0; i <= matcher.groupCount(); i++) {
+                                    entry.headerImage = matcher.group(i);
+                                }
+                            }
+                            entry.content = imgWithWhitespace.matcher(entry.content).replaceFirst("");
+                        }
                         parseNextTag(parser);
                         break;
                     case "author":
                         if(parseNextTag(parser) == XmlPullParser.START_TAG && parser.getName().equals("name")){
-                            if(parseNextTag(parser) == XmlPullParser.TEXT && !parser.isWhitespace())        // TODO: multi-author support
-                                entry.author = parser.getText();
+                            if(parseNextTag(parser) == XmlPullParser.TEXT)        // TODO: multi-author support
+                                entry.author = parser.getText().trim();
                             parseNextTag(parser);
                         }
                         parseNextTag(parser);

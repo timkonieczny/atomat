@@ -5,7 +5,7 @@ import java.util.Date;
 public class Entry {
 
     public Date published, updated;
-    public String title, content, link, id, author, uniqueId;
+    public String title, content, link, id, author, uniqueId, headerImage;
     public Source source;
 
     public String toString(){
