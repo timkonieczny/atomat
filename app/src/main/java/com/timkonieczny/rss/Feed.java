@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -142,7 +143,7 @@ class Feed extends AsyncTask<URL, Void, ArrayList<Entry>> {
                         parseNextTag(parser);
                         break;
                     case "link":
-                        source.link = parser.getAttributeValue(null, "href");
+                        source.link = new URL(parser.getAttributeValue(null, "href"));
                         parseNextTag(parser);
                         break;
                 }
@@ -187,7 +188,7 @@ class Feed extends AsyncTask<URL, Void, ArrayList<Entry>> {
                         parseNextTag(parser);
                         break;
                     case "link":
-                        entry.link = parser.getAttributeValue(null, "href");
+                        entry.link = new URL(parser.getAttributeValue(null, "href"));
                         parseNextTag(parser);
                         break;
                     case "content":
@@ -195,9 +196,9 @@ class Feed extends AsyncTask<URL, Void, ArrayList<Entry>> {
                             entry.content = parser.getText();
                             matcher = img.matcher(entry.content);
                             if (matcher.find()){
-                                for(int i = 0; i <= matcher.groupCount(); i++) {
-                                    entry.headerImage = matcher.group(i);
-                                }
+//                                entry.headerImage = new URL(URLEncoder.encode(matcher.group(1), "UTF-8"));
+                                entry.headerImage = new URL(matcher.group(1));
+
                             }
                             entry.content = imgWithWhitespace.matcher(entry.content).replaceFirst("");
                         }
