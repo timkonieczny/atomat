@@ -153,7 +153,7 @@ class Feed extends AsyncTask<URL, Void, ArrayList<Article>> {
                         article.content = readText(parser);
                         Matcher matcher = img.matcher(article.content);
                         if (matcher.find())
-                            article.headerImage = new URL(matcher.group(1));
+                            article.headerImage = new URL(matcher.group(1));    // FIXME: first article has no header image
                         article.content = imgWithWhitespace.matcher(article.content).replaceFirst("");
                         break;
                     case "author":

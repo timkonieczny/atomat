@@ -23,7 +23,7 @@ class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ArticleCardViewHolder
 
     @Override
     public ArticleCardViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.article_list_item, parent, false);
+        View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.article_card, parent, false);
         articleCardViewHolder = new ArticleCardViewHolder(itemView);
         return articleCardViewHolder;
     }
@@ -56,8 +56,7 @@ class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ArticleCardViewHolder
 
     @Override
     public void onImageLoaded(Bitmap bitmap) {
-        articleCardViewHolder.articleHeader.setImageBitmap(bitmap);
-        articleCardViewHolder.articleHeader.setAdjustViewBounds(true);
+        articleCardViewHolder.articleHeader.setImageBitmap(bitmap); // FIXME: images are not always set correctly
     }
 
     static class ArticleCardViewHolder extends RecyclerView.ViewHolder{
