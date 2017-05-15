@@ -1,6 +1,5 @@
 package com.timkonieczny.rss;
 
-import android.graphics.Bitmap;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -11,9 +10,7 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
-class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ArticleCardViewHolder> implements LoadImageListener{
-
-    private ArticleCardViewHolder articleCardViewHolder;
+class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ArticleCardViewHolder> {
 
     ArrayList<Article> articles;
 
@@ -24,8 +21,7 @@ class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ArticleCardViewHolder
     @Override
     public ArticleCardViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.article_card, parent, false);
-        articleCardViewHolder = new ArticleCardViewHolder(itemView);
-        return articleCardViewHolder;
+        return new ArticleCardViewHolder(itemView);
     }
 
     @Override
@@ -46,17 +42,12 @@ class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ArticleCardViewHolder
         holder.articleAuthor.setText(article.author);
         holder.articleContent.setText(article.content);
 
-        (new LoadImageTask(this)).execute(article.headerImage);
+        holder.articleHeader.setImageBitmap(article.headerImageBitmap);
     }
 
     @Override
     public int getItemCount() {
         return articles.size();
-    }
-
-    @Override
-    public void onImageLoaded(Bitmap bitmap) {
-        articleCardViewHolder.articleHeader.setImageBitmap(bitmap); // FIXME: images are not always set correctly
     }
 
     static class ArticleCardViewHolder extends RecyclerView.ViewHolder{

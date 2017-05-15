@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
-public class MainActivity extends Activity implements FeedListener, SwipeRefreshLayout.OnRefreshListener {
+public class MainActivity extends Activity implements FeedListener, LoadHeaderImageListener, SwipeRefreshLayout.OnRefreshListener {
 
     FeedAdapter feedAdapter;
     ArrayList<Article> articles;
@@ -63,9 +63,14 @@ public class MainActivity extends Activity implements FeedListener, SwipeRefresh
 
     public void updateFeed(){
         try {
-            (new Feed(this, articles)).execute(new URL("https://www.theverge.com/rss/index.xml"));
+            (new Feed(this, this, articles)).execute(new URL("https://www.theverge.com/rss/index.xml"));
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void onImageLoaded(Article article) {
+        feedAdapter.notifyDataSetChanged();     // TODO: only notify the card that changed
     }
 }

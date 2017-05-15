@@ -22,6 +22,7 @@ import java.util.regex.Pattern;
 class Feed extends AsyncTask<URL, Void, ArrayList<Article>> {
 
     private FeedListener feedListener;
+    private LoadHeaderImageListener loadHeaderImageListener;
 
     private ArrayList<Article> articles;
     private HashSet<String> existingIds;
@@ -29,8 +30,9 @@ class Feed extends AsyncTask<URL, Void, ArrayList<Article>> {
     private SimpleDateFormat dateFormat;
     private Pattern imgWithWhitespace, img;
 
-    Feed(FeedListener feedListener, ArrayList<Article> existingArticles){
+    Feed(FeedListener feedListener, LoadHeaderImageListener loadHeaderImageListener, ArrayList<Article> existingArticles){
         this.feedListener = feedListener;
+        this.loadHeaderImageListener = loadHeaderImageListener;
 
         dateFormat = new SimpleDateFormat("yyyy-mm-dd'T'HH:mm:ssX");
         imgWithWhitespace = Pattern.compile("\\A<img(.*?)/>\\s*");  // <img ... /> at beginning of input, including trailing whitespaces
@@ -152,8 +154,10 @@ class Feed extends AsyncTask<URL, Void, ArrayList<Article>> {
                     case "content":
                         article.content = readText(parser);
                         Matcher matcher = img.matcher(article.content);
-                        if (matcher.find())
-                            article.headerImage = new URL(matcher.group(1));    // FIXME: first article has no header image
+                        if (matcher.find()) {
+                            article.headerImage = new URL(matcher.group(1));
+                            (new LoadHeaderImageTask(loadHeaderImageListener)).execute(article);    // TODO: move this to Article.java
+                        }
                         article.content = imgWithWhitespace.matcher(article.content).replaceFirst("");
                         break;
                     case "author":
