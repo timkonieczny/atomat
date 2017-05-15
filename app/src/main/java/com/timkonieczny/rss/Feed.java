@@ -38,8 +38,8 @@ class Feed extends AsyncTask<URL, Void, ArrayList<Entry>> {
 
     public Feed(FeedListener feedListener, ArrayList<Entry> existingEntries){
         dateFormat = new SimpleDateFormat("yyyy-mm-dd'T'HH:mm:ssX");
-        imgWithWhitespace = Pattern.compile("\\s*<img(.*?)/>\\s*");
-        img = Pattern.compile("<img(?:.*?)src=\"(.*?)\"(?:.*?)/>");
+        imgWithWhitespace = Pattern.compile("\\A<img(.*?)/>\\s*");  // <img ... /> at beginning of input, including trailing whitespaces
+        img = Pattern.compile("<img(?:.*?)src=\"(.*?)\"(?:.*?)/>"); // src attribute of <img ... />
 
         this.feedListener = feedListener;
         existingIds = getExistingEntryIds(existingEntries);
@@ -193,10 +193,9 @@ class Feed extends AsyncTask<URL, Void, ArrayList<Entry>> {
                         break;
                     case "content":
                         if(parseNextTag(parser) == XmlPullParser.TEXT) {
-                            entry.content = parser.getText();
+                            entry.content = parser.getText().trim();
                             matcher = img.matcher(entry.content);
                             if (matcher.find()){
-//                                entry.headerImage = new URL(URLEncoder.encode(matcher.group(1), "UTF-8"));
                                 entry.headerImage = new URL(matcher.group(1));
 
                             }
