@@ -3,23 +3,21 @@ package com.timkonieczny.rss;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
-import android.util.Log;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 
-public class LoadImageTask extends AsyncTask<URL, Void, Bitmap> {
+class LoadImageTask extends AsyncTask<URL, Void, Bitmap> {
 
-    public LoadImageListener loadImageListener;
+    private LoadImageListener loadImageListener;
 
-    public LoadImageTask(LoadImageListener loadImageListener){
+    LoadImageTask(LoadImageListener loadImageListener){
         this.loadImageListener = loadImageListener;
     }
 
     @Override
     protected Bitmap doInBackground(URL... params) {
-        Log.d("LoadImageTask", "starting to load "+params[0].toString());
         Bitmap image = null;
         try {
             InputStream stream = params[0].openStream();
@@ -34,6 +32,5 @@ public class LoadImageTask extends AsyncTask<URL, Void, Bitmap> {
     protected void onPostExecute(Bitmap bitmap) {
         super.onPostExecute(bitmap);
         loadImageListener.onImageLoaded(bitmap);
-        Log.d("LoadImageTask", "done");
     }
 }

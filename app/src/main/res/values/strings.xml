@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">RSS</string>
+    <string name="header_image_descriptor">header image</string>
 </resources>

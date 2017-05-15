@@ -1,82 +1,103 @@
 package com.timkonieczny.rss;
 
-import android.content.Context;
 import android.graphics.Bitmap;
-import android.os.Debug;
-import android.support.annotation.LayoutRes;
-import android.support.annotation.NonNull;
-import android.util.Log;
+import android.support.v7.widget.CardView;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
 
-public class FeedAdapter extends ArrayAdapter<Entry> implements LoadImageListener{
+class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ArticleCardViewHolder> implements LoadImageListener{
 
-    ImageView entryHeader;
+    private ArticleCardViewHolder articleCardViewHolder;
 
-    public FeedAdapter(Context context, int view, ArrayList<Entry> objects) {
-        super(context, view, objects);
-        Log.d("LoadImageTask", "FeedAdapter created");
+    ArrayList<Article> articles;
+
+    FeedAdapter(ArrayList<Article> articles){
+        this.articles = articles;
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        // Get the data item for this position
-        Entry entry = getItem(position);
-        // Check if an existing view is being reused, otherwise inflate the view
-        if (convertView == null) {
-            convertView = LayoutInflater.from(getContext()).inflate(R.layout.article_list_item, parent, false);
-        }
-        // Lookup view for data population
-        TextView sourceTitle = (TextView) convertView.findViewById(R.id.source_title);
-        TextView sourceIcon = (TextView) convertView.findViewById(R.id.source_icon);
-        TextView sourceLink = (TextView) convertView.findViewById(R.id.source_link);
-        TextView sourceId = (TextView) convertView.findViewById(R.id.source_id);
-        TextView sourceUpdated = (TextView) convertView.findViewById(R.id.source_updated);
+    public ArticleCardViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.article_list_item, parent, false);
+        articleCardViewHolder = new ArticleCardViewHolder(itemView);
+        return articleCardViewHolder;
+    }
 
-        TextView entryTitle = (TextView) convertView.findViewById(R.id.entry_title);
-        TextView entryLink = (TextView) convertView.findViewById(R.id.entry_link);
-        TextView entryId = (TextView) convertView.findViewById(R.id.entry_id);
-        TextView entryUpdated = (TextView) convertView.findViewById(R.id.entry_updated);
-        TextView entryPublished = (TextView) convertView.findViewById(R.id.entry_published);
-        TextView entryAuthor = (TextView) convertView.findViewById(R.id.entry_author);
-        TextView entryContent = (TextView) convertView.findViewById(R.id.entry_content);
+    @Override
+    public void onBindViewHolder(ArticleCardViewHolder holder, int position) {
+        Article article = articles.get(position);
 
-        Log.d("LoadImageTask", "Grabbing imageview");
-        entryHeader = (ImageView) convertView.findViewById(R.id.entry_header);
-        Log.d("LoadImageTask", "Grabbing imageview done");
+        holder.sourceTitle.setText(article.source.title);
+        holder.sourceIcon.setText(article.source.icon);
+        holder.sourceLink.setText(article.source.link.toString());
+        holder.sourceId.setText(article.source.id);
+        holder.sourceUpdated.setText(article.source.updated.toString());
 
-        // Populate the data into the template view using the data object
-        sourceTitle.setText(entry.source.title);
-        sourceIcon.setText(entry.source.icon);
-        sourceLink.setText(entry.source.link.toString());
-        sourceId.setText(entry.source.id);
-        sourceUpdated.setText(entry.source.updated.toString());
+        holder.articleTitle.setText(article.title);
+        holder.articleLink.setText(article.link.toString());
+        holder.articleId.setText(article.id);
+        holder.articleUpdated.setText(article.updated.toString());
+        holder.articlePublished.setText(article.published.toString());
+        holder.articleAuthor.setText(article.author);
+        holder.articleContent.setText(article.content);
 
-        entryTitle.setText(entry.title);
-        entryLink.setText(entry.link.toString());
-        entryId.setText(entry.id);
-        entryUpdated.setText(entry.updated.toString());
-        entryPublished.setText(entry.published.toString());
-        entryAuthor.setText(entry.author);
-        entryContent.setText(entry.content);
+        (new LoadImageTask(this)).execute(article.headerImage);
+    }
 
-        Log.d("LoadImageTask", "FeedAdapter: starting to load "+entry.headerImage.toString());
-
-        (new LoadImageTask(this)).execute(entry.headerImage);
-        // Return the completed view to render on screen
-        return convertView;
+    @Override
+    public int getItemCount() {
+        return articles.size();
     }
 
     @Override
     public void onImageLoaded(Bitmap bitmap) {
-        Log.d("LoadImageTask", "FeedAdapter: Callback fired)");
-        entryHeader.setImageBitmap(bitmap);
-        entryHeader.setAdjustViewBounds(true);
+        articleCardViewHolder.articleHeader.setImageBitmap(bitmap);
+        articleCardViewHolder.articleHeader.setAdjustViewBounds(true);
+    }
+
+    static class ArticleCardViewHolder extends RecyclerView.ViewHolder{
+
+        CardView cardView;
+
+        TextView sourceTitle,
+                sourceIcon,
+                sourceLink,
+                sourceId,
+                sourceUpdated,
+                articleTitle,
+                articleLink,
+                articleId,
+                articleUpdated,
+                articlePublished,
+                articleAuthor,
+                articleContent;
+        ImageView articleHeader;
+
+        ArticleCardViewHolder(View itemView) {
+            super(itemView);
+
+            cardView = (CardView)itemView.findViewById(R.id.card_view);
+
+            sourceTitle = (TextView) itemView.findViewById(R.id.source_title);
+            sourceIcon = (TextView) itemView.findViewById(R.id.source_icon);
+            sourceLink = (TextView) itemView.findViewById(R.id.source_link);
+            sourceId = (TextView) itemView.findViewById(R.id.source_id);
+            sourceUpdated = (TextView) itemView.findViewById(R.id.source_updated);
+
+            articleTitle = (TextView) itemView.findViewById(R.id.article_title);
+            articleLink = (TextView) itemView.findViewById(R.id.article_link);
+            articleId = (TextView) itemView.findViewById(R.id.article_id);
+            articleUpdated = (TextView) itemView.findViewById(R.id.article_updated);
+            articlePublished = (TextView) itemView.findViewById(R.id.article_published);
+            articleAuthor = (TextView) itemView.findViewById(R.id.article_author);
+            articleContent = (TextView) itemView.findViewById(R.id.article_content);
+
+            articleHeader = (ImageView) itemView.findViewById(R.id.article_header);
+        }
     }
 }

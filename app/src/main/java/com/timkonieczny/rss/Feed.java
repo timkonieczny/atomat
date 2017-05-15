@@ -12,43 +12,37 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLEncoder;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-class Feed extends AsyncTask<URL, Void, ArrayList<Entry>> {
+class Feed extends AsyncTask<URL, Void, ArrayList<Article>> {
 
-    private static final String ns = null;
+    private FeedListener feedListener;
 
-//    private Source source;
-    private ArrayList<Entry> entries;
+    private ArrayList<Article> articles;
     private HashSet<String> existingIds;
 
     private SimpleDateFormat dateFormat;
+    private Pattern imgWithWhitespace, img;
 
-    public FeedListener feedListener;
+    Feed(FeedListener feedListener, ArrayList<Article> existingArticles){
+        this.feedListener = feedListener;
 
-    private Pattern imgWithWhitespace;
-    private Pattern img;
-    private Matcher matcher;
-
-
-    public Feed(FeedListener feedListener, ArrayList<Entry> existingEntries){
         dateFormat = new SimpleDateFormat("yyyy-mm-dd'T'HH:mm:ssX");
         imgWithWhitespace = Pattern.compile("\\A<img(.*?)/>\\s*");  // <img ... /> at beginning of input, including trailing whitespaces
         img = Pattern.compile("<img(?:.*?)src=\"(.*?)\"(?:.*?)/>"); // src attribute of <img ... />
 
-        this.feedListener = feedListener;
-        existingIds = getExistingEntryIds(existingEntries);
+        existingIds = getExistingArticlesIds(existingArticles);
     }
 
     @Override
-    protected ArrayList<Entry> doInBackground(URL... params) {
+    protected ArrayList<Article> doInBackground(URL... params) {
 
-        entries = new ArrayList<>();
+        articles = new ArrayList<>();
 
         for(URL url : params){
             try {
@@ -61,52 +55,45 @@ class Feed extends AsyncTask<URL, Void, ArrayList<Entry>> {
                 connection.connect();
                 InputStream stream = connection.getInputStream();
 
-                parse(stream);
+                readStream(stream);
 
             } catch (IOException | XmlPullParserException e) {
                 e.printStackTrace();
             }
         }
 
-        Entry entry;
-        for(int i = 0; i < entries.size(); i++){
-            entry = entries.get(i);
-            entry.uniqueId = entry.source.id + "_" + entry.id;
-            if(existingIds.contains(entry.uniqueId)){
-                entries.remove(i);
+        Article article;
+        for(int i = 0; i < articles.size(); i++){
+            article = articles.get(i);
+            article.uniqueId = article.source.id + "_" + article.id;
+            if(existingIds.contains(article.uniqueId)){
+                articles.remove(i);
                 i--;
             }
         }
 
-        return entries;
+        return articles;
+    }
+
+    @Override
+    protected void onPostExecute(ArrayList<Article> articles) {
+        super.onPostExecute(articles);
+        feedListener.onFeedUpdated(articles);
     }
 
 
-    private void parse(InputStream in) throws XmlPullParserException, IOException {
+    private void readStream(InputStream in) throws XmlPullParserException, IOException {
         try {
             XmlPullParser parser = Xml.newPullParser();
             parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
             parser.setInput(in, null);
-            parser.nextTag();
-            parser.require(XmlPullParser.START_TAG, ns, "feed");
 
-            //parseNextTag(parser);
+            parser.nextTag();
+            parser.require(XmlPullParser.START_TAG, null, "feed");
+
             readSource(parser);
-            //return readFeed(parser);
         } finally {
             in.close();
-        }
-    }
-
-    private void printTag(String debugTag, XmlPullParser parser){
-        try {
-            switch (parser.getEventType()){
-                case XmlPullParser.START_TAG: Log.d(debugTag, "start ("+parser.getName()+")"); break;
-                case XmlPullParser.TEXT: if(parser.getText() == null) Log.d(debugTag, "text (null)"); else Log.d(debugTag, "text ("+parser.getText().trim()+")") ; break;
-                case XmlPullParser.END_TAG: Log.d(debugTag, "end ("+parser.getName()+")"); break;
-            }
-        } catch (XmlPullParserException e) {
-            e.printStackTrace();
         }
     }
 
@@ -119,28 +106,16 @@ class Feed extends AsyncTask<URL, Void, ArrayList<Entry>> {
                         readEntry(parser, source);
                         break;
                     case "title":
-                        if(parseNextTag(parser) == XmlPullParser.TEXT)
-                            source.title = parser.getText().trim();
-                        parseNextTag(parser);
+                        source.title = readText(parser);
                         break;
                     case "icon":
-                        if(parseNextTag(parser) == XmlPullParser.TEXT)
-                            source.icon = parser.getText().trim();
-                        parseNextTag(parser);
+                        source.icon = readText(parser);
                         break;
                     case "updated":
-                        if(parseNextTag(parser) == XmlPullParser.TEXT)
-                            try {
-                                source.updated = dateFormat.parse(parser.getText().trim());
-                            } catch (ParseException e) {
-                                e.printStackTrace();
-                            }
-                        parseNextTag(parser);
+                        source.updated = readDate(parser);
                         break;
                     case "id":
-                        if(parseNextTag(parser) == XmlPullParser.TEXT)
-                            source.id = parser.getText().trim();
-                        parseNextTag(parser);
+                        source.id = readText(parser);
                         break;
                     case "link":
                         source.link = new URL(parser.getAttributeValue(null, "href"));
@@ -154,59 +129,37 @@ class Feed extends AsyncTask<URL, Void, ArrayList<Entry>> {
     }
 
     private void readEntry(XmlPullParser parser, Source source) throws IOException, XmlPullParserException {
-        Entry entry = new Entry();
-        entry.source = source;
+        Article article = new Article();
+        article.source = source;
         while(parseNextTag(parser) != XmlPullParser.END_TAG){
             if(parser.getEventType() == XmlPullParser.START_TAG){
                 switch (parser.getName()){
                     case "published":
-                        if(parseNextTag(parser) == XmlPullParser.TEXT)
-                            try {
-                                entry.published = dateFormat.parse(parser.getText().trim());
-                            } catch (ParseException e) {
-                                e.printStackTrace();
-                            }
-                        parseNextTag(parser);
+                        article.published = readDate(parser);
                         break;
                     case "title":
-                        if(parseNextTag(parser) == XmlPullParser.TEXT)
-                            entry.title = parser.getText().trim();
-                        parseNextTag(parser);
+                        article.title = readText(parser);
                         break;
                     case "updated":
-                        if(parseNextTag(parser) == XmlPullParser.TEXT)
-                            try {
-                                entry.updated = dateFormat.parse(parser.getText().trim());
-                            } catch (ParseException e) {
-                                e.printStackTrace();
-                            }
-                        parseNextTag(parser);
+                        article.updated = readDate(parser);
                         break;
                     case "id":
-                        if(parseNextTag(parser) == XmlPullParser.TEXT)
-                            entry.id = parser.getText().trim();
-                        parseNextTag(parser);
+                        article.id = readText(parser);
                         break;
                     case "link":
-                        entry.link = new URL(parser.getAttributeValue(null, "href"));
-                        parseNextTag(parser);
+                        article.link = readLink(parser);
                         break;
                     case "content":
-                        if(parseNextTag(parser) == XmlPullParser.TEXT) {
-                            entry.content = parser.getText().trim();
-                            matcher = img.matcher(entry.content);
-                            if (matcher.find()){
-                                entry.headerImage = new URL(matcher.group(1));
-
-                            }
-                            entry.content = imgWithWhitespace.matcher(entry.content).replaceFirst("");
-                        }
-                        parseNextTag(parser);
+                        article.content = readText(parser);
+                        Matcher matcher = img.matcher(article.content);
+                        if (matcher.find())
+                            article.headerImage = new URL(matcher.group(1));
+                        article.content = imgWithWhitespace.matcher(article.content).replaceFirst("");
                         break;
                     case "author":
                         if(parseNextTag(parser) == XmlPullParser.START_TAG && parser.getName().equals("name")){
-                            if(parseNextTag(parser) == XmlPullParser.TEXT)        // TODO: multi-author support
-                                entry.author = parser.getText().trim();
+                            if(parseNextTag(parser) == XmlPullParser.TEXT)        // FIXME: support for multiple authors
+                                article.author = parser.getText().trim();
                             parseNextTag(parser);
                         }
                         parseNextTag(parser);
@@ -216,8 +169,9 @@ class Feed extends AsyncTask<URL, Void, ArrayList<Entry>> {
                 parseNextTag(parser);
             }
         }
-        entries.add(entry);
+        articles.add(article);
     }
+
 
     private int parseNextTag(XmlPullParser parser) throws IOException, XmlPullParserException {
         if(parser.next() == XmlPullParser.TEXT && parser.isWhitespace())
@@ -226,18 +180,48 @@ class Feed extends AsyncTask<URL, Void, ArrayList<Entry>> {
             return parser.getEventType();
     }
 
-    @Override
-    protected void onPostExecute(ArrayList<Entry> entries) {
-        super.onPostExecute(entries);
-        feedListener.onSourcesUpdated(entries);
+    private String readText(XmlPullParser parser) throws IOException, XmlPullParserException {
+        String text = null;
+        if(parseNextTag(parser) == XmlPullParser.TEXT) text = parser.getText().trim();
+        parseNextTag(parser);
+        return text;
     }
 
-    private HashSet<String> getExistingEntryIds(ArrayList<Entry> existingEntries){
-        HashSet<String> ids = new HashSet<String>();
-        for(int i = 0; i < existingEntries.size(); i++){
-            ids.add(existingEntries.get(i).uniqueId);
+    private Date readDate(XmlPullParser parser) throws IOException, XmlPullParserException {
+        Date date = null;
+        if(parseNextTag(parser) == XmlPullParser.TEXT)
+            try {
+                date = dateFormat.parse(parser.getText().trim());
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+        parseNextTag(parser);
+        return date;
+    }
+
+    private URL readLink(XmlPullParser parser) throws IOException, XmlPullParserException {
+        URL link = new URL(parser.getAttributeValue(null, "href"));
+        parseNextTag(parser);
+        return link;
+    }
+
+    private HashSet<String> getExistingArticlesIds(ArrayList<Article> existingArticles){
+        HashSet<String> ids = new HashSet<>();
+        for(int i = 0; i < existingArticles.size(); i++){
+            ids.add(existingArticles.get(i).uniqueId);
         }
         return ids;
     }
 
+    private void printTag(String debugTag, XmlPullParser parser){
+        try {
+            switch (parser.getEventType()){
+                case XmlPullParser.START_TAG: Log.d(debugTag, "start ("+parser.getName()+")"); break;
+                case XmlPullParser.TEXT: if(parser.getText() == null) Log.d(debugTag, "text (null)"); else Log.d(debugTag, "text ("+parser.getText().trim()+")") ; break;
+                case XmlPullParser.END_TAG: Log.d(debugTag, "end ("+parser.getName()+")"); break;
+            }
+        } catch (XmlPullParserException e) {
+            e.printStackTrace();
+        }
+    }
 }
