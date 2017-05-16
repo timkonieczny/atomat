@@ -14,8 +14,8 @@ class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ArticleCardViewHolder
 
     ArrayList<Article> articles;
 
-    FeedAdapter(ArrayList<Article> articles){
-        this.articles = articles;
+    FeedAdapter(){
+        articles = new ArrayList<>();
     }
 
     @Override

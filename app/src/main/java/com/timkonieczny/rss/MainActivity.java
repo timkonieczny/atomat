@@ -12,10 +12,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
-public class MainActivity extends Activity implements FeedListener, LoadHeaderImageListener, SwipeRefreshLayout.OnRefreshListener {
+public class MainActivity extends Activity implements FeedListener, UpdateHeaderImageListener, SwipeRefreshLayout.OnRefreshListener {
 
     FeedAdapter feedAdapter;
-    ArrayList<Article> articles;
     Comparator<Article> descending;
 
     SwipeRefreshLayout swipeRefreshLayout;
@@ -25,7 +24,6 @@ public class MainActivity extends Activity implements FeedListener, LoadHeaderIm
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        articles = new ArrayList<>(0);
         descending = new Comparator<Article>() {
             @Override
             public int compare(Article a1, Article a2) {
@@ -33,7 +31,7 @@ public class MainActivity extends Activity implements FeedListener, LoadHeaderIm
             }
         };
 
-        feedAdapter = new FeedAdapter(articles);
+        feedAdapter = new FeedAdapter();
 
         RecyclerView recyclerView = (RecyclerView)findViewById(R.id.recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -52,9 +50,8 @@ public class MainActivity extends Activity implements FeedListener, LoadHeaderIm
 
     @Override
     public void onFeedUpdated(ArrayList<Article> articles) {
-        this.articles = articles;
 
-        feedAdapter.articles.addAll(this.articles);
+        feedAdapter.articles.addAll(articles);
         Collections.sort(feedAdapter.articles, descending);
 
         feedAdapter.notifyDataSetChanged();
@@ -63,14 +60,18 @@ public class MainActivity extends Activity implements FeedListener, LoadHeaderIm
 
     public void updateFeed(){
         try {
-            (new Feed(this, this, articles)).execute(new URL("https://www.theverge.com/rss/index.xml"));
+            (new Feed(this, this, feedAdapter.articles)).execute(new URL("https://www.theverge.com/rss/index.xml"));
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
     }
 
     @Override
-    public void onImageLoaded(Article article) {
-        feedAdapter.notifyDataSetChanged();     // TODO: only notify the card that changed
+    public void onHeaderImageUpdated(Article article) {
+        int index = feedAdapter.articles.indexOf(article);
+        if(index>=0)
+            feedAdapter.notifyItemChanged(index);   // Article card exists already and only needs to update
+        else
+            feedAdapter.notifyDataSetChanged();     // Article card doesn't exist yet and needs to be created
     }
 }

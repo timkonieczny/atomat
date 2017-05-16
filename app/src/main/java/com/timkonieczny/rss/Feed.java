@@ -22,7 +22,7 @@ import java.util.regex.Pattern;
 class Feed extends AsyncTask<URL, Void, ArrayList<Article>> {
 
     private FeedListener feedListener;
-    private LoadHeaderImageListener loadHeaderImageListener;
+    private UpdateHeaderImageListener updateHeaderImageListener;
 
     private ArrayList<Article> articles;
     private HashSet<String> existingIds;
@@ -30,9 +30,9 @@ class Feed extends AsyncTask<URL, Void, ArrayList<Article>> {
     private SimpleDateFormat dateFormat;
     private Pattern imgWithWhitespace, img;
 
-    Feed(FeedListener feedListener, LoadHeaderImageListener loadHeaderImageListener, ArrayList<Article> existingArticles){
+    Feed(FeedListener feedListener, UpdateHeaderImageListener updateHeaderImageListener, ArrayList<Article> existingArticles){
         this.feedListener = feedListener;
-        this.loadHeaderImageListener = loadHeaderImageListener;
+        this.updateHeaderImageListener = updateHeaderImageListener;
 
         dateFormat = new SimpleDateFormat("yyyy-mm-dd'T'HH:mm:ssX");
         imgWithWhitespace = Pattern.compile("\\A<img(.*?)/>\\s*");  // <img ... /> at beginning of input, including trailing whitespaces
@@ -71,6 +71,8 @@ class Feed extends AsyncTask<URL, Void, ArrayList<Article>> {
             if(existingIds.contains(article.uniqueId)){
                 articles.remove(i);
                 i--;
+            }else{
+                article.updateHeaderImage();
             }
         }
 
@@ -131,7 +133,7 @@ class Feed extends AsyncTask<URL, Void, ArrayList<Article>> {
     }
 
     private void readEntry(XmlPullParser parser, Source source) throws IOException, XmlPullParserException {
-        Article article = new Article();
+        Article article = new Article(updateHeaderImageListener);
         article.source = source;
         while(parseNextTag(parser) != XmlPullParser.END_TAG){
             if(parser.getEventType() == XmlPullParser.START_TAG){
@@ -155,8 +157,7 @@ class Feed extends AsyncTask<URL, Void, ArrayList<Article>> {
                         article.content = readText(parser);
                         Matcher matcher = img.matcher(article.content);
                         if (matcher.find()) {
-                            article.headerImage = new URL(matcher.group(1));
-                            (new LoadHeaderImageTask(loadHeaderImageListener)).execute(article);    // TODO: move this to Article.java
+                            article.headerImage = matcher.group(1);
                         }
                         article.content = imgWithWhitespace.matcher(article.content).replaceFirst("");
                         break;

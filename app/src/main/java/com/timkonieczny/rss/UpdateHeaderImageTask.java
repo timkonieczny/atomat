@@ -6,20 +6,21 @@ import android.os.AsyncTask;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 
-class LoadHeaderImageTask extends AsyncTask<Article, Void, Article> {
+class UpdateHeaderImageTask extends AsyncTask<Article, Void, Article> {
 
-    private LoadHeaderImageListener loadHeaderImageListener;
+    private UpdateHeaderImageListener updateHeaderImageListener;
 
-    LoadHeaderImageTask(LoadHeaderImageListener loadHeaderImageListener){
-        this.loadHeaderImageListener = loadHeaderImageListener;
+    UpdateHeaderImageTask(UpdateHeaderImageListener updateHeaderImageListener){
+        this.updateHeaderImageListener = updateHeaderImageListener;
     }
 
     @Override
     protected Article doInBackground(Article... params) {
         Bitmap image = null;
         try {
-            InputStream stream = params[0].headerImage.openStream();
+            InputStream stream = (new URL(params[0].headerImage)).openStream();
             image = BitmapFactory.decodeStream(stream);
         } catch (IOException e) {
             e.printStackTrace();
@@ -31,6 +32,6 @@ class LoadHeaderImageTask extends AsyncTask<Article, Void, Article> {
     @Override
     protected void onPostExecute(Article article) {
         super.onPostExecute(article);
-        loadHeaderImageListener.onImageLoaded(article);
+        updateHeaderImageListener.onHeaderImageUpdated(article);
     }
 }
