@@ -1,5 +1,6 @@
 package com.timkonieczny.rss;
 
+import android.graphics.Color;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -30,19 +31,16 @@ class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ArticleCardViewHolder
 
         holder.sourceTitle.setText(article.source.title);
         holder.sourceIcon.setText(article.source.icon);
-        holder.sourceLink.setText(article.source.link.toString());
-        holder.sourceId.setText(article.source.id);
-        holder.sourceUpdated.setText(article.source.updated.toString());
 
         holder.articleTitle.setText(article.title);
-        holder.articleLink.setText(article.link.toString());
-        holder.articleId.setText(article.id);
-        holder.articleUpdated.setText(article.updated.toString());
-        holder.articlePublished.setText(article.published.toString());
         holder.articleAuthor.setText(article.author);
-        holder.articleContent.setText(article.content);
 
         holder.articleHeader.setImageBitmap(article.headerImageBitmap);
+
+        if(article.colorPalette!=null) {
+            int color = article.colorPalette.getDarkMutedColor(Color.DKGRAY);
+            holder.articleHeader.setColorFilter(Color.argb(128, Color.red(color), Color.green(color), Color.blue(color)));
+        }
     }
 
     @Override
@@ -56,16 +54,8 @@ class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ArticleCardViewHolder
 
         TextView sourceTitle,
                 sourceIcon,
-                sourceLink,
-                sourceId,
-                sourceUpdated,
                 articleTitle,
-                articleLink,
-                articleId,
-                articleUpdated,
-                articlePublished,
-                articleAuthor,
-                articleContent;
+                articleAuthor;
         ImageView articleHeader;
 
         ArticleCardViewHolder(View itemView) {
@@ -75,17 +65,17 @@ class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ArticleCardViewHolder
 
             sourceTitle = (TextView) itemView.findViewById(R.id.source_title);
             sourceIcon = (TextView) itemView.findViewById(R.id.source_icon);
-            sourceLink = (TextView) itemView.findViewById(R.id.source_link);
-            sourceId = (TextView) itemView.findViewById(R.id.source_id);
-            sourceUpdated = (TextView) itemView.findViewById(R.id.source_updated);
+//            sourceLink = (TextView) itemView.findViewById(R.id.source_link);
+//            sourceId = (TextView) itemView.findViewById(R.id.source_id);
+//            sourceUpdated = (TextView) itemView.findViewById(R.id.source_updated);
 
             articleTitle = (TextView) itemView.findViewById(R.id.article_title);
-            articleLink = (TextView) itemView.findViewById(R.id.article_link);
-            articleId = (TextView) itemView.findViewById(R.id.article_id);
-            articleUpdated = (TextView) itemView.findViewById(R.id.article_updated);
-            articlePublished = (TextView) itemView.findViewById(R.id.article_published);
+//            articleLink = (TextView) itemView.findViewById(R.id.article_link);
+//            articleId = (TextView) itemView.findViewById(R.id.article_id);
+//            articleUpdated = (TextView) itemView.findViewById(R.id.article_updated);
+//            articlePublished = (TextView) itemView.findViewById(R.id.article_published);
             articleAuthor = (TextView) itemView.findViewById(R.id.article_author);
-            articleContent = (TextView) itemView.findViewById(R.id.article_content);
+//            articleContent = (TextView) itemView.findViewById(R.id.article_content);
 
             articleHeader = (ImageView) itemView.findViewById(R.id.article_header);
         }
