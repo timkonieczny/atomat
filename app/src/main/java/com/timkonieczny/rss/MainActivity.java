@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
-public class MainActivity extends Activity implements FeedListener, UpdateHeaderImageListener, SwipeRefreshLayout.OnRefreshListener {
+public class MainActivity extends Activity implements FeedListener, UpdateHeaderImageListener, UpdateIconImageListener, SwipeRefreshLayout.OnRefreshListener {
 
     FeedAdapter feedAdapter;
     Comparator<Article> descending;
@@ -60,7 +60,7 @@ public class MainActivity extends Activity implements FeedListener, UpdateHeader
 
     public void updateFeed(){
         try {
-            (new Feed(this, this, feedAdapter.articles)).execute(new URL("https://www.theverge.com/rss/index.xml"));
+            (new Feed(this, this, this, this, feedAdapter.articles)).execute(new URL("https://www.theverge.com/rss/index.xml"));
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -73,5 +73,10 @@ public class MainActivity extends Activity implements FeedListener, UpdateHeader
             feedAdapter.notifyItemChanged(index);   // Article card exists already and only needs to update
         else
             feedAdapter.notifyDataSetChanged();     // Article card doesn't exist yet and needs to be created
+    }
+
+    @Override
+    public void onIconImageUpdated(Source source) {
+        feedAdapter.notifyDataSetChanged();     // This is fine since icon only needs to be loaded once.
     }
 }

@@ -1,5 +1,6 @@
 package com.timkonieczny.rss;
 
+import android.content.Context;
 import android.icu.text.SimpleDateFormat;
 import android.os.AsyncTask;
 import android.util.Log;
@@ -23,16 +24,20 @@ class Feed extends AsyncTask<URL, Void, ArrayList<Article>> {
 
     private FeedListener feedListener;
     private UpdateHeaderImageListener updateHeaderImageListener;
+    private UpdateIconImageListener updateIconImageListener;
 
     private ArrayList<Article> articles;
     private HashSet<String> existingIds;
 
     private SimpleDateFormat dateFormat;
     private Pattern imgWithWhitespace, img;
+    private Context context;
 
-    Feed(FeedListener feedListener, UpdateHeaderImageListener updateHeaderImageListener, ArrayList<Article> existingArticles){
+    Feed(FeedListener feedListener, UpdateHeaderImageListener updateHeaderImageListener, UpdateIconImageListener updateIconImageListener, Context context, ArrayList<Article> existingArticles){
+        this.context = context;
         this.feedListener = feedListener;
         this.updateHeaderImageListener = updateHeaderImageListener;
+        this.updateIconImageListener = updateIconImageListener;
 
         dateFormat = new SimpleDateFormat("yyyy-mm-dd'T'HH:mm:ssX");
         imgWithWhitespace = Pattern.compile("\\A<img(.*?)/>\\s*");  // <img ... /> at beginning of input, including trailing whitespaces
@@ -102,7 +107,7 @@ class Feed extends AsyncTask<URL, Void, ArrayList<Article>> {
     }
 
     private void readSource(XmlPullParser parser) throws IOException, XmlPullParserException {
-        Source source = new Source();
+        Source source = new Source(updateIconImageListener, context);
         while(parseNextTag(parser) != XmlPullParser.END_TAG){
             if(parser.getEventType() == XmlPullParser.START_TAG){
                 switch (parser.getName()){
@@ -114,6 +119,7 @@ class Feed extends AsyncTask<URL, Void, ArrayList<Article>> {
                         break;
                     case "icon":
                         source.icon = readText(parser);
+                        source.updateIconImage();
                         break;
                     case "updated":
                         source.updated = readDate(parser);

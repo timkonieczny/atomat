@@ -30,8 +30,7 @@ class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ArticleCardViewHolder
         Article article = articles.get(position);
 
         holder.sourceTitle.setText(article.source.title);
-        holder.sourceIcon.setText(article.source.icon);
-
+        holder.sourceTitle.setCompoundDrawablesWithIntrinsicBounds(article.source.iconDrawable, null, null, null);
         holder.articleTitle.setText(article.title);
         holder.articleAuthor.setText(article.author);
 
@@ -53,30 +52,16 @@ class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ArticleCardViewHolder
         CardView cardView;
 
         TextView sourceTitle,
-                sourceIcon,
                 articleTitle,
                 articleAuthor;
         ImageView articleHeader;
 
         ArticleCardViewHolder(View itemView) {
             super(itemView);
-
             cardView = (CardView)itemView.findViewById(R.id.card_view);
-
             sourceTitle = (TextView) itemView.findViewById(R.id.source_title);
-            sourceIcon = (TextView) itemView.findViewById(R.id.source_icon);
-//            sourceLink = (TextView) itemView.findViewById(R.id.source_link);
-//            sourceId = (TextView) itemView.findViewById(R.id.source_id);
-//            sourceUpdated = (TextView) itemView.findViewById(R.id.source_updated);
-
             articleTitle = (TextView) itemView.findViewById(R.id.article_title);
-//            articleLink = (TextView) itemView.findViewById(R.id.article_link);
-//            articleId = (TextView) itemView.findViewById(R.id.article_id);
-//            articleUpdated = (TextView) itemView.findViewById(R.id.article_updated);
-//            articlePublished = (TextView) itemView.findViewById(R.id.article_published);
             articleAuthor = (TextView) itemView.findViewById(R.id.article_author);
-//            articleContent = (TextView) itemView.findViewById(R.id.article_content);
-
             articleHeader = (ImageView) itemView.findViewById(R.id.article_header);
         }
     }
