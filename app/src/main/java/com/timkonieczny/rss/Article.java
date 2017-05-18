@@ -11,7 +11,7 @@ class Article {
     Date published, updated;
     String title, content, id, author, uniqueId, headerImage;
     URL link;
-    Bitmap headerImageBitmap;
+    Bitmap headerImageBitmap = null;
     Palette colorPalette;
     Source source;
     private UpdateHeaderImageListener updateHeaderImageListener;

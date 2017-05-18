@@ -34,7 +34,7 @@ class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ArticleCardViewHolder
         holder.articleTitle.setText(article.title);
         holder.articleAuthor.setText(article.author);
 
-        holder.articleHeader.setImageBitmap(article.headerImageBitmap);
+        if(article.headerImageBitmap!=null) holder.articleHeader.setImageBitmap(article.headerImageBitmap);
 
         if(article.colorPalette!=null) {
             int color = article.colorPalette.getDarkMutedColor(Color.DKGRAY);
