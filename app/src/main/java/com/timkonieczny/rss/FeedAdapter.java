@@ -30,6 +30,8 @@ class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ArticleCardViewHolder
     public void onBindViewHolder(ArticleCardViewHolder holder, int position) {
         Article article = articles.get(position);
 
+        holder.cardView.setOnClickListener(article.onClickListener);
+
         holder.sourceTitle.setText(article.source.title);
         holder.sourceTitle.setCompoundDrawablesWithIntrinsicBounds(article.source.iconDrawable, null, null, null);
         holder.articleTitle.setText(article.title);
