@@ -3,6 +3,7 @@ package com.timkonieczny.rss;
 import android.graphics.Color;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -59,6 +60,12 @@ class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ArticleCardViewHolder
         ArticleCardViewHolder(View itemView) {
             super(itemView);
             cardView = (CardView)itemView.findViewById(R.id.card_view);
+            cardView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Log.d("FeedAdapter", "Click");
+                }
+            });
             sourceTitle = (TextView) itemView.findViewById(R.id.source_title);
             articleTitle = (TextView) itemView.findViewById(R.id.article_title);
             articleAuthor = (TextView) itemView.findViewById(R.id.article_author);
