@@ -3,6 +3,7 @@ package com.timkonieczny.rss;
 import android.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -22,6 +23,7 @@ public class OverviewFragment extends Fragment implements FeedListener, UpdateHe
     Comparator<Article> descending;
 
     SwipeRefreshLayout swipeRefreshLayout;
+    Snackbar noUpdatesSnackbar;
 
     // Required empty public constructor
     public OverviewFragment() {}
@@ -54,6 +56,9 @@ public class OverviewFragment extends Fragment implements FeedListener, UpdateHe
         swipeRefreshLayout = ((SwipeRefreshLayout)view.findViewById(R.id.swipe_refresh_layout));
         swipeRefreshLayout.setOnRefreshListener(this);
 
+        noUpdatesSnackbar = Snackbar.make(view, getResources().getString(R.string.no_updates_snackbar), Snackbar.LENGTH_SHORT);
+
+        swipeRefreshLayout.setRefreshing(true);
         updateFeed();
     }
 
@@ -88,10 +93,14 @@ public class OverviewFragment extends Fragment implements FeedListener, UpdateHe
 
     @Override
     public void onFeedUpdated(ArrayList<Article> articles) {
-        feedAdapter.articles.addAll(articles);
-        Collections.sort(feedAdapter.articles, descending);
+        if(articles.size()==0){
+            noUpdatesSnackbar.show();
+        }else {
+            feedAdapter.articles.addAll(articles);
+            Collections.sort(feedAdapter.articles, descending);
 
-        feedAdapter.notifyDataSetChanged();
+            feedAdapter.notifyDataSetChanged();
+        }
         swipeRefreshLayout.setRefreshing(false);
     }
 
