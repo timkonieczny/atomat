@@ -78,7 +78,7 @@ class Feed extends AsyncTask<URL, Void, ArrayList<Article>> {
                 articles.remove(i);
                 i--;
             }else{
-                article.onClickListener = new ArticleOnClickListener(article);
+                article.onClickListener = new ArticleOnClickListener(article, context);
                 article.updateHeaderImage();
             }
         }

@@ -62,12 +62,6 @@ class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ArticleCardViewHolder
         ArticleCardViewHolder(View itemView) {
             super(itemView);
             cardView = (CardView)itemView.findViewById(R.id.card_view);
-            cardView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Log.d("FeedAdapter", "Click");
-                }
-            });
             sourceTitle = (TextView) itemView.findViewById(R.id.source_title);
             articleTitle = (TextView) itemView.findViewById(R.id.article_title);
             articleAuthor = (TextView) itemView.findViewById(R.id.article_author);
