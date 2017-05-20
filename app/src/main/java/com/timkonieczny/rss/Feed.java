@@ -5,7 +5,6 @@ import android.icu.text.SimpleDateFormat;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.util.Xml;
-import android.view.View;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
