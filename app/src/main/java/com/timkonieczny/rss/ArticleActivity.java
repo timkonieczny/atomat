@@ -48,11 +48,14 @@ public class ArticleActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
-        if(getSupportActionBar()!=null) getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        if(getSupportActionBar()!=null){
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setDisplayShowTitleEnabled(false);
+        }
         Bundle extras = this.getIntent().getExtras();
-//        setTitle(extras.getString("title"));
-        setTitle(null);
-
+        ((TextView)findViewById(R.id.article_title)).setText(extras.getString("title"));
+        ((TextView)findViewById(R.id.article_author)).setText(extras.getString("author"));
+        ((TextView)findViewById(R.id.source_title)).setText(extras.getString("source"));
 
         TextView contentTextView = (TextView)findViewById(R.id.article_content);
         CharSequence contentWithLinkSpans = Html.fromHtml(extras.getString("content"),Html.FROM_HTML_MODE_COMPACT);

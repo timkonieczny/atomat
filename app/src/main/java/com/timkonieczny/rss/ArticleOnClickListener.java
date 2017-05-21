@@ -22,6 +22,7 @@ class ArticleOnClickListener implements View.OnClickListener {
         intent.putExtra("author", article.author);
         intent.putExtra("title", article.title);
         intent.putExtra("published", article.published);
+        intent.putExtra("source", article.source.title);
         context.startActivity(intent);
     }
 }
