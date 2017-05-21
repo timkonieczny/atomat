@@ -50,7 +50,8 @@ public class ArticleActivity extends AppCompatActivity {
         });
         if(getSupportActionBar()!=null) getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         Bundle extras = this.getIntent().getExtras();
-        setTitle(extras.getString("title"));
+//        setTitle(extras.getString("title"));
+        setTitle(null);
 
 
         TextView contentTextView = (TextView)findViewById(R.id.article_content);
