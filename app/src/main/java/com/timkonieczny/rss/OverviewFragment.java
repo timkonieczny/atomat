@@ -25,6 +25,8 @@ public class OverviewFragment extends Fragment implements FeedListener, UpdateHe
     SwipeRefreshLayout swipeRefreshLayout;
     Snackbar noUpdatesSnackbar;
 
+    boolean isInitialRefreshDone = false;
+
     // Required empty public constructor
     public OverviewFragment() {}
 
@@ -58,8 +60,10 @@ public class OverviewFragment extends Fragment implements FeedListener, UpdateHe
 
         noUpdatesSnackbar = Snackbar.make(view, getResources().getString(R.string.no_updates_snackbar), Snackbar.LENGTH_SHORT);
 
-        swipeRefreshLayout.setRefreshing(true);
-        updateFeed();
+        if(!isInitialRefreshDone) {
+            swipeRefreshLayout.setRefreshing(true);
+            updateFeed();
+        }
     }
 
     @Override
@@ -93,6 +97,7 @@ public class OverviewFragment extends Fragment implements FeedListener, UpdateHe
 
     @Override
     public void onFeedUpdated(ArrayList<Article> articles) {
+        isInitialRefreshDone = true;
         if(articles.size()==0){
             noUpdatesSnackbar.show();
         }else {
