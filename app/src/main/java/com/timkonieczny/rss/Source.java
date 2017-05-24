@@ -1,6 +1,6 @@
 package com.timkonieczny.rss;
 
-import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 
@@ -15,15 +15,15 @@ class Source {
     Drawable iconDrawable;
     Date updated;
     private UpdateIconImageListener updateIconImageListener;
-    private Context context;
+    private Resources resources;
 
-    Source(UpdateIconImageListener updateIconImageListener, Context context){
+    Source(UpdateIconImageListener updateIconImageListener, Resources resources){
         this.updateIconImageListener = updateIconImageListener;
-        this.context = context;
+        this.resources = resources;
     }
 
     void updateIconImage(){
-        (new UpdateIconImageTask(updateIconImageListener, context)).execute(this);
+        (new UpdateIconImageTask(updateIconImageListener, resources)).execute(this);
     }
 
 }

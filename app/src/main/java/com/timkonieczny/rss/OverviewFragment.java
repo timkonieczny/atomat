@@ -111,7 +111,7 @@ public class OverviewFragment extends Fragment implements FeedListener, UpdateHe
 
     public void updateFeed(){
         try {
-            (new Feed(this, this, this, getContext(), feedAdapter.articles)).execute(new URL("https://www.theverge.com/rss/index.xml"));
+            (new Feed(this, this, this, getResources(), getFragmentManager(), feedAdapter.articles)).execute(new URL("https://www.theverge.com/rss/index.xml"));
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }

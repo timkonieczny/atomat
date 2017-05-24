@@ -9,6 +9,6 @@ public class MainActivity extends FragmentActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        getFragmentManager().beginTransaction().add(R.id.fragment_container, new OverviewFragment()).commit();
+        getFragmentManager().beginTransaction().replace(R.id.fragment_container, new OverviewFragment()).commit();
     }
 }

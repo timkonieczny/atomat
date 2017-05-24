@@ -3,7 +3,6 @@ package com.timkonieczny.rss;
 import android.graphics.Color;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,7 +36,7 @@ class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ArticleCardViewHolder
         holder.articleTitle.setText(article.title);
         holder.articleAuthor.setText(article.author);
 
-//        if(article.headerImageBitmap!=null) holder.articleHeader.setImageBitmap(article.headerImageBitmap);
+        if(article.headerImageBitmap!=null) holder.articleHeader.setImageBitmap(article.headerImageBitmap);
 
         if(article.colorPalette!=null) {
             int color = article.colorPalette.getDarkMutedColor(Color.DKGRAY);

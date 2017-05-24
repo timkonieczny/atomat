@@ -1,6 +1,6 @@
 package com.timkonieczny.rss;
 
-import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
@@ -13,11 +13,11 @@ import java.net.URL;
 class UpdateIconImageTask extends AsyncTask<Source, Void, Source> {
 
     private UpdateIconImageListener updateIconImageListener;
-    private Context context;
+    private Resources resources;
 
-    UpdateIconImageTask(UpdateIconImageListener updateIconImageListener, Context context){
+    UpdateIconImageTask(UpdateIconImageListener updateIconImageListener, Resources resources){
         this.updateIconImageListener = updateIconImageListener;
-        this.context = context;
+        this.resources = resources;
     }
 
     @Override
@@ -27,7 +27,7 @@ class UpdateIconImageTask extends AsyncTask<Source, Void, Source> {
             InputStream stream = (new URL(params[0].icon)).openStream();
             image = BitmapFactory.decodeStream(stream);
             params[0].iconBitmap = image;
-            params[0].iconDrawable = new BitmapDrawable( context.getResources(), image);
+            params[0].iconDrawable = new BitmapDrawable( resources, image);
 
         } catch (IOException e) {
             e.printStackTrace();

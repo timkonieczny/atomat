@@ -1,6 +1,7 @@
 package com.timkonieczny.rss;
 
-import android.content.Context;
+import android.app.FragmentManager;
+import android.content.res.Resources;
 import android.icu.text.SimpleDateFormat;
 import android.os.AsyncTask;
 import android.util.Log;
@@ -31,10 +32,18 @@ class Feed extends AsyncTask<URL, Void, ArrayList<Article>> {
 
     private SimpleDateFormat dateFormat;
     private Pattern imgWithWhitespace, img;
-    private Context context;
+    private Resources resources;
+    private FragmentManager fragmentManager;
 
-    Feed(FeedListener feedListener, UpdateHeaderImageListener updateHeaderImageListener, UpdateIconImageListener updateIconImageListener, Context context, ArrayList<Article> existingArticles){
-        this.context = context;
+    Feed(FeedListener feedListener,
+         UpdateHeaderImageListener updateHeaderImageListener,
+         UpdateIconImageListener updateIconImageListener,
+         Resources resources,
+         FragmentManager fragmentManager,
+         ArrayList<Article> existingArticles){
+
+        this.resources = resources;
+        this.fragmentManager = fragmentManager;
         this.feedListener = feedListener;
         this.updateHeaderImageListener = updateHeaderImageListener;
         this.updateIconImageListener = updateIconImageListener;
@@ -77,7 +86,7 @@ class Feed extends AsyncTask<URL, Void, ArrayList<Article>> {
                 articles.remove(i);
                 i--;
             }else{
-                article.onClickListener = new ArticleOnClickListener(article, context);
+                article.onClickListener = new ArticleOnClickListener(article, fragmentManager);
                 article.updateHeaderImage();
             }
         }
@@ -108,7 +117,7 @@ class Feed extends AsyncTask<URL, Void, ArrayList<Article>> {
     }
 
     private void readSource(XmlPullParser parser) throws IOException, XmlPullParserException {
-        Source source = new Source(updateIconImageListener, context);
+        Source source = new Source(updateIconImageListener, resources);
         while(parseNextTag(parser) != XmlPullParser.END_TAG){
             if(parser.getEventType() == XmlPullParser.START_TAG){
                 switch (parser.getName()){
