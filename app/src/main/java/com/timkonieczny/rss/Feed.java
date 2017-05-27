@@ -4,6 +4,7 @@ import android.app.FragmentManager;
 import android.content.res.Resources;
 import android.icu.text.SimpleDateFormat;
 import android.os.AsyncTask;
+import android.text.Html;
 import android.util.Log;
 import android.util.Xml;
 
@@ -16,12 +17,14 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-class Feed extends AsyncTask<URL, Void, ArrayList<Article>> {
+class Feed extends AsyncTask<URL, Void, Boolean> {
 
     private FeedListener feedListener;
     private UpdateHeaderImageListener updateHeaderImageListener;
@@ -29,34 +32,36 @@ class Feed extends AsyncTask<URL, Void, ArrayList<Article>> {
 
     private ArrayList<Article> articles;
     private HashSet<String> existingIds;
+    private Comparator<Article> descending;
 
     private SimpleDateFormat dateFormat;
     private Pattern imgWithWhitespace, img;
     private Resources resources;
     private FragmentManager fragmentManager;
 
-    Feed(FeedListener feedListener,
-         UpdateHeaderImageListener updateHeaderImageListener,
-         UpdateIconImageListener updateIconImageListener,
-         Resources resources,
-         FragmentManager fragmentManager,
-         ArrayList<Article> existingArticles){
+    Feed(Object listener, Resources resources, FragmentManager fragmentManager){
 
         this.resources = resources;
         this.fragmentManager = fragmentManager;
-        this.feedListener = feedListener;
-        this.updateHeaderImageListener = updateHeaderImageListener;
-        this.updateIconImageListener = updateIconImageListener;
+        this.feedListener = (FeedListener)listener;
+        this.updateHeaderImageListener = (UpdateHeaderImageListener)listener;
+        this.updateIconImageListener = (UpdateIconImageListener)listener;
 
         dateFormat = new SimpleDateFormat("yyyy-mm-dd'T'HH:mm:ssX");
         imgWithWhitespace = Pattern.compile("\\A<img(.*?)/>\\s*");  // <img ... /> at beginning of input, including trailing whitespaces
         img = Pattern.compile("<img(?:.*?)src=\"(.*?)\"(?:.*?)/>"); // src attribute of <img ... />
+        descending = new Comparator<Article>() {
+            @Override
+            public int compare(Article a1, Article a2) {
+                return a2.published.compareTo(a1.published);
+            }
+        };
 
-        existingIds = getExistingArticlesIds(existingArticles);
+        existingIds = getExistingArticlesIds();
     }
 
     @Override
-    protected ArrayList<Article> doInBackground(URL... params) {
+    protected Boolean doInBackground(URL... params) {
 
         articles = new ArrayList<>();
 
@@ -91,13 +96,16 @@ class Feed extends AsyncTask<URL, Void, ArrayList<Article>> {
             }
         }
 
-        return articles;
+        MainActivity.articles.addAll(articles);
+        Collections.sort(MainActivity.articles, descending);
+
+        return articles.size() > 0;
     }
 
     @Override
-    protected void onPostExecute(ArrayList<Article> articles) {
-        super.onPostExecute(articles);
-        feedListener.onFeedUpdated(articles);
+    protected void onPostExecute(Boolean hasNewArticles) {
+        super.onPostExecute(hasNewArticles);
+        feedListener.onFeedUpdated(hasNewArticles);
     }
 
 
@@ -175,7 +183,7 @@ class Feed extends AsyncTask<URL, Void, ArrayList<Article>> {
                         if (matcher.find()) {
                             article.headerImage = matcher.group(1);
                         }
-                        article.content = imgWithWhitespace.matcher(article.content).replaceFirst("");
+                        article.content = Html.fromHtml(imgWithWhitespace.matcher(article.content).replaceFirst(""), Html.FROM_HTML_MODE_COMPACT);
                         break;
                     case "author":
                         if(parseNextTag(parser) == XmlPullParser.START_TAG && parser.getName().equals("name")){
@@ -226,10 +234,10 @@ class Feed extends AsyncTask<URL, Void, ArrayList<Article>> {
         return link;
     }
 
-    private HashSet<String> getExistingArticlesIds(ArrayList<Article> existingArticles){
+    private HashSet<String> getExistingArticlesIds(){
         HashSet<String> ids = new HashSet<>();
-        for(int i = 0; i < existingArticles.size(); i++){
-            ids.add(existingArticles.get(i).uniqueId);
+        for(int i = 0; i < MainActivity.articles.size(); i++){
+            ids.add(MainActivity.articles.get(i).uniqueId);
         }
         return ids;
     }

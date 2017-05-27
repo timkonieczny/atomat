@@ -14,7 +14,6 @@ import android.view.ViewGroup;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 
 public class OverviewFragment extends Fragment implements FeedListener, UpdateHeaderImageListener, UpdateIconImageListener, SwipeRefreshLayout.OnRefreshListener{
@@ -61,6 +60,7 @@ public class OverviewFragment extends Fragment implements FeedListener, UpdateHe
         noUpdatesSnackbar = Snackbar.make(view, getResources().getString(R.string.no_updates_snackbar), Snackbar.LENGTH_SHORT);
 
         if(!isInitialRefreshDone) {
+            MainActivity.articles = new ArrayList<>();
             swipeRefreshLayout.setRefreshing(true);
             updateFeed();
         }
@@ -88,7 +88,7 @@ public class OverviewFragment extends Fragment implements FeedListener, UpdateHe
 
     @Override
     public void onHeaderImageUpdated(Article article) {
-        int index = feedAdapter.articles.indexOf(article);
+        int index = MainActivity.articles.indexOf(article);
         if(index>=0)
             feedAdapter.notifyItemChanged(index);   // Article card exists already and only needs to update
         else
@@ -96,22 +96,19 @@ public class OverviewFragment extends Fragment implements FeedListener, UpdateHe
     }
 
     @Override
-    public void onFeedUpdated(ArrayList<Article> articles) {
+    public void onFeedUpdated(boolean hasNewArticles) {
         isInitialRefreshDone = true;
-        if(articles.size()==0){
-            noUpdatesSnackbar.show();
-        }else {
-            feedAdapter.articles.addAll(articles);
-            Collections.sort(feedAdapter.articles, descending);
-
+        if(hasNewArticles)
             feedAdapter.notifyDataSetChanged();
-        }
+        else
+            noUpdatesSnackbar.show();
+
         swipeRefreshLayout.setRefreshing(false);
     }
 
     public void updateFeed(){
         try {
-            (new Feed(this, this, this, getResources(), getFragmentManager(), feedAdapter.articles)).execute(new URL("https://www.theverge.com/rss/index.xml"));
+            (new Feed(this, getResources(), getFragmentManager())).execute(new URL("https://www.theverge.com/rss/index.xml"));
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }

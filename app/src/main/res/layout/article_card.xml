@@ -20,7 +20,7 @@
         android:scaleType="centerCrop"
         android:adjustViewBounds="true"
         android:tintMode="src_atop"
-        android:transitionName="headerImage"
+        android:transitionName="headerImage1"
         android:contentDescription="@string/header_image_descriptor"/>
 
     <LinearLayout

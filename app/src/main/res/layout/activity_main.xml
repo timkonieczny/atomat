@@ -10,10 +10,4 @@
         android:layout_weight="1"
         android:layout_width="0dp"
         android:layout_height="match_parent" />
-    <fragment
-        android:name="com.timkonieczny.rss.ArticleFragment"
-        android:id="@+id/article_fragment"
-        android:layout_weight="1"
-        android:layout_width="0dp"
-        android:layout_height="match_parent" />
 </LinearLayout>

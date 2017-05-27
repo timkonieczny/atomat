@@ -10,7 +10,8 @@ import java.util.Date;
 class Article {
 
     Date published, updated;
-    String title, content, id, author, uniqueId, headerImage;
+    String title, id, author, uniqueId, headerImage;
+    CharSequence content;
     URL link;
     Bitmap headerImageBitmap = null;
     Palette colorPalette;

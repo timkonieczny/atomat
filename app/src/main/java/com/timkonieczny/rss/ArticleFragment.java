@@ -1,14 +1,14 @@
 package com.timkonieczny.rss;
 
 
-import android.os.Bundle;
 import android.app.Fragment;
+import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.widget.TextViewCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 
@@ -43,10 +43,15 @@ public class ArticleFragment extends Fragment {
 
             // TODO: this is called when the activity is created, hence arguments is null. Put this in (probably) onAttach
 
-            ((TextView) view.findViewById(R.id.article_title)).setText(arguments.getString("title"));
-            ((TextView) view.findViewById(R.id.article_author)).setText(arguments.getString("author"));
-            ((TextView) view.findViewById(R.id.source_title)).setText(arguments.getString("source"));
-            ((TextView) view.findViewById(R.id.article_content)).setText(arguments.getString("content"));
+            Article article = MainActivity.articles.get(arguments.getInt("index"));
+
+            ((TextView) view.findViewById(R.id.article_title)).setText(article.title);
+            ((TextView) view.findViewById(R.id.article_author)).setText(article.author);
+            ((TextView) view.findViewById(R.id.source_title)).setText(article.source.title);
+            ((TextView) view.findViewById(R.id.article_content)).setText(article.content);
+
+            if(article.headerImageBitmap != null)
+                ((ImageView) view.findViewById(R.id.article_header)).setImageBitmap(article.headerImageBitmap);
         }
     }
 }

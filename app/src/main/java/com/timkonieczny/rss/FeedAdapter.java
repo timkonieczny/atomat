@@ -9,15 +9,9 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import java.util.ArrayList;
-
 class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ArticleCardViewHolder> {
 
-    ArrayList<Article> articles;
-
-    FeedAdapter(){
-        articles = new ArrayList<>();
-    }
+    FeedAdapter(){}
 
     @Override
     public ArticleCardViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -27,7 +21,7 @@ class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ArticleCardViewHolder
 
     @Override
     public void onBindViewHolder(ArticleCardViewHolder holder, int position) {
-        Article article = articles.get(position);
+        Article article = MainActivity.articles.get(position);
 
         holder.cardView.setOnClickListener(article.onClickListener);
 
@@ -46,7 +40,7 @@ class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ArticleCardViewHolder
 
     @Override
     public int getItemCount() {
-        return articles.size();
+        return MainActivity.articles.size();
     }
 
     static class ArticleCardViewHolder extends RecyclerView.ViewHolder{
