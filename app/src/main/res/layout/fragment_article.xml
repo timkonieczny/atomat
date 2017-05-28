@@ -1,39 +1,54 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.timkonieczny.rss.ArticleFragment">
+    android:layout_width="match_parent">
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        tools:context="com.timkonieczny.rss.ArticleFragment">
         <ImageView
             android:id="@+id/article_header"
             android:transitionName="headerImage"
-            android:layout_width="100dp"
-            android:layout_height="100dp"/>
-        <TextView
-            android:id="@+id/article_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-        <TextView
-            android:id="@+id/article_author"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-        <TextView
-            android:id="@+id/source_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-        <TextView
-            android:id="@+id/article_content"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-
-        <!-- TODO: Update blank fragment layout -->
-        <!--<TextView
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:text="@string/hello_blank_fragment" />-->
-    </LinearLayout>
+            android:layout_height="wrap_content"
+            android:adjustViewBounds="true"
+            android:src="@drawable/debug"
+            android:contentDescription="@string/header_image_descriptor" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="24dp"
+            android:orientation="vertical">
 
-</FrameLayout>
+            <TextView
+                android:id="@+id/source_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:text="The Verge -  All Posts"/>
+            <TextView
+                android:id="@+id/article_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="24sp"
+                android:layout_marginTop="14dp"
+                android:layout_marginBottom="14dp"
+                android:text="Android O is supposed to make Android updates arrive faster" />
+            <TextView
+                android:id="@+id/article_author"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:text="Andrew Liptak" />
+            <TextView
+                android:id="@+id/article_content"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:layout_marginTop="16dp"
+                android:lineSpacingExtra="4sp"
+                android:text="@string/large_text"/>
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>
