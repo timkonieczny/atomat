@@ -4,8 +4,10 @@ package com.timkonieczny.rss;
 import android.app.Fragment;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -41,19 +43,14 @@ public class ArticleFragment extends Fragment {
             Log.d("ArticleFragment", "arguments is null");
         }else{
 
+            /*MainActivity.toggle.setDrawerIndicatorEnabled(false);
+            ((AppCompatActivity)getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            ((AppCompatActivity)getActivity()).getSupportActionBar().setHomeButtonEnabled(true);
+            MainActivity.toggle.syncState();*/
+
             // TODO: this is called when the activity is created, hence arguments is null. Put this in (probably) onAttach
 
             Article article = MainActivity.articles.get(arguments.getInt("index"));
-//            ((CollapsingToolbarLayout)view.findViewById(R.id.toolbar_layout)).setTitle(article.title);
-//            ((CollapsingToolbarLayout)view.findViewById(R.id.toolbar_layout)).setTitleEnabled(false);
-//            ((CollapsingToolbarLayout)view.findViewById(R.id.toolbar_layout));
-
-//            getActivity().getSupportActionBar().setDisplayHomeAsUpEnabled(true);      // TODO: set up Action bar + menu in Activity. Set Action bar from there
-
-//            ((ActionBarActivity) getActivity()).setSupportActionBar((android.support.v7.widget.Toolbar)view.findViewById(R.id.toolbar));
-//            getActivity().setSupportActionBar(((Toolbar)view.findViewById(R.id.toolbar)));
-
-
 
             ((TextView) view.findViewById(R.id.article_title)).setText(article.title);
             ((TextView) view.findViewById(R.id.article_author)).setText(article.author);
