@@ -14,15 +14,20 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     protected static ArrayList<Article> articles;
+    protected static HashMap<String, Source> sources = null;
+    protected static ArrayList<String> sourcesUrls;
+
     protected static ActionBarDrawerToggle toggle;
 
     private OverviewFragment overviewFragment = null;
     private SourcesFragment sourcesFragment = null;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

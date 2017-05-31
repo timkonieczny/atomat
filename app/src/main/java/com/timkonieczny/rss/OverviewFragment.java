@@ -7,14 +7,15 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
 
 public class OverviewFragment extends Fragment implements FeedListener, UpdateHeaderImageListener, UpdateIconImageListener, SwipeRefreshLayout.OnRefreshListener{
 
@@ -103,14 +104,21 @@ public class OverviewFragment extends Fragment implements FeedListener, UpdateHe
         else
             noUpdatesSnackbar.show();
 
+        for (Map.Entry<String, Source> entry : MainActivity.sources.entrySet()) {
+            Log.d("Feed", "Key (URL):\t\t"+entry.getKey()+"\n"+entry.getValue().toString());
+        }
+
         swipeRefreshLayout.setRefreshing(false);
     }
 
     public void updateFeed(){
-        try {
-            (new Feed(this, getResources(), getFragmentManager())).execute(new URL("https://www.theverge.com/rss/index.xml"));
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        }
+
+        // TODO: get from shared preferences / set up in SourcesFragment
+        if(MainActivity.sources == null)
+            MainActivity.sources = new HashMap<>();
+
+        MainActivity.sourcesUrls = new ArrayList<>();
+        MainActivity.sourcesUrls.add("https://www.theverge.com/rss/index.xml");
+        (new Feed(this, getResources(), getFragmentManager(), MainActivity.sourcesUrls)).execute();
     }
 }

@@ -24,7 +24,7 @@ import java.util.HashSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-class Feed extends AsyncTask<URL, Void, Boolean> {
+class Feed extends AsyncTask<Void, Void, Boolean> {
 
     private FeedListener feedListener;
     private UpdateHeaderImageListener updateHeaderImageListener;
@@ -39,7 +39,12 @@ class Feed extends AsyncTask<URL, Void, Boolean> {
     private Resources resources;
     private FragmentManager fragmentManager;
 
-    Feed(Object listener, Resources resources, FragmentManager fragmentManager){
+    private ArrayList<String> urls;
+    private String currentURL;
+
+    Feed(Object listener, Resources resources, FragmentManager fragmentManager, ArrayList<String> urls){
+
+        this.urls = urls;
 
         this.resources = resources;
         this.fragmentManager = fragmentManager;
@@ -61,13 +66,16 @@ class Feed extends AsyncTask<URL, Void, Boolean> {
     }
 
     @Override
-    protected Boolean doInBackground(URL... params) {
+    protected final Boolean doInBackground(Void... params) {
 
         articles = new ArrayList<>();
 
-        for(URL url : params){
+        for(int i = 0; i < urls.size(); i++) {
+
+            currentURL = urls.get(i);
+
             try {
-                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                HttpURLConnection connection = (HttpURLConnection) (new URL(currentURL)).openConnection();
 
                 connection.setReadTimeout(10000);
                 connection.setConnectTimeout(15000);
@@ -125,28 +133,39 @@ class Feed extends AsyncTask<URL, Void, Boolean> {
     }
 
     private void readSource(XmlPullParser parser) throws IOException, XmlPullParserException {
-        Source source = new Source(updateIconImageListener, resources);
+        if(!MainActivity.sources.containsKey(currentURL)) MainActivity.sources.put(currentURL, new Source(updateIconImageListener, resources));
+        Source currentSource = MainActivity.sources.get(currentURL);
         while(parseNextTag(parser) != XmlPullParser.END_TAG){
             if(parser.getEventType() == XmlPullParser.START_TAG){
                 switch (parser.getName()){
                     case "entry":
-                        readEntry(parser, source);
+                        readEntry(parser, currentSource);
                         break;
                     case "title":
-                        source.title = readText(parser);
+                        if(currentSource.title == null)
+                            currentSource.title = readText(parser);
+                        else
+                            readText(parser);                   // TODO: skipTag()
                         break;
                     case "icon":
-                        source.icon = readText(parser);
-                        source.updateIconImage();
+                        if(currentSource.icon == null) {
+                            currentSource.icon = readText(parser);
+                            currentSource.updateIconImage();
+                        }else
+                            readText(parser);
                         break;
                     case "updated":
-                        source.updated = readDate(parser);
+                        currentSource.updated = readDate(parser);
                         break;
                     case "id":
-                        source.id = readText(parser);
+                        if(currentSource.id == null)
+                            currentSource.id = readText(parser);
+                        else
+                            readText(parser);
                         break;
                     case "link":
-                        source.link = new URL(parser.getAttributeValue(null, "href"));
+                        if(currentSource.link == null)
+                            currentSource.link = new URL(parser.getAttributeValue(null, "href"));
                         parseNextTag(parser);
                         break;
                 }
