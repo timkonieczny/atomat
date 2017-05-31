@@ -1,7 +1,6 @@
 package com.timkonieczny.rss;
 
 import android.app.FragmentManager;
-import android.content.res.Resources;
 import android.icu.text.SimpleDateFormat;
 import android.os.AsyncTask;
 import android.text.Html;
@@ -21,6 +20,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -28,7 +28,6 @@ class Feed extends AsyncTask<Void, Void, Boolean> {
 
     private FeedListener feedListener;
     private UpdateHeaderImageListener updateHeaderImageListener;
-    private UpdateIconImageListener updateIconImageListener;
 
     private ArrayList<Article> articles;
     private HashSet<String> existingIds;
@@ -36,21 +35,15 @@ class Feed extends AsyncTask<Void, Void, Boolean> {
 
     private SimpleDateFormat dateFormat;
     private Pattern imgWithWhitespace, img;
-    private Resources resources;
     private FragmentManager fragmentManager;
 
-    private ArrayList<String> urls;
     private String currentURL;
 
-    Feed(Object listener, Resources resources, FragmentManager fragmentManager, ArrayList<String> urls){
+    Feed(Object listener, FragmentManager fragmentManager){
 
-        this.urls = urls;
-
-        this.resources = resources;
         this.fragmentManager = fragmentManager;
         this.feedListener = (FeedListener)listener;
         this.updateHeaderImageListener = (UpdateHeaderImageListener)listener;
-        this.updateIconImageListener = (UpdateIconImageListener)listener;
 
         dateFormat = new SimpleDateFormat("yyyy-mm-dd'T'HH:mm:ssX");
         imgWithWhitespace = Pattern.compile("\\A<img(.*?)/>\\s*");  // <img ... /> at beginning of input, including trailing whitespaces
@@ -70,9 +63,9 @@ class Feed extends AsyncTask<Void, Void, Boolean> {
 
         articles = new ArrayList<>();
 
-        for(int i = 0; i < urls.size(); i++) {
+        for (Map.Entry<String, Source> entry : MainActivity.sources.entrySet()) {
 
-            currentURL = urls.get(i);
+            currentURL = entry.getKey();
 
             try {
                 HttpURLConnection connection = (HttpURLConnection) (new URL(currentURL)).openConnection();
@@ -133,7 +126,7 @@ class Feed extends AsyncTask<Void, Void, Boolean> {
     }
 
     private void readSource(XmlPullParser parser) throws IOException, XmlPullParserException {
-        if(!MainActivity.sources.containsKey(currentURL)) MainActivity.sources.put(currentURL, new Source(updateIconImageListener, resources));
+//        if(!MainActivity.sources.containsKey(currentURL)) MainActivity.sources.put(currentURL, new Source(updateIconImageListener, resources));
         Source currentSource = MainActivity.sources.get(currentURL);
         while(parseNextTag(parser) != XmlPullParser.END_TAG){
             if(parser.getEventType() == XmlPullParser.START_TAG){

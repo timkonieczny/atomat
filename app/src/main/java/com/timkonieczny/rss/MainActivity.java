@@ -21,7 +21,6 @@ public class MainActivity extends AppCompatActivity
 
     protected static ArrayList<Article> articles;
     protected static HashMap<String, Source> sources = null;
-    protected static ArrayList<String> sourcesUrls;
 
     protected static ActionBarDrawerToggle toggle;
 

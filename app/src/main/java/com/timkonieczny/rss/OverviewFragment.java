@@ -117,8 +117,7 @@ public class OverviewFragment extends Fragment implements FeedListener, UpdateHe
         if(MainActivity.sources == null)
             MainActivity.sources = new HashMap<>();
 
-        MainActivity.sourcesUrls = new ArrayList<>();
-        MainActivity.sourcesUrls.add("https://www.theverge.com/rss/index.xml");
-        (new Feed(this, getResources(), getFragmentManager(), MainActivity.sourcesUrls)).execute();
+        MainActivity.sources.put("https://www.theverge.com/rss/index.xml", new Source(this, getResources()));
+        (new Feed(this, getFragmentManager())).execute();
     }
 }
