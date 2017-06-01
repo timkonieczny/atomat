@@ -113,6 +113,27 @@ public class OverviewFragment extends Fragment implements FeedListener, UpdateHe
 
     public void updateFeed(){
 
+        // TODO: if id == url, use this.
+        // TODO: root element == channel / feed
+        // TODO: remove unnecessary properties
+
+        /*
+        * Source
+        *
+        * Icon
+        * Title
+        * URL
+        * Updated
+        *
+        *
+        * Article
+        *
+        * Content
+        * Title
+        * Author
+        * Header Image
+        * */
+
         // TODO: get from shared preferences / set up in SourcesFragment
         if(MainActivity.sources == null)
             MainActivity.sources = new HashMap<>();

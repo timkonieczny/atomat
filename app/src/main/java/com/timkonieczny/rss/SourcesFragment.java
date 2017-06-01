@@ -3,9 +3,11 @@ package com.timkonieczny.rss;
 
 import android.os.Bundle;
 import android.app.Fragment;
+import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.GridView;
 
 
 /**
@@ -26,4 +28,10 @@ public class SourcesFragment extends Fragment {
         return inflater.inflate(R.layout.fragment_sources, container, false);
     }
 
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        GridView gridView = (GridView) view.findViewById(R.id.sources_grid);
+        gridView.setAdapter(new SourcesAdapter(getContext()));
+    }
 }
