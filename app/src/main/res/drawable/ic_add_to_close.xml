@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animation-list xmlns:android="http://schemas.android.com/apk/res/android"
+    android:oneshot="true">
+    <!-- TODO: total duration: 300ms -->
+    <!-- TODO: set correct icons. Can icons be rotated as animation? -->
+    <item android:drawable="@drawable/ic_add_white_24dp"  android:duration="150"/>
+    <!--<item android:drawable="@drawable/ic_settings_black_24dp" android:duration="66"/>-->
+    <!--<item android:drawable="@drawable/ic_cloud_black_24dp" android:duration="66"/>-->
+    <item android:drawable="@drawable/ic_close_white_24dp" android:duration="150"/>
+</animation-list>

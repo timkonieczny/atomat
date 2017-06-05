@@ -1,4 +1,4 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -17,12 +17,24 @@
         android:numColumns="auto_fit"
         android:stretchMode="columnWidth"/>
 
+    <LinearLayout
+        android:id="@+id/fab_content"
+        android:background="@color/colorAccent"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+    </LinearLayout>
+
     <android.support.design.widget.FloatingActionButton
+        android:id="@+id/add_source_fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:fabSize="normal"
-        android:layout_gravity="bottom|end"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
         app:useCompatPadding="true"
         android:src="@drawable/ic_add_white_24dp"/>
 
-</FrameLayout>
+</RelativeLayout>
