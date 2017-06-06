@@ -7,11 +7,18 @@ import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.TextInputLayout;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
+import android.webkit.URLUtil;
+import android.widget.EditText;
 import android.widget.GridView;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 /**
@@ -20,6 +27,8 @@ import android.widget.GridView;
 public class SourcesFragment extends Fragment {
 
     private boolean isLayoutRevealed = false;
+    private Pattern httpPattern = Pattern.compile("\\Ahttp(s)?+://");
+    private Pattern xmlPattern = Pattern.compile("\\.xml\\Z");
 
     public SourcesFragment() {
         // Required empty public constructor
@@ -102,6 +111,23 @@ public class SourcesFragment extends Fragment {
                 }
                 isLayoutRevealed = !isLayoutRevealed;
 
+            }
+        });
+
+        final EditText urlEditText = (EditText) view.findViewById(R.id.feed_url_edit_text);
+        final TextInputLayout urlTextInputLayout = (TextInputLayout) view.findViewById(R.id.text_input_layout_url);
+        view.findViewById(R.id.add_source_button).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                urlTextInputLayout.setErrorEnabled(false);
+                Log.d("SourcesFragment", urlEditText.getText().toString());
+                String url = urlEditText.getText().toString().replaceAll(" ", "");
+                if(!url.equals("")) {
+                    if (!httpPattern.matcher(url).find()) url = "http://" + url;
+                    if (URLUtil.isValidUrl(url) && xmlPattern.matcher(url).find()) {
+                        Log.d("SourcesFragment", "URL is valid");
+                    } else urlTextInputLayout.setError("Enter an URL that points to an XML file");
+                }else urlTextInputLayout.setError("Enter a valid URL");
             }
         });
     }
