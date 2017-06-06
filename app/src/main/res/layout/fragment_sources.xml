@@ -17,13 +17,39 @@
         android:numColumns="auto_fit"
         android:stretchMode="columnWidth"/>
 
+    <!--android:visibility="gone"-->
+
     <LinearLayout
         android:id="@+id/fab_content"
-        android:background="@color/colorAccent"
-        android:visibility="gone"
+        android:background="@color/colorWhite"
+        android:visibility="visible"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="16dp">
+
+        <android.support.design.widget.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/feed_url"
+            android:labelFor="@+id/feed_url_edit_text">
+            <EditText
+                android:id="@id/feed_url_edit_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:imeActionLabel="Label"
+                android:inputType="textUri" />
+        </android.support.design.widget.TextInputLayout>
+        <Button
+            android:layout_marginTop="24dp"
+            android:layout_marginEnd="4dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:text="@string/add"
+            android:textColor="@color/colorWhite"
+            android:background="@color/colorAccent"/>
 
     </LinearLayout>
 

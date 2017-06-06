@@ -53,6 +53,7 @@ public class SourcesFragment extends Fragment {
                 Log.d("SourcesFragment", "OnScreen: " + fabLocation[0] + " " + fabLocation[1]);*/
 
                 if(isLayoutRevealed){
+                    view.findViewById(R.id.feed_url_edit_text).clearFocus();
                     Animator animator = ViewAnimationUtils.createCircularReveal(
                             revealingView,
                             view.getRight(),
@@ -83,6 +84,7 @@ public class SourcesFragment extends Fragment {
                     ((AnimationDrawable)((FloatingActionButton)fab).getDrawable()).start();
                     animator.start();
                 }else {
+                    view.findViewById(R.id.feed_url_edit_text).requestFocus();
                     Animator animator = ViewAnimationUtils.createCircularReveal(
                             revealingView,
                             view.getRight(),
