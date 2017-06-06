@@ -79,8 +79,9 @@ public class SourcesFragment extends Fragment {
                         @Override
                         public void onAnimationRepeat(Animator animation) {}
                     });
+                    ((FloatingActionButton)fab).setImageDrawable(getActivity().getDrawable(R.drawable.ic_close_to_add));
+                    ((AnimationDrawable)((FloatingActionButton)fab).getDrawable()).start();
                     animator.start();
-                    ((FloatingActionButton)fab).setImageDrawable(getActivity().getDrawable(R.drawable.ic_add_white_24dp));  // TODO: use animation in reverse
                 }else {
                     Animator animator = ViewAnimationUtils.createCircularReveal(
                             revealingView,
