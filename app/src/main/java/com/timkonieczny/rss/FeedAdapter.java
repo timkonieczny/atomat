@@ -9,7 +9,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ArticleCardViewHolder> {
+class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ArticleCardViewHolder> implements UpdateHeaderImageListener, UpdateIconImageListener{
 
     FeedAdapter(){}
 
@@ -26,11 +26,13 @@ class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ArticleCardViewHolder
         holder.cardView.setOnClickListener(article.onClickListener);
 
         holder.sourceTitle.setText(article.source.title);
-        holder.sourceTitle.setCompoundDrawablesWithIntrinsicBounds(article.source.iconDrawable, null, null, null);
+        if(article.source.iconDrawable != null) holder.sourceTitle.setCompoundDrawablesWithIntrinsicBounds(article.source.iconDrawable, null, null, null);
+        else article.source.setUpdateIconImageListener(this);
         holder.articleTitle.setText(article.title);
         holder.articleAuthor.setText(article.author);
 
         if(article.headerImageBitmap!=null) holder.articleHeader.setImageBitmap(article.headerImageBitmap);
+        else article.setUpdateHeaderImageListener(this);
 
         if(article.colorPalette!=null) {
             int color = article.colorPalette.getDarkMutedColor(Color.DKGRAY);
@@ -41,6 +43,20 @@ class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ArticleCardViewHolder
     @Override
     public int getItemCount() {
         return MainActivity.articles.size();
+    }
+
+    @Override
+    public void onHeaderImageUpdated(Article article) {
+        int index = MainActivity.articles.indexOf(article);
+        if(index>=0)
+            notifyItemChanged(index);   // Article card exists already and only needs to update
+        else
+            notifyDataSetChanged();     // Article card doesn't exist yet and needs to be created
+    }
+
+    @Override
+    public void onIconImageUpdated(Source source) {
+        notifyDataSetChanged();
     }
 
     static class ArticleCardViewHolder extends RecyclerView.ViewHolder{

@@ -11,14 +11,16 @@
     <ImageView
         android:id="@+id/source_icon"
         android:layout_width="match_parent"
-        android:layout_height="90dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="20dp"
         android:src="@drawable/debugicon"
-        android:scaleType="center"
+        android:scaleType="fitCenter"
         android:layout_gravity="center"
         android:contentDescription="@string/source_icon_image_descriptor" />
 
     <!--
-    TODO: Add fab; change background color dynamically
+    TODO: Change background color dynamically
     -->
 
     <TextView

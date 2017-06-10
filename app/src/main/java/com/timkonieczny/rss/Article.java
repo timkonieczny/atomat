@@ -18,13 +18,25 @@ class Article {
     Source source;
     View.OnClickListener onClickListener;
 
-    private UpdateHeaderImageListener updateHeaderImageListener;
-
-    Article(UpdateHeaderImageListener updateHeaderImageListener){
-        this.updateHeaderImageListener = updateHeaderImageListener;
-    }
+    private UpdateHeaderImageTask task;
 
     void updateHeaderImage() {
-        (new UpdateHeaderImageTask(updateHeaderImageListener)).execute(this);
+        task = new UpdateHeaderImageTask();
+        task.execute(this);
+    }
+
+    void setUpdateHeaderImageListener(UpdateHeaderImageListener listener){
+        task.updateHeaderImageListener = listener;
+    }
+
+    @Override
+    public String toString(){
+        return "Title: " + title +
+                "\nAuthors: " + author +
+                "\nContent: " + content +
+                "\nLink: " + link +
+                "\nID: " + id +
+                "\nheaderImage: " + headerImage +
+                "\nuniqueID: " + uniqueId;
     }
 }

@@ -7,7 +7,6 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,7 +14,6 @@ import android.view.ViewGroup;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Map;
 
 public class OverviewFragment extends Fragment implements FeedListener, UpdateHeaderImageListener, UpdateIconImageListener, SwipeRefreshLayout.OnRefreshListener{
 
@@ -41,6 +39,13 @@ public class OverviewFragment extends Fragment implements FeedListener, UpdateHe
             }
         };
 
+        // TODO: save / load from shared preferences
+        if(MainActivity.sources == null) MainActivity.sources = new HashMap<>();
+        /*Source source = new Source();
+        source.resources = getResources();
+        MainActivity.sources.put("https://www.theverge.com/rss/index.xml", source);*/
+        if(MainActivity.articles == null) MainActivity.articles = new ArrayList<>();
+
         feedAdapter = new FeedAdapter();
     }
 
@@ -61,7 +66,6 @@ public class OverviewFragment extends Fragment implements FeedListener, UpdateHe
         noUpdatesSnackbar = Snackbar.make(view, getResources().getString(R.string.no_updates_snackbar), Snackbar.LENGTH_SHORT);
 
         if(!isInitialRefreshDone) {
-            MainActivity.articles = new ArrayList<>();
             swipeRefreshLayout.setRefreshing(true);
             updateFeed();
         }
@@ -89,11 +93,7 @@ public class OverviewFragment extends Fragment implements FeedListener, UpdateHe
 
     @Override
     public void onHeaderImageUpdated(Article article) {
-        int index = MainActivity.articles.indexOf(article);
-        if(index>=0)
-            feedAdapter.notifyItemChanged(index);   // Article card exists already and only needs to update
-        else
-            feedAdapter.notifyDataSetChanged();     // Article card doesn't exist yet and needs to be created
+
     }
 
     @Override
@@ -103,10 +103,6 @@ public class OverviewFragment extends Fragment implements FeedListener, UpdateHe
             feedAdapter.notifyDataSetChanged();
         else
             noUpdatesSnackbar.show();
-
-        for (Map.Entry<String, Source> entry : MainActivity.sources.entrySet()) {
-            Log.d("Feed", "Key (URL):\t\t"+entry.getKey()+"\n"+entry.getValue().toString());
-        }
 
         swipeRefreshLayout.setRefreshing(false);
     }
@@ -134,11 +130,7 @@ public class OverviewFragment extends Fragment implements FeedListener, UpdateHe
         * Header Image
         * */
 
-        // TODO: get from shared preferences / set up in SourcesFragment
-        if(MainActivity.sources == null)
-            MainActivity.sources = new HashMap<>();
-
-        MainActivity.sources.put("https://www.theverge.com/rss/index.xml", new Source(this, getResources()));
+//        MainActivity.sources.put("https://www.theverge.com/rss/index.xml", new Source(this, getResources()));
         (new Feed(this, getFragmentManager())).execute();
     }
 }

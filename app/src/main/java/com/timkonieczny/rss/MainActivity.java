@@ -19,7 +19,7 @@ import java.util.HashMap;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    protected static ArrayList<Article> articles;
+    protected static ArrayList<Article> articles = null;
     protected static HashMap<String, Source> sources = null;
 
     protected static ActionBarDrawerToggle toggle;

@@ -5,16 +5,18 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.Map;
 
-class SourcesAdapter extends BaseAdapter {
+class SourcesAdapter extends BaseAdapter implements UpdateIconImageListener {
 
-    private ArrayList<String> keys;
+    static ArrayList<String> keys;
     private LayoutInflater layoutInflater;
+    private GridView gridView;
 
     SourcesAdapter(Context context){
         keys = new ArrayList<>();
@@ -41,6 +43,7 @@ class SourcesAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
+        gridView = (GridView) parent;
         View view;
         if (convertView == null) {
             view = layoutInflater.inflate(R.layout.source_item, parent, false);
@@ -48,12 +51,20 @@ class SourcesAdapter extends BaseAdapter {
             view = convertView;
         }
 
-        ((ImageView)view.findViewById(R.id.source_icon)).setImageDrawable(MainActivity.sources.get(keys.get(position)).iconDrawable);
-        ((TextView)view.findViewById(R.id.source_title)).setText(MainActivity.sources.get(keys.get(position)).title);
+        Source source = MainActivity.sources.get(keys.get(position));
+
+        if(source.iconDrawable != null) ((ImageView)view.findViewById(R.id.source_icon)).setImageDrawable(source.iconDrawable);
+        else source.setUpdateIconImageListener(this);
+        ((TextView)view.findViewById(R.id.source_title)).setText(source.title);
 //        ((TextView)view.findViewById(R.id.source_title)).setCompoundDrawablesWithIntrinsicBounds(null, MainActivity.sources.get(keys.get(position)).iconDrawable, null, null);
 
         // TODO: create color palette for icon and set background color
 
         return view;
+    }
+
+    @Override
+    public void onIconImageUpdated(Source source) {
+        gridView.invalidateViews();
     }
 }

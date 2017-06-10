@@ -12,11 +12,10 @@ import java.net.URL;
 
 class UpdateIconImageTask extends AsyncTask<Source, Void, Source> {
 
-    private UpdateIconImageListener updateIconImageListener;
+    UpdateIconImageListener updateIconImageListener = null;
     private Resources resources;
 
-    UpdateIconImageTask(UpdateIconImageListener updateIconImageListener, Resources resources){
-        this.updateIconImageListener = updateIconImageListener;
+    UpdateIconImageTask(Resources resources){
         this.resources = resources;
     }
 
@@ -27,7 +26,7 @@ class UpdateIconImageTask extends AsyncTask<Source, Void, Source> {
             InputStream stream = (new URL(params[0].icon)).openStream();
             image = BitmapFactory.decodeStream(stream);
             params[0].iconBitmap = image;
-            params[0].iconDrawable = new BitmapDrawable( resources, image);
+            params[0].iconDrawable = new BitmapDrawable(resources, image);
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -38,6 +37,6 @@ class UpdateIconImageTask extends AsyncTask<Source, Void, Source> {
     @Override
     protected void onPostExecute(Source source) {
         super.onPostExecute(source);
-        updateIconImageListener.onIconImageUpdated(source);
+        if(updateIconImageListener!=null) updateIconImageListener.onIconImageUpdated(source);
     }
 }

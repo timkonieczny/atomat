@@ -11,11 +11,7 @@ import java.net.URL;
 
 class UpdateHeaderImageTask extends AsyncTask<Article, Void, Article> {
 
-    private UpdateHeaderImageListener updateHeaderImageListener;
-
-    UpdateHeaderImageTask(UpdateHeaderImageListener updateHeaderImageListener){
-        this.updateHeaderImageListener = updateHeaderImageListener;
-    }
+    UpdateHeaderImageListener updateHeaderImageListener;
 
     @Override
     protected Article doInBackground(Article... params) {
@@ -34,6 +30,6 @@ class UpdateHeaderImageTask extends AsyncTask<Article, Void, Article> {
     @Override
     protected void onPostExecute(Article article) {
         super.onPostExecute(article);
-        updateHeaderImageListener.onHeaderImageUpdated(article);
+        if(updateHeaderImageListener != null) updateHeaderImageListener.onHeaderImageUpdated(article);
     }
 }

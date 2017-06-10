@@ -14,12 +14,13 @@ class Source {
     Bitmap iconBitmap;
     Drawable iconDrawable;
     Date updated;
-    private UpdateIconImageListener updateIconImageListener;
+    boolean isStub;
+
     private Resources resources;
 
-    Source(UpdateIconImageListener updateIconImageListener, Resources resources){
-        this.updateIconImageListener = updateIconImageListener;
-        this.resources = resources;
+    private UpdateIconImageTask task;
+
+    Source(Resources resources){
         title = null;
         icon = null;
         id = null;
@@ -27,10 +28,17 @@ class Source {
         iconBitmap = null;
         iconDrawable = null;
         updated = null;
+        isStub = true;
+        this.resources = resources;
     }
 
     void updateIconImage(){
-        (new UpdateIconImageTask(updateIconImageListener, resources)).execute(this);
+        task = new UpdateIconImageTask(resources);
+        task.execute(this);
+    }
+
+    void setUpdateIconImageListener(UpdateIconImageListener listener){
+        task.updateIconImageListener = listener;
     }
 
     @Override
