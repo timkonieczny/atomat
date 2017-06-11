@@ -12,6 +12,8 @@ import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
@@ -24,10 +26,27 @@ class SourceUpdater {
     private Source source;
     private boolean updateSource;
 
+    private HashSet<String> feedTags;
+    private HashSet<String> feedTitleTags;
+    private HashSet<String> feedIconTags;
+    private HashSet<String> feedUpdatedTags;
+    private HashSet<String> feedIdTags;
+    private HashSet<String> feedLinkTags;
+
+    private HashSet<String> entryTags;
+    private HashSet<String> entryPublishedTags;
+    private HashSet<String> entryTitleTags;
+    private HashSet<String> entryContentTags;
+    private HashSet<String> entryLinkTags;
+    private HashSet<String> entryIdTags;
+    private HashSet<String> entryAuthorTags;
+
     List<Article> parse(InputStream in, Source source, boolean updateSource) throws XmlPullParserException, IOException {
         try {
             this.updateSource = updateSource;
             this.source = source;
+
+            initializeTagDictionaries();
 
             imgWithWhitespace = Pattern.compile("\\A<img(.*?)/>\\s*");  // <img ... /> at beginning of input, including trailing whitespaces
             img = Pattern.compile("<img(?:.*?)src=\"(.*?)\"(?:.*?)/>"); // src attribute of <img ... />
@@ -45,41 +64,40 @@ class SourceUpdater {
     private List<Article> readFeed(XmlPullParser parser) throws XmlPullParserException, IOException {
         ArrayList<Article> articles = new ArrayList<>();
 
-        parser.require(XmlPullParser.START_TAG, null, "feed");
-        while (parser.next() != XmlPullParser.END_TAG) {
-            if (parser.getEventType() != XmlPullParser.START_TAG) {
-                continue;
-            }
-            String name = parser.getName();
-            // Starts by looking for the entry tag
-            if (name.equals("entry")) {
-                articles.add(readEntry(parser));
-            } else if(updateSource) {
-                switch (name){
-                    case "title":
-                        source.title = readTag(parser, "title");
-                        break;
-                    case "icon":
-                        source.icon = readTag(parser, "icon");
+        if(feedTags.contains(parser.getName())) {
+            parser.require(XmlPullParser.START_TAG, null, parser.getName());
+            while (parser.next() != XmlPullParser.END_TAG) {
+                if (parser.getEventType() != XmlPullParser.START_TAG) {
+                    continue;
+                }
+                String name = parser.getName();
+                // Starts by looking for the entry tag
+                if (entryTags.contains(name)) {
+                    articles.add(readEntry(parser));
+                } else if (updateSource) {
+                    if (feedTitleTags.contains(name)) {
+                        source.title = readTag(parser, name);
+                    } else if (feedIconTags.contains(name)) {
+                        // TODO: icon is missing in some feeds
+                        source.icon = readTag(parser, name);
                         source.updateIconImage();
-                        break;
-                    case "updated":
+                    } else if (feedUpdatedTags.contains(name)) {
                         try {
-                            source.updated = dateFormat.parse(readTag(parser, "updated"));
+                            source.updated = dateFormat.parse(readTag(parser, name));
                         } catch (ParseException e) {
                             e.printStackTrace();
                         }
-                        break;
-                    case "id":
-                        source.id = readTag(parser, "id");
-                        break;
-                    case "link":
+                    } else if (feedIdTags.contains(name)) {
+                        // TODO: id is missing in some feeds
+                        source.id = readTag(parser, name);
+                    } else if (feedLinkTags.contains(name)) {
+                        // TODO: link has different encoding in some feeds
                         source.link = new URL(parser.getAttributeValue(null, "href"));
                         parser.next();
-                        break;
+                    }
+                } else {
+                    skip(parser);
                 }
-            }else{
-                skip(parser);
             }
         }
         for(int i = 0; i < articles.size(); i++){
@@ -97,51 +115,40 @@ class SourceUpdater {
         Article article = new Article();
         article.source = source;
 
-        parser.require(XmlPullParser.START_TAG, null, "entry");
+        parser.require(XmlPullParser.START_TAG, null, parser.getName());
         while (parser.next() != XmlPullParser.END_TAG) {
             if (parser.getEventType() != XmlPullParser.START_TAG) {
                 continue;
             }
             String name = parser.getName();
-            switch (name) {
-                case "title":
-                    article.title = readTag(parser, "title");
-//                title = readTitle(parser);
-                    break;
-                case "content":
-                    article.content = readTag(parser, "content");
-                    Matcher matcher = img.matcher(article.content);
-                    if (matcher.find()) {
-                        article.headerImage = matcher.group(1);
-                    }
-                    article.content = Html.fromHtml(imgWithWhitespace.matcher(article.content).replaceFirst(""), Html.FROM_HTML_MODE_COMPACT);
-                    break;
-                case "link":
-                    article.link = readLink(parser);
-                    break;
-                case "id":
-                    article.id = readTag(parser, "id");
-                    break;
-                case "author":
-                    article.author = readAuthors(parser);
-                    break;
-                case "published":
-                    try {
-                        article.published = dateFormat.parse(readTag(parser, "published"));
-                    } catch (ParseException e) {
-                        e.printStackTrace();
-                    }
-                    break;
-                case "updated":
-                    try {
-                        article.published = dateFormat.parse(readTag(parser, "updated"));
-                    } catch (ParseException e) {
-                        e.printStackTrace();
-                    }
-                    break;
-                default:
-                    skip(parser);
-                    break;
+
+            if(entryTitleTags.contains(name)){
+                article.title = readTag(parser, name);
+            }else if(entryContentTags.contains(name)){
+                // TODO: content has different encoding in some feeds
+                article.content = readTag(parser, name);
+                Matcher matcher = img.matcher(article.content);
+                if (matcher.find()) {
+                    article.headerImage = matcher.group(1);
+                }
+                article.content = Html.fromHtml(imgWithWhitespace.matcher(article.content).replaceFirst(""), Html.FROM_HTML_MODE_COMPACT);
+            }else if(entryLinkTags.contains(name)){
+                // TODO: link has different encoding in some feeds
+                article.link = readLink(parser);
+            }else if(entryIdTags.contains(name)){
+                article.id = readTag(parser, name);
+            }else if(entryAuthorTags.contains(name)){
+                // TODO: author has different encoding in some feeds
+                article.author = readAuthors(parser);
+            }else if(entryPublishedTags.contains(name)){
+                // TODO: published date has different encoding in some feeds
+                try {
+                    article.published = dateFormat.parse(readTag(parser, name));
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+            }else{
+                skip(parser);
             }
         }
         return article;
@@ -150,7 +157,7 @@ class SourceUpdater {
     // Processes link tags in the feed.
     private URL readLink(XmlPullParser parser) throws IOException, XmlPullParserException {
         String link = "";
-        parser.require(XmlPullParser.START_TAG, null, "link");
+        parser.require(XmlPullParser.START_TAG, null, parser.getName());
         String tag = parser.getName();
         String relType = parser.getAttributeValue(null, "rel");
         if (tag.equals("link")) {
@@ -159,7 +166,7 @@ class SourceUpdater {
                 parser.nextTag();
             }
         }
-        parser.require(XmlPullParser.END_TAG, null, "link");
+        parser.require(XmlPullParser.END_TAG, null, parser.getName());
         return new URL(link);
     }
 
@@ -183,14 +190,14 @@ class SourceUpdater {
 
     private String readAuthors(XmlPullParser parser) throws IOException, XmlPullParserException {
         String result = "";
-        parser.require(XmlPullParser.START_TAG, null, "author");
+        parser.require(XmlPullParser.START_TAG, null, parser.getName());
         while(parser.next() != XmlPullParser.END_TAG){
             if (parser.getEventType() != XmlPullParser.START_TAG) {
                 continue;
             }
             result+=readTag(parser, "name");
         }
-        parser.require(XmlPullParser.END_TAG, null, "author");
+        parser.require(XmlPullParser.END_TAG, null, parser.getName());
         return result.replaceAll("/(, )\\Z/", "");
     }
 
@@ -212,5 +219,28 @@ class SourceUpdater {
                     break;
             }
         }
+    }
+
+    private void initializeTagDictionaries() {
+        feedTags = createHashSet("feed", "channel");
+        feedTitleTags = createHashSet("title");
+        feedIconTags = createHashSet("icon");                           // missing
+        feedUpdatedTags = createHashSet("updated", "lastBuildDate");
+        feedIdTags = createHashSet("id");                               // missing
+        feedLinkTags = createHashSet("link");                           // different encoding
+
+        entryTags = createHashSet("entry", "item");
+        entryPublishedTags = createHashSet("published", "pubDate");     // different encoding
+        entryTitleTags = createHashSet("title");
+        entryContentTags = createHashSet("content", "content:encoded"); // different encoding
+        entryLinkTags = createHashSet("link");                          // different encoding
+        entryIdTags = createHashSet("id", "guid");
+        entryAuthorTags = createHashSet("author", "dc:creator");        // different encoding
+    }
+
+    private HashSet<String> createHashSet(String... strings){
+        HashSet<String> hashSet = new HashSet<>();
+        Collections.addAll(hashSet, strings);
+        return hashSet;
     }
 }

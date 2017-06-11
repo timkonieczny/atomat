@@ -9,7 +9,7 @@ import java.util.Date;
 
 class Article {
 
-    Date published, updated;
+    Date published;
     String title, id, author, uniqueId, headerImage;
     CharSequence content;
     URL link;
