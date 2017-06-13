@@ -41,7 +41,10 @@ public class OverviewFragment extends Fragment implements FeedListener, UpdateHe
 
         // TODO: save / load from shared preferences
         if(MainActivity.sources == null) MainActivity.sources = new HashMap<>();
-        MainActivity.sources.put("https://www.theverge.com/rss/index.xml", new Source(getResources()));
+
+//        MainActivity.sources.put("http://www.roadtovr.com/feed/", new Source(getResources()));
+//        MainActivity.sources.put("https://www.theverge.com/rss/index.xml", new Source(getResources()));
+
         if(MainActivity.articles == null) MainActivity.articles = new ArrayList<>();
 
         feedAdapter = new FeedAdapter();

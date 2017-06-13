@@ -26,6 +26,8 @@ public class SourcesFragment extends Fragment implements FeedListener{
     private Pattern xmlPattern = Pattern.compile("\\.xml\\Z");
 
     private View fab;
+    private EditText urlEditText;
+    private TextInputLayout urlTextInputLayout;
 
     private SourcesAdapter sourcesAdapter;
 
@@ -59,13 +61,11 @@ public class SourcesFragment extends Fragment implements FeedListener{
                 }else {
                     openCircularReveal(view);
                 }
-                isLayoutRevealed = !isLayoutRevealed;
-
             }
         });
 
-        final EditText urlEditText = (EditText) view.findViewById(R.id.feed_url_edit_text);
-        final TextInputLayout urlTextInputLayout = (TextInputLayout) view.findViewById(R.id.text_input_layout_url);
+        urlEditText = (EditText) view.findViewById(R.id.feed_url_edit_text);
+        urlTextInputLayout = (TextInputLayout) view.findViewById(R.id.text_input_layout_url);
         final FeedListener feedListener = this;
         view.findViewById(R.id.add_source_button).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -74,7 +74,8 @@ public class SourcesFragment extends Fragment implements FeedListener{
                 String url = urlEditText.getText().toString().replaceAll(" ", "");
                 if(!url.equals("")) {
                     if (!httpPattern.matcher(url).find()) url = "http://" + url;
-                    if (URLUtil.isValidUrl(url) && xmlPattern.matcher(url).find()) {
+//                    if (URLUtil.isValidUrl(url) && xmlPattern.matcher(url).find()) {
+                    if (URLUtil.isValidUrl(url)) {
                         if(MainActivity.sources.containsKey(url))
                             urlTextInputLayout.setError("This website is already in your sources");
                         else {
@@ -103,6 +104,7 @@ public class SourcesFragment extends Fragment implements FeedListener{
         ((FloatingActionButton)fab).setImageDrawable(getActivity().getDrawable(R.drawable.ic_add_to_close));
         ((AnimationDrawable)((FloatingActionButton)fab).getDrawable()).start();
         animator.start();
+        isLayoutRevealed = !isLayoutRevealed;
     }
 
     void closeCircularReveal(View view){
@@ -122,6 +124,7 @@ public class SourcesFragment extends Fragment implements FeedListener{
 
             @Override
             public void onAnimationEnd(Animator animation) {
+                urlEditText.setText("");
                 revealingView.setVisibility(View.GONE);
             }
 
@@ -134,6 +137,7 @@ public class SourcesFragment extends Fragment implements FeedListener{
         ((FloatingActionButton)fab).setImageDrawable(getActivity().getDrawable(R.drawable.ic_close_to_add));
         ((AnimationDrawable)((FloatingActionButton)fab).getDrawable()).start();
         animator.start();
+        isLayoutRevealed = !isLayoutRevealed;
     }
 
     @Override

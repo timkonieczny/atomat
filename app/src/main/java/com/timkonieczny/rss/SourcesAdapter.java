@@ -53,10 +53,10 @@ class SourcesAdapter extends BaseAdapter implements UpdateIconImageListener {
 
         Source source = MainActivity.sources.get(keys.get(position));
 
-        if(source.iconDrawable != null) ((ImageView)view.findViewById(R.id.source_icon)).setImageDrawable(source.iconDrawable);
-        else source.setUpdateIconImageListener(this);
+        if(source.iconDrawable != null) ((ImageView) view.findViewById(R.id.source_icon)).setImageDrawable(source.iconDrawable);
+        else if(source.icon != null) source.setUpdateIconImageListener(this);
+
         ((TextView)view.findViewById(R.id.source_title)).setText(source.title);
-//        ((TextView)view.findViewById(R.id.source_title)).setCompoundDrawablesWithIntrinsicBounds(null, MainActivity.sources.get(keys.get(position)).iconDrawable, null, null);
 
         // TODO: create color palette for icon and set background color
 

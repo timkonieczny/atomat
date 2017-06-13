@@ -46,10 +46,10 @@ class Source {
         return "Title:\t\t\t"+title+
             "\nIcon:\t\t\t"+icon+
             "\nID:\t\t\t\t"+id+
-            "\nLink:\t\t\t"+link.toString()+
+            "\nLink:\t\t\t"+ ((link==null) ? "null" : link.toString())+
             "\nIcon Bitmap:\t"+(iconBitmap != null)+
             "\nIcon Drawable:\t"+(iconDrawable != null)+
-            "\nUpdated:\t\t"+updated.toString();
+            "\nUpdated:\t\t"+((updated==null) ? "null" : updated.toString());
     }
 
 }

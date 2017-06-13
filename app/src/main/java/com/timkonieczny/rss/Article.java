@@ -33,10 +33,11 @@ class Article {
     public String toString(){
         return "Title: " + title +
                 "\nAuthors: " + author +
-                "\nContent: " + content +
+//                "\nContent: " + content +
                 "\nLink: " + link +
                 "\nID: " + id +
                 "\nheaderImage: " + headerImage +
+                "\nPublished: " + published.toString() +
                 "\nuniqueID: " + uniqueId;
     }
 }

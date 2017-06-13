@@ -26,13 +26,18 @@ class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ArticleCardViewHolder
         holder.cardView.setOnClickListener(article.onClickListener);
 
         holder.sourceTitle.setText(article.source.title);
-        if(article.source.iconDrawable != null) holder.sourceTitle.setCompoundDrawablesWithIntrinsicBounds(article.source.iconDrawable, null, null, null);
-        else article.source.setUpdateIconImageListener(this);
+        if(article.source.iconDrawable != null){
+            holder.sourceTitle.setCompoundDrawablesWithIntrinsicBounds(article.source.iconDrawable, null, null, null);
+        }else if(article.source.icon != null){
+            article.source.setUpdateIconImageListener(this);
+        }else{  // remove old icon (this is a recycled view.)
+            holder.sourceTitle.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
+        }
         holder.articleTitle.setText(article.title);
         holder.articleAuthor.setText(article.author);
 
         if(article.headerImageBitmap!=null) holder.articleHeader.setImageBitmap(article.headerImageBitmap);
-        else article.setUpdateHeaderImageListener(this);
+        else if(article.headerImage!=null) article.setUpdateHeaderImageListener(this);
 
         if(article.colorPalette!=null) {
             int color = article.colorPalette.getDarkMutedColor(Color.DKGRAY);
