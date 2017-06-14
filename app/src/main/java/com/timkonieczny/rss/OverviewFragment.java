@@ -2,6 +2,7 @@ package com.timkonieczny.rss;
 
 import android.app.Fragment;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -39,11 +40,7 @@ public class OverviewFragment extends Fragment implements FeedListener, UpdateHe
             }
         };
 
-        // TODO: save / load from shared preferences
-        if(MainActivity.sources == null) MainActivity.sources = new HashMap<>();
-
-//        MainActivity.sources.put("http://www.roadtovr.com/feed/", new Source(getResources()));
-//        MainActivity.sources.put("https://www.theverge.com/rss/index.xml", new Source(getResources()));
+        initSources();
 
         if(MainActivity.articles == null) MainActivity.articles = new ArrayList<>();
 
@@ -111,7 +108,6 @@ public class OverviewFragment extends Fragment implements FeedListener, UpdateHe
     public void updateFeed(){
 
         // TODO: if id == url, use this.
-        // TODO: root element == channel / feed
         // TODO: remove unnecessary properties
 
         /*
@@ -133,5 +129,17 @@ public class OverviewFragment extends Fragment implements FeedListener, UpdateHe
 
 //        MainActivity.sources.put("https://www.theverge.com/rss/index.xml", new Source(this, getResources()));
         (new Feed(this, getFragmentManager())).execute();
+    }
+
+    public void initSources(){
+        if(MainActivity.sources == null) MainActivity.sources = new HashMap<>();
+
+        for (String url : getActivity().getPreferences(Context.MODE_PRIVATE).getString("sources", "").split(" ")) {
+            if(!url.equals("")) {
+                Source source = new Source(getResources());
+                source.isStub = true;
+                MainActivity.sources.put(url, source);
+            }
+        }
     }
 }

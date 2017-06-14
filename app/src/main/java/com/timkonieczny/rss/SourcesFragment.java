@@ -3,11 +3,14 @@ package com.timkonieczny.rss;
 
 import android.animation.Animator;
 import android.app.Fragment;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TextInputLayout;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewAnimationUtils;
@@ -31,6 +34,7 @@ public class SourcesFragment extends Fragment implements FeedListener{
 
     private SourcesAdapter sourcesAdapter;
 
+    private SharedPreferences savedSources;
 
     public SourcesFragment() {
         // Required empty public constructor
@@ -47,6 +51,9 @@ public class SourcesFragment extends Fragment implements FeedListener{
     @Override
     public void onViewCreated(final View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        savedSources = getActivity().getPreferences(Context.MODE_PRIVATE);
+
         GridView gridView = (GridView) view.findViewById(R.id.sources_grid);
         sourcesAdapter = new SourcesAdapter(getContext());
         gridView.setAdapter(sourcesAdapter);
@@ -81,6 +88,11 @@ public class SourcesFragment extends Fragment implements FeedListener{
                         else {
                             MainActivity.sources.put(url, new Source(getResources()));
                             SourcesAdapter.keys.add(url);
+
+                            SharedPreferences.Editor editor = savedSources.edit();
+                            editor.putString("sources", savedSources.getString("sources", "") + " "+url);
+                            editor.apply();
+
                             (new Feed(feedListener, getFragmentManager())).execute();
                             closeCircularReveal(view);
                         }

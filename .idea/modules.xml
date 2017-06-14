@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/RSS.iml" filepath="$PROJECT_DIR$/RSS.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/atomat.iml" filepath="$PROJECT_DIR$/atomat.iml" />
     </modules>
   </component>
 </project>
