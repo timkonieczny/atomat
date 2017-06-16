@@ -51,7 +51,7 @@ class SourceUpdater {
 
             initializeTagDictionaries();
 
-            imgWithWhitespace = Pattern.compile("\\A<img(.*?)/>\\s*");  // <img ... /> at beginning of input, including trailing whitespaces
+            imgWithWhitespace = Pattern.compile("\\A\\s*<img(.*?)/>\\s*");  // <img ... /> at beginning of input, including trailing whitespaces
             img = Pattern.compile("<img(?:.*?)src=\"(.*?)\"(?:.*?)/>"); // src attribute of <img ... />
 
             XmlPullParser parser = Xml.newPullParser();
