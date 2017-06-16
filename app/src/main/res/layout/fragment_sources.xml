@@ -9,16 +9,18 @@
     https://stackoverflow.com/questions/17566589/which-stretchmode-to-use-in-gridview-on-android
     -->
 
-    <!-- FIXME: Set fixed number of columns -->
     <GridView
         android:id="@+id/sources_grid"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:columnWidth="200dp"
-        android:numColumns="auto_fit"
-        android:stretchMode="columnWidth"/>
-
-    <!--android:visibility="gone"-->
+        android:numColumns="2"
+        android:stretchMode="columnWidth"
+        android:verticalSpacing="4dp"
+        android:horizontalSpacing="4dp"
+        android:paddingLeft="4dp"
+        android:paddingRight="4dp"
+        android:paddingTop="4dp"/>
 
     <LinearLayout
         android:id="@+id/fab_content"
