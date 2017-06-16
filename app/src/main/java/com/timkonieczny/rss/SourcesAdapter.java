@@ -17,6 +17,7 @@ class SourcesAdapter extends BaseAdapter implements UpdateIconImageListener {
     static ArrayList<String> keys;
     private LayoutInflater layoutInflater;
     private GridView gridView;
+    private Context context;
 
     SourcesAdapter(Context context){
         keys = new ArrayList<>();
@@ -24,6 +25,7 @@ class SourcesAdapter extends BaseAdapter implements UpdateIconImageListener {
             keys.add(entry.getKey());
         }
         layoutInflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        this.context = context;
     }
 
     @Override
@@ -56,9 +58,16 @@ class SourcesAdapter extends BaseAdapter implements UpdateIconImageListener {
         if(source.iconDrawable != null) ((ImageView) view.findViewById(R.id.source_icon)).setImageDrawable(source.iconDrawable);
         else if(source.icon != null) source.setUpdateIconImageListener(this);
 
-        ((TextView)view.findViewById(R.id.source_title)).setText(source.title);
+        if(source.colorPalette != null)
+            view.findViewById(R.id.source_background).setBackgroundColor(
+                    source.colorPalette.getVibrantColor(
+                            context.getResources().getColor(
+                                    R.color.cardview_dark_background, context.getTheme()
+                            )
+                    )
+            );
 
-        // TODO: Create color palette for icon and set background color
+        ((TextView)view.findViewById(R.id.source_title)).setText(source.title);
 
         return view;
     }

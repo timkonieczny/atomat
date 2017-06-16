@@ -6,7 +6,8 @@
     android:layout_height="122dp"
     tools:context="com.timkonieczny.rss.SourcesFragment"
     android:background="@color/cardview_dark_background"
-    android:baselineAligned="false">
+    android:baselineAligned="false"
+    android:id="@+id/source_background">
 
     <ImageView
         android:id="@+id/source_icon"
@@ -18,10 +19,6 @@
         android:scaleType="fitCenter"
         android:layout_gravity="center"
         android:contentDescription="@string/source_icon_image_descriptor" />
-
-    <!--
-    TODO: Change background color dynamically
-    -->
 
     <TextView
         android:id="@+id/source_title"

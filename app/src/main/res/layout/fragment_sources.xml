@@ -9,6 +9,7 @@
     https://stackoverflow.com/questions/17566589/which-stretchmode-to-use-in-gridview-on-android
     -->
 
+    <!-- FIXME: Set fixed number of columns -->
     <GridView
         android:id="@+id/sources_grid"
         android:layout_width="match_parent"

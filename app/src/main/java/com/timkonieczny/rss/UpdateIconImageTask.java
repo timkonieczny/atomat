@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.AsyncTask;
+import android.support.v7.graphics.Palette;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,7 +28,7 @@ class UpdateIconImageTask extends AsyncTask<Source, Void, Source> {
             image = BitmapFactory.decodeStream(stream);
             params[0].iconBitmap = image;
             params[0].iconDrawable = new BitmapDrawable(resources, image);
-
+            params[0].colorPalette = (new Palette.Builder(params[0].iconBitmap)).generate();
         } catch (IOException e) {
             e.printStackTrace();
         }

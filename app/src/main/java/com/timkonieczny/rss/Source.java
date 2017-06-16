@@ -3,6 +3,7 @@ package com.timkonieczny.rss;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.support.v7.graphics.Palette;
 
 import java.net.URL;
 import java.util.Date;
@@ -13,6 +14,7 @@ class Source {
     URL link;
     Bitmap iconBitmap;
     Drawable iconDrawable;
+    Palette colorPalette;
     Date updated;
     boolean isStub;
 
@@ -27,6 +29,7 @@ class Source {
         link = null;
         iconBitmap = null;
         iconDrawable = null;
+        colorPalette = null;
         updated = null;
         isStub = true;
         this.resources = resources;
