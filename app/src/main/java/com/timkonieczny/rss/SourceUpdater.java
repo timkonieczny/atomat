@@ -148,7 +148,7 @@ class SourceUpdater {
             }else if(entryContentTags.contains(name)){
                 article.content = readTag(parser, name);
                 Matcher matcher = img.matcher(article.content);
-                if (matcher.find()) {               // TODO: Handle articles that lack a header image
+                if (matcher.find()) {
                     article.headerImage = matcher.group(1);
                 }
                 article.content = Html.fromHtml(imgWithWhitespace.matcher(article.content).replaceFirst(""), Html.FROM_HTML_MODE_COMPACT);
