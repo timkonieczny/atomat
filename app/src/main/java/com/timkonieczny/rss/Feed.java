@@ -93,7 +93,7 @@ class Feed extends AsyncTask<Void, Void, Boolean> {
                 i--;
             }else{
                 article.onClickListener = new ArticleOnClickListener(article, fragmentManager);
-                article.updateHeaderImage();
+                if(article.headerImage!=null) article.updateHeaderImage();
             }
         }
 
