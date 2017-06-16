@@ -58,7 +58,7 @@ class SourcesAdapter extends BaseAdapter implements UpdateIconImageListener {
 
         ((TextView)view.findViewById(R.id.source_title)).setText(source.title);
 
-        // TODO: create color palette for icon and set background color
+        // TODO: Create color palette for icon and set background color
 
         return view;
     }

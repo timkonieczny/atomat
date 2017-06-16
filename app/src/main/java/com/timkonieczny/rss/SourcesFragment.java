@@ -89,6 +89,7 @@ public class SourcesFragment extends Fragment implements FeedListener{
                             MainActivity.sources.put(url, new Source(getResources()));
                             SourcesAdapter.keys.add(url);
 
+                            // TODO: Save icon and source data in storage
                             SharedPreferences.Editor editor = savedSources.edit();
                             editor.putString("sources", savedSources.getString("sources", "") + " "+url);
                             editor.apply();

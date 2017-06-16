@@ -95,7 +95,7 @@ public class OverviewFragment extends Fragment implements FeedListener, UpdateHe
     }
 
     @Override
-    public void onFeedUpdated(boolean hasNewArticles) {
+    public void onFeedUpdated(boolean hasNewArticles) { // TODO: Save article header and content in storage
         isInitialRefreshDone = true;
         if(hasNewArticles)
             feedAdapter.notifyDataSetChanged();
@@ -107,25 +107,7 @@ public class OverviewFragment extends Fragment implements FeedListener, UpdateHe
 
     public void updateFeed(){
 
-        // TODO: if id == url, use this.
-        // TODO: remove unnecessary properties
-
-        /*
-        * Source
-        *
-        * Icon
-        * Title
-        * URL
-        * Updated
-        *
-        *
-        * Article
-        *
-        * Content
-        * Title
-        * Author
-        * Header Image
-        * */
+        // TODO: The Verge: Feed only contains article previews. But ID is also a feed URL containing full articles.
 
 //        MainActivity.sources.put("https://www.theverge.com/rss/index.xml", new Source(this, getResources()));
         (new Feed(this, getFragmentManager())).execute();

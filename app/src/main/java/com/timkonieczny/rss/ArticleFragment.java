@@ -56,6 +56,8 @@ public class ArticleFragment extends Fragment {
             ((TextView) view.findViewById(R.id.article_author)).setText(article.author);
             ((TextView) view.findViewById(R.id.source_title)).setText(article.source.title);
             ((TextView) view.findViewById(R.id.article_content)).setText(article.content);
+            // TODO: Make links clickable
+            // TODO: Load inline images / media
 
             if(article.headerImageBitmap != null)
                 ((ImageView) view.findViewById(R.id.article_header)).setImageBitmap(article.headerImageBitmap);
