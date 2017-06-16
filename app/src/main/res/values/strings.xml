@@ -93,8 +93,11 @@
     <string name="pref_title_vibrate">Vibrate</string>
 
     <!-- placeholder strings -->
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="large_text">
+    <!-- TODO: Remove placeholder strings -->
+    <string name="debug_title">Android O is supposed to make Android updates arrive faster</string>
+    <string name="debug_author">Andrew Liptak</string>
+    <string name="debug_source_title">The Verge -  All Posts</string>
+    <string name="debug_text">
         "Material is the metaphor.\n\n"
 
         "A material metaphor is the unifying theory of a rationalized space and a system of motion."

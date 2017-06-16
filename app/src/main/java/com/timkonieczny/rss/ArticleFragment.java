@@ -4,10 +4,7 @@ package com.timkonieczny.rss;
 import android.app.Fragment;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -17,9 +14,12 @@ import android.widget.TextView;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class ArticleFragment extends Fragment {
+public class ArticleFragment extends Fragment implements UpdateHeaderImageListener, UpdateIconImageListener{
 
     private Bundle arguments;
+
+    private TextView sourceTitle;
+    private ImageView headerImage;
 
     public ArticleFragment() {
         // Required empty public constructor
@@ -38,29 +38,40 @@ public class ArticleFragment extends Fragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        /*MainActivity.toggle.setDrawerIndicatorEnabled(false);
+        ((AppCompatActivity)getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        ((AppCompatActivity)getActivity()).getSupportActionBar().setHomeButtonEnabled(true);
+        MainActivity.toggle.syncState();*/
 
-        if(arguments == null){
-            Log.d("ArticleFragment", "arguments is null");
-        }else{
+        Article article = MainActivity.articles.get(arguments.getInt("index"));
 
-            /*MainActivity.toggle.setDrawerIndicatorEnabled(false);
-            ((AppCompatActivity)getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            ((AppCompatActivity)getActivity()).getSupportActionBar().setHomeButtonEnabled(true);
-            MainActivity.toggle.syncState();*/
+        headerImage = (ImageView) view.findViewById(R.id.article_header);
+        sourceTitle = (TextView) view.findViewById(R.id.source_title);
 
-            // TODO: this is called when the activity is created, hence arguments is null. Put this in (probably) onAttach
+        ((TextView) view.findViewById(R.id.article_title)).setText(article.title);
+        ((TextView) view.findViewById(R.id.article_author)).setText(article.author);
+        sourceTitle.setText(article.source.title);
+        ((TextView) view.findViewById(R.id.article_content)).setText(article.content);
+        // TODO: Make links clickable
+        // TODO: Load inline images / media
 
-            Article article = MainActivity.articles.get(arguments.getInt("index"));
+        if(article.headerImageBitmap!=null) headerImage.setImageBitmap(article.headerImageBitmap);
+        else if(article.headerImage!=null) article.setUpdateHeaderImageListener(this);
 
-            ((TextView) view.findViewById(R.id.article_title)).setText(article.title);
-            ((TextView) view.findViewById(R.id.article_author)).setText(article.author);
-            ((TextView) view.findViewById(R.id.source_title)).setText(article.source.title);
-            ((TextView) view.findViewById(R.id.article_content)).setText(article.content);
-            // TODO: Make links clickable
-            // TODO: Load inline images / media
-
-            if(article.headerImageBitmap != null)
-                ((ImageView) view.findViewById(R.id.article_header)).setImageBitmap(article.headerImageBitmap);
+        if(article.source.iconDrawable != null){
+            sourceTitle.setCompoundDrawablesWithIntrinsicBounds(article.source.iconDrawable, null, null, null);
+        }else if(article.source.icon != null){
+            article.source.setUpdateIconImageListener(this);
         }
+    }
+
+    @Override
+    public void onIconImageUpdated(Source source) {
+        sourceTitle.setCompoundDrawablesWithIntrinsicBounds(source.iconDrawable, null, null, null);
+    }
+
+    @Override
+    public void onHeaderImageUpdated(Article article) {
+        headerImage.setImageBitmap(article.headerImageBitmap);
     }
 }
