@@ -2,13 +2,28 @@ package com.timkonieczny.rss;
 
 
 import android.app.Fragment;
+import android.content.ComponentName;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.customtabs.CustomTabsCallback;
+import android.support.customtabs.CustomTabsClient;
+import android.support.customtabs.CustomTabsIntent;
+import android.support.customtabs.CustomTabsService;
+import android.support.customtabs.CustomTabsServiceConnection;
+import android.support.customtabs.CustomTabsSession;
+import android.text.SpannableStringBuilder;
+import android.text.method.LinkMovementMethod;
+import android.text.style.ClickableSpan;
+import android.text.style.URLSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -20,6 +35,13 @@ public class ArticleFragment extends Fragment implements UpdateHeaderImageListen
 
     private TextView sourceTitle;
     private ImageView headerImage;
+    private Uri mostLikelyUrl;
+    private List<Bundle> likelyUrls;
+
+    private CustomTabsClient customTabsClient;
+    private CustomTabsSession customTabsSession;
+    private CustomTabsIntent intent;
+    private CustomTabsIntent.Builder builder;
 
     public ArticleFragment() {
         // Required empty public constructor
@@ -51,8 +73,58 @@ public class ArticleFragment extends Fragment implements UpdateHeaderImageListen
         ((TextView) view.findViewById(R.id.article_title)).setText(article.title);
         ((TextView) view.findViewById(R.id.article_author)).setText(article.author);
         sourceTitle.setText(article.source.title);
-        ((TextView) view.findViewById(R.id.article_content)).setText(article.content);
-        // TODO: Make links clickable
+
+        // TODO: Handle Images like this too
+        TextView contentTextView = (TextView)view.findViewById(R.id.article_content);
+        SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder(article.content);
+        URLSpan[] links = spannableStringBuilder.getSpans(0, article.content.length(), URLSpan.class);
+        likelyUrls = new ArrayList<>(links.length-1);
+        mostLikelyUrl = null;
+        for(int i = 0; i < links.length; i++) {
+            final Uri linkUri = Uri.parse(links[i].getURL());
+            spannableStringBuilder.setSpan(
+                    new ClickableSpan() {
+                        public void onClick(View view) {
+                            intent.launchUrl(view.getContext(),linkUri);
+                        }
+                    },
+                    spannableStringBuilder.getSpanStart(links[i]),
+                    spannableStringBuilder.getSpanEnd(links[i]),
+                    spannableStringBuilder.getSpanFlags(links[i])
+            );
+            spannableStringBuilder.removeSpan(links[i]);
+            if(i<links.length-1){
+                Bundle bundle = new Bundle();
+                bundle.putParcelable(CustomTabsService.KEY_URL, linkUri);
+                likelyUrls.add(bundle);
+            }else{
+                mostLikelyUrl = linkUri;
+            }
+        }
+        if(links.length>0){
+            CustomTabsServiceConnection customTabsServiceConnection = new CustomTabsServiceConnection() {
+                @Override
+                public void onCustomTabsServiceConnected(ComponentName name, CustomTabsClient client) {
+                    customTabsClient = client;
+                    customTabsClient.warmup(0);
+                    customTabsSession = customTabsClient.newSession(new CustomTabsCallback());
+                    if(mostLikelyUrl != null) customTabsSession.mayLaunchUrl(mostLikelyUrl, null, likelyUrls);  // TODO: Maybe loading too many links
+
+                    builder = new CustomTabsIntent.Builder(customTabsSession);
+                    intent = builder.build();
+                }
+
+                @Override
+                public void onServiceDisconnected(ComponentName name) {
+                    customTabsClient = null;
+                }
+            };
+
+            CustomTabsClient.bindCustomTabsService(getContext(), "com.android.chrome", customTabsServiceConnection);
+        }
+        contentTextView.setText(spannableStringBuilder);
+        contentTextView.setMovementMethod(LinkMovementMethod.getInstance());
+
         // TODO: Load inline images / media
 
         if(article.headerImageBitmap!=null) headerImage.setImageBitmap(article.headerImageBitmap);
