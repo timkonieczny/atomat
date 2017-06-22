@@ -1,6 +1,7 @@
 package com.timkonieczny.rss;
 
 import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.support.v7.graphics.Palette;
 import android.view.View;
 
@@ -17,6 +18,7 @@ class Article {
     Palette colorPalette;
     Source source;
     View.OnClickListener onClickListener;
+    Drawable[] inlineImages;
 
     private UpdateHeaderImageTask task;
 

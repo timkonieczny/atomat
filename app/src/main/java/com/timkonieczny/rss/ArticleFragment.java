@@ -3,6 +3,7 @@ package com.timkonieczny.rss;
 
 import android.app.Fragment;
 import android.content.ComponentName;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -15,13 +16,17 @@ import android.support.customtabs.CustomTabsSession;
 import android.text.SpannableStringBuilder;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
+import android.text.style.ImageSpan;
 import android.text.style.URLSpan;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,7 +34,7 @@ import java.util.List;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class ArticleFragment extends Fragment implements UpdateHeaderImageListener, UpdateIconImageListener{
+public class ArticleFragment extends Fragment implements UpdateHeaderImageListener, UpdateIconImageListener, UpdateImageListener{
 
     private Bundle arguments;
 
@@ -42,6 +47,11 @@ public class ArticleFragment extends Fragment implements UpdateHeaderImageListen
     private CustomTabsSession customTabsSession;
     private CustomTabsIntent intent;
     private CustomTabsIntent.Builder builder;
+    private ImageSpan[] images;
+    private TextView contentTextView;
+    private int contentTextViewWidth;
+    private SpannableStringBuilder spannableStringBuilder;
+    private Article article;
 
     public ArticleFragment() {
         // Required empty public constructor
@@ -59,13 +69,14 @@ public class ArticleFragment extends Fragment implements UpdateHeaderImageListen
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        contentTextViewWidth = view.getWidth()-contentTextView.getPaddingLeft()-contentTextView.getPaddingRight();
 
         /*MainActivity.toggle.setDrawerIndicatorEnabled(false);
         ((AppCompatActivity)getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         ((AppCompatActivity)getActivity()).getSupportActionBar().setHomeButtonEnabled(true);
         MainActivity.toggle.syncState();*/
 
-        Article article = MainActivity.articles.get(arguments.getInt("index"));
+        article = MainActivity.articles.get(arguments.getInt("index"));
 
         headerImage = (ImageView) view.findViewById(R.id.article_header);
         sourceTitle = (TextView) view.findViewById(R.id.source_title);
@@ -74,9 +85,9 @@ public class ArticleFragment extends Fragment implements UpdateHeaderImageListen
         ((TextView) view.findViewById(R.id.article_author)).setText(article.author);
         sourceTitle.setText(article.source.title);
 
-        // TODO: Handle Images like this too
-        TextView contentTextView = (TextView)view.findViewById(R.id.article_content);
-        SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder(article.content);
+        contentTextView = (TextView)view.findViewById(R.id.article_content);
+        spannableStringBuilder = new SpannableStringBuilder(article.content);
+
         URLSpan[] links = spannableStringBuilder.getSpans(0, article.content.length(), URLSpan.class);
         likelyUrls = new ArrayList<>(links.length-1);
         mostLikelyUrl = null;
@@ -125,7 +136,19 @@ public class ArticleFragment extends Fragment implements UpdateHeaderImageListen
         contentTextView.setText(spannableStringBuilder);
         contentTextView.setMovementMethod(LinkMovementMethod.getInstance());
 
-        // TODO: Load inline images / media
+        images = spannableStringBuilder.getSpans(0, article.content.length(), ImageSpan.class);
+        article.inlineImages = new Drawable[images.length];
+        for(int i = 0; i < images.length; i++) {
+            try {
+                Log.d("ArticleFragment", images[i].getSource());
+                UpdateImageTask updateImageTask = new UpdateImageTask(this, i, getResources());
+                updateImageTask.execute(new URL(images[i].getSource()));
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            }
+        }
+
+        // TODO: Handle non-image media
 
         if(article.headerImageBitmap!=null) headerImage.setImageBitmap(article.headerImageBitmap);
         else if(article.headerImage!=null) article.setUpdateHeaderImageListener(this);
@@ -145,5 +168,20 @@ public class ArticleFragment extends Fragment implements UpdateHeaderImageListen
     @Override
     public void onHeaderImageUpdated(Article article) {
         headerImage.setImageBitmap(article.headerImageBitmap);
+    }
+
+    @Override
+    public void onImageUpdated(Drawable image, int imageSpanIndex) {
+        article.inlineImages[imageSpanIndex] = image;   // TODO: save / load images in external storage
+
+        image.setBounds(0, 0, contentTextViewWidth,     // TODO: format image captions
+                (image.getMinimumHeight()*contentTextViewWidth)/image.getMinimumWidth()
+        );
+        spannableStringBuilder.setSpan(
+                new ImageSpan(image),
+                spannableStringBuilder.getSpanStart(images[imageSpanIndex]),
+                spannableStringBuilder.getSpanEnd(images[imageSpanIndex]),
+                spannableStringBuilder.getSpanFlags(images[imageSpanIndex]));
+        contentTextView.setText(spannableStringBuilder);
     }
 }
