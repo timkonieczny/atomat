@@ -10,7 +10,6 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TextInputLayout;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewAnimationUtils;
@@ -34,7 +33,7 @@ public class SourcesFragment extends Fragment implements FeedListener{
 
     private SourcesAdapter sourcesAdapter;
 
-    private SharedPreferences savedSources;
+    private SharedPreferences sharedPreferences;
 
     public SourcesFragment() {
         // Required empty public constructor
@@ -52,7 +51,7 @@ public class SourcesFragment extends Fragment implements FeedListener{
     public void onViewCreated(final View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        savedSources = getActivity().getPreferences(Context.MODE_PRIVATE);
+        sharedPreferences = getActivity().getPreferences(Context.MODE_PRIVATE);
 
         GridView gridView = (GridView) view.findViewById(R.id.sources_grid);
         sourcesAdapter = new SourcesAdapter(getContext());
@@ -90,11 +89,8 @@ public class SourcesFragment extends Fragment implements FeedListener{
                             SourcesAdapter.keys.add(url);
 
                             // TODO: Save icon and source data in storage
-                            SharedPreferences.Editor editor = savedSources.edit();
-                            editor.putString("sources", savedSources.getString("sources", "") + " "+url);
-                            editor.apply();
 
-                            (new Feed(feedListener, getFragmentManager())).execute();
+                            (new Feed(feedListener, getFragmentManager(), sharedPreferences)).execute();
                             closeCircularReveal(view);
                         }
                     } else urlTextInputLayout.setError("Enter an URL that points to an XML file");

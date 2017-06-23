@@ -1,6 +1,5 @@
 package com.timkonieczny.rss;
 
-
 import android.app.Fragment;
 import android.content.ComponentName;
 import android.graphics.drawable.Drawable;
@@ -18,7 +17,6 @@ import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
 import android.text.style.ImageSpan;
 import android.text.style.URLSpan;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -140,7 +138,6 @@ public class ArticleFragment extends Fragment implements UpdateHeaderImageListen
         article.inlineImages = new Drawable[images.length];
         for(int i = 0; i < images.length; i++) {
             try {
-                Log.d("ArticleFragment", images[i].getSource());
                 UpdateImageTask updateImageTask = new UpdateImageTask(this, i, getResources());
                 updateImageTask.execute(new URL(images[i].getSource()));
             } catch (MalformedURLException e) {

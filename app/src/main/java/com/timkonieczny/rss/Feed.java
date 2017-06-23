@@ -1,8 +1,8 @@
 package com.timkonieczny.rss;
 
 import android.app.FragmentManager;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
-import android.util.Log;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -26,16 +26,18 @@ class Feed extends AsyncTask<Void, Void, Boolean> {
 
     private FragmentManager fragmentManager;
 
-    Feed(Object listener, FragmentManager fragmentManager){
+    private SharedPreferences sharedPreferences;
+
+    Feed(Object listener, FragmentManager fragmentManager, SharedPreferences sharedPreferences){
 
         this.fragmentManager = fragmentManager;
         this.feedListener = (FeedListener)listener;
+        this.sharedPreferences = sharedPreferences;
 
         descending = new Comparator<Article>() {
             @Override
             public int compare(Article a1, Article a2) {
                 return a2.published.compareTo(a1.published);
-//                return (int)(a2.published.getTime()-a1.published.getTime());
             }
         };
 
@@ -64,6 +66,16 @@ class Feed extends AsyncTask<Void, Void, Boolean> {
 
                 if(MainActivity.sources.get(currentURL).isStub){
                     articles.addAll(sourceUpdater.parse(stream, MainActivity.sources.get(currentURL), true));
+
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putString("sources", sharedPreferences.getString("sources", "") + " "+currentURL);
+                    editor.putString(currentURL + "_id", sourceUpdater.source.id);
+                    editor.putString(currentURL + "_title", sourceUpdater.source.title);
+                    if(sourceUpdater.source.icon!=null) editor.putString(currentURL + "_icon", sourceUpdater.source.icon);
+                    editor.putString(currentURL + "_link", sourceUpdater.source.link.toString());
+                    editor.putInt(currentURL + "_updated", (int)sourceUpdater.source.updated.getTime());
+                    editor.apply();
+
                     MainActivity.sources.get(currentURL).isStub = false;
                 }else{
                     articles.addAll(sourceUpdater.parse(stream, MainActivity.sources.get(currentURL), false));
@@ -73,16 +85,6 @@ class Feed extends AsyncTask<Void, Void, Boolean> {
                 e.printStackTrace();
             }
         }
-
-       /* for(int i = 0; i < MainActivity.articles.size(); i++){
-            Article article1 = MainActivity.articles.get(i);
-            Log.d("Feed", "Before adding: "+article1.source.title + "\t" + article1.published);
-        }
-
-        for(int i = 0; i < articles.size(); i++){
-            Article article1 = articles.get(i);
-            Log.d("Feed", "Articles to add: "+article1.source.title + "\t" + article1.published);
-        }*/
 
         Article article;
         for(int i = 0; i < articles.size(); i++){
@@ -99,11 +101,6 @@ class Feed extends AsyncTask<Void, Void, Boolean> {
 
         MainActivity.articles.addAll(articles);
         Collections.sort(MainActivity.articles, descending);
-
-        for(int i = 0; i < MainActivity.articles.size(); i++){
-            Article article1 = MainActivity.articles.get(i);
-            Log.d("Feed", "After adding: "+article1.published+"\t"+article1.source.title + "\t" + article1.title);
-        }
 
         return articles.size() > 0;
     }

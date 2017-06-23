@@ -26,7 +26,7 @@ class SourceUpdater {
             new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX", Locale.US)
     };
     private Pattern imgWithWhitespace, img;
-    private Source source;
+    protected Source source;
     private boolean updateSource;
 
     private HashSet<String> feedTags;
@@ -120,21 +120,20 @@ class SourceUpdater {
                 }
             }
         }
+        if(source.id == null) source.id = source.link.toString();
         for(int i = 0; i < articles.size(); i++){
             Article article = articles.get(i);
-            if(article.source.id == null) article.source.id = article.source.link.toString();
-            article.uniqueId = article.source.id + "_" + article.id;
+            article.source = source;
+            article.uniqueId = source.id + "_" + article.id;
         }
         return articles;
     }
 
     // Parses the contents of an entry. If it encounters a title, summary, or link tag, hands them
-    // off
-    // to their respective &quot;read&quot; methods for processing. Otherwise, skips the tag.
+    // off  to their respective methods for processing. Otherwise, skips the tag.
     private Article readEntry(XmlPullParser parser) throws XmlPullParserException, IOException {
 
         Article article = new Article();
-        article.source = source;
 
         parser.require(XmlPullParser.START_TAG, null, parser.getName());
         while (parser.next() != XmlPullParser.END_TAG) {

@@ -12,8 +12,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 
 public class OverviewFragment extends Fragment implements FeedListener, UpdateHeaderImageListener, UpdateIconImageListener, SwipeRefreshLayout.OnRefreshListener{
@@ -40,7 +43,7 @@ public class OverviewFragment extends Fragment implements FeedListener, UpdateHe
             }
         };
 
-        initSources();
+        getSourcesFromSharedPreferences();
 
         if(MainActivity.articles == null) MainActivity.articles = new ArrayList<>();
 
@@ -110,17 +113,36 @@ public class OverviewFragment extends Fragment implements FeedListener, UpdateHe
         // TODO: The Verge: Feed only contains article previews. But ID is also a feed URL containing full articles.
 
 //        MainActivity.sources.put("https://www.theverge.com/rss/index.xml", new Source(this, getResources()));
-        (new Feed(this, getFragmentManager())).execute();
+        (new Feed(this, getFragmentManager(), getActivity().getPreferences(Context.MODE_PRIVATE))).execute();
     }
 
-    public void initSources(){
+    public void getSourcesFromSharedPreferences(){
         if(MainActivity.sources == null) MainActivity.sources = new HashMap<>();
 
-        for (String url : getActivity().getPreferences(Context.MODE_PRIVATE).getString("sources", "").split(" ")) {
-            if(!url.equals("")) {
+        SharedPreferences sharedPreferences = getActivity().getPreferences(Context.MODE_PRIVATE);
+
+        for (String key : sharedPreferences.getString("sources", "").split(" ")) {
+            if(!key.equals("")) {
                 Source source = new Source(getResources());
-                source.isStub = true;
-                MainActivity.sources.put(url, source);
+                source.id = sharedPreferences.getString(key + "_id", null);
+
+                String link = sharedPreferences.getString(key + "_link", null);
+                if(link!=null) try {
+                    source.link = new URL(link);
+                } catch (MalformedURLException e) {
+                    e.printStackTrace();
+                }
+
+                source.title = sharedPreferences.getString(key + "_title", null);
+                source.icon = sharedPreferences.getString(key + "_icon", null);
+                //source.updateIconImage();
+                int updated = sharedPreferences.getInt(key + "_updated", -1);
+                if(updated != -1) source.updated = new Date(updated);
+
+                //source.isStub = (source.title == null || source.icon == null ||
+                //        source.updated == null || source.link == null);
+
+                MainActivity.sources.put(key, source);
             }
         }
     }
