@@ -15,10 +15,10 @@
         android:layout_height="50dp"
         android:layout_marginTop="20dp"
         android:layout_marginBottom="20dp"
-        android:src="@drawable/debugicon"
         android:scaleType="fitCenter"
         android:layout_gravity="center"
         android:contentDescription="@string/source_icon_image_descriptor" />
+    <!--android:src="@drawable/debugicon"-->
 
     <TextView
         android:id="@+id/source_title"
@@ -29,8 +29,7 @@
         android:maxLines="1"
         android:paddingLeft="16dp"
         android:paddingRight="16dp"
-        android:text="The Verge - All Posts"
         android:textColor="@android:color/white"
         android:textSize="16sp" />
-
+    <!--android:text="@string/debug_source_title"-->
 </LinearLayout>

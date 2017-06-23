@@ -40,7 +40,7 @@ class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ArticleCardViewHolder
         else if(article.headerImage!=null) article.setUpdateHeaderImageListener(this);
 
         if(article.colorPalette!=null) {
-            int color = article.colorPalette.getDarkMutedColor(Color.DKGRAY);
+            int color = article.colorPalette.getDarkVibrantColor(Color.DKGRAY);
             holder.articleHeader.setColorFilter(Color.argb(128, Color.red(color), Color.green(color), Color.blue(color)));
         }
     }
