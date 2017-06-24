@@ -47,25 +47,28 @@ class SourcesAdapter extends BaseAdapter implements UpdateIconImageListener {
     public View getView(int position, View convertView, ViewGroup parent) {
         gridView = (GridView) parent;
         View view;
+
         if (convertView == null) {
             view = layoutInflater.inflate(R.layout.source_item, parent, false);
         } else {
             view = convertView;
         }
 
+        ImageView iconImageView = (ImageView) view.findViewById(R.id.source_icon);
+        View backgroundView = view.findViewById(R.id.source_background);
+        int backgroundColor = context.getResources().getColor(R.color.cardview_dark_background, context.getTheme());
+
         Source source = MainActivity.sources.get(keys.get(position));
+        if(source.iconDrawable != null) iconImageView.setImageDrawable(source.iconDrawable);
+        else if(source.iconFileName!=null){
+            source.loadIconFromInternalStorage();
+            iconImageView.setImageDrawable(source.iconDrawable);
+        }else if(source.icon != null) source.setUpdateIconImageListener(this);
+        else iconImageView.setImageDrawable(null);
 
-        if(source.iconDrawable != null) ((ImageView) view.findViewById(R.id.source_icon)).setImageDrawable(source.iconDrawable);
-        else if(source.icon != null) source.setUpdateIconImageListener(this);
+        if(source.colorPalette != null) backgroundView.setBackgroundColor(source.colorPalette.getVibrantColor(backgroundColor));
+        else backgroundView.setBackgroundColor(backgroundColor);
 
-        if(source.colorPalette != null)
-            view.findViewById(R.id.source_background).setBackgroundColor(
-                    source.colorPalette.getVibrantColor(
-                            context.getResources().getColor(
-                                    R.color.cardview_dark_background, context.getTheme()
-                            )
-                    )
-            );
 
         ((TextView)view.findViewById(R.id.source_title)).setText(source.title);
 

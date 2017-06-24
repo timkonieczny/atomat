@@ -43,7 +43,7 @@ public class OverviewFragment extends Fragment implements FeedListener, UpdateHe
             }
         };
 
-        getSourcesFromSharedPreferences();
+        if(!isInitialRefreshDone) getSourcesFromSharedPreferences();
 
         if(MainActivity.articles == null) MainActivity.articles = new ArrayList<>();
 
@@ -123,7 +123,7 @@ public class OverviewFragment extends Fragment implements FeedListener, UpdateHe
 
         for (String key : sharedPreferences.getString("sources", "").split(" ")) {
             if(!key.equals("")) {
-                Source source = new Source(getResources());
+                Source source = new Source(getResources(), getContext(), key);
                 source.id = sharedPreferences.getString(key + "_id", null);
 
                 String link = sharedPreferences.getString(key + "_link", null);
@@ -135,12 +135,9 @@ public class OverviewFragment extends Fragment implements FeedListener, UpdateHe
 
                 source.title = sharedPreferences.getString(key + "_title", null);
                 source.icon = sharedPreferences.getString(key + "_icon", null);
-                //source.updateIconImage();
+
                 int updated = sharedPreferences.getInt(key + "_updated", -1);
                 if(updated != -1) source.updated = new Date(updated);
-
-                //source.isStub = (source.title == null || source.icon == null ||
-                //        source.updated == null || source.link == null);
 
                 MainActivity.sources.put(key, source);
             }

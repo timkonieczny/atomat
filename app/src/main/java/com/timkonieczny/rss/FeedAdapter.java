@@ -26,7 +26,10 @@ class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ArticleCardViewHolder
         holder.cardView.setOnClickListener(article.onClickListener);
 
         holder.sourceTitle.setText(article.source.title);
-        if(article.source.iconDrawable != null){
+        if(article.source.iconDrawable != null) {
+            holder.sourceTitle.setCompoundDrawablesWithIntrinsicBounds(article.source.iconDrawable, null, null, null);
+        }else if(article.source.iconFileName!=null){
+            article.source.loadIconFromInternalStorage();
             holder.sourceTitle.setCompoundDrawablesWithIntrinsicBounds(article.source.iconDrawable, null, null, null);
         }else if(article.source.icon != null){
             article.source.setUpdateIconImageListener(this);

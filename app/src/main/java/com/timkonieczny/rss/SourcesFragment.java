@@ -35,9 +35,7 @@ public class SourcesFragment extends Fragment implements FeedListener{
 
     private SharedPreferences sharedPreferences;
 
-    public SourcesFragment() {
-        // Required empty public constructor
-    }
+    public SourcesFragment() {}
 
 
     @Override
@@ -85,10 +83,8 @@ public class SourcesFragment extends Fragment implements FeedListener{
                         if(MainActivity.sources.containsKey(url))
                             urlTextInputLayout.setError("This website is already in your sources");
                         else {
-                            MainActivity.sources.put(url, new Source(getResources()));
+                            MainActivity.sources.put(url, new Source(getResources(), getContext(), url));
                             SourcesAdapter.keys.add(url);
-
-                            // TODO: Save icon and source data in storage
 
                             (new Feed(feedListener, getFragmentManager(), sharedPreferences)).execute();
                             closeCircularReveal(view);
