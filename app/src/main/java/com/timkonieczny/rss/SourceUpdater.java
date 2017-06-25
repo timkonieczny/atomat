@@ -1,8 +1,14 @@
 package com.timkonieczny.rss;
 
+import android.graphics.Color;
+import android.text.Editable;
 import android.text.Html;
+import android.text.Spannable;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.RelativeSizeSpan;
 import android.util.Xml;
 
+import org.xml.sax.XMLReader;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -150,7 +156,25 @@ class SourceUpdater {
                 if (matcher.find()) {
                     article.headerImage = matcher.group(1);
                 }
-                article.content = Html.fromHtml(imgWithWhitespace.matcher(article.content).replaceFirst(""), Html.FROM_HTML_MODE_COMPACT);
+
+                Html.TagHandler figcaptionHandler = new Html.TagHandler() {
+
+                    int startPosition, endPosition;
+
+                    @Override
+                    public void handleTag(boolean opening, String tagName, Editable editable, XMLReader xmlReader) {
+                        if(tagName.equalsIgnoreCase("figcaption")){
+                            if(opening) startPosition = editable.length();
+                            else{
+                                endPosition = editable.length();    // 13sp = caption font size; 15sp = body font size
+                                editable.setSpan(new RelativeSizeSpan(13.0f/15), startPosition, endPosition, Spannable.SPAN_MARK_MARK);
+                                editable.setSpan(new ForegroundColorSpan(Color.parseColor("#616161")), startPosition, endPosition, Spannable.SPAN_MARK_MARK);
+                            }
+                        }
+                    }
+                };
+                // FIXME: ignore style tags
+                article.content = Html.fromHtml(imgWithWhitespace.matcher(article.content).replaceFirst(""), Html.FROM_HTML_MODE_COMPACT, null, figcaptionHandler);
             }else if(entryLinkTags.contains(name)){
                 String linkUrl = parser.getAttributeValue(null, "href");
                 if(linkUrl!=null) {

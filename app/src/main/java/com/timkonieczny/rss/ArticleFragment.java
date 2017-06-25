@@ -17,9 +17,11 @@ import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
 import android.text.style.ImageSpan;
 import android.text.style.URLSpan;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -65,8 +67,16 @@ public class ArticleFragment extends Fragment implements UpdateHeaderImageListen
     }
 
     @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+    public void onViewCreated(final View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        view.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            public void onGlobalLayout() {
+                view.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+
+                contentTextViewWidth = view.getWidth()-contentTextView.getPaddingLeft()-contentTextView.getPaddingRight();
+            }
+        });
 
         /*MainActivity.toggle.setDrawerIndicatorEnabled(false);
         ((AppCompatActivity)getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -84,8 +94,6 @@ public class ArticleFragment extends Fragment implements UpdateHeaderImageListen
 
         contentTextView = (TextView)view.findViewById(R.id.article_content);
         spannableStringBuilder = new SpannableStringBuilder(article.content);
-
-        contentTextViewWidth = view.getWidth()-contentTextView.getPaddingLeft()-contentTextView.getPaddingRight();
 
         URLSpan[] links = spannableStringBuilder.getSpans(0, article.content.length(), URLSpan.class);
         likelyUrls = new ArrayList<>(links.length-1);
@@ -140,6 +148,7 @@ public class ArticleFragment extends Fragment implements UpdateHeaderImageListen
         for(int i = 0; i < images.length; i++) {
             try {
                 UpdateImageTask updateImageTask = new UpdateImageTask(this, i, getResources());
+                Log.d("ArticleFragment", images[i].getSource());
                 updateImageTask.execute(new URL(images[i].getSource()));
             } catch (MalformedURLException e) {
                 e.printStackTrace();
@@ -170,6 +179,7 @@ public class ArticleFragment extends Fragment implements UpdateHeaderImageListen
 
     @Override
     public void onImageUpdated(Drawable image, int imageSpanIndex) {
+        Log.d("ArticleFragment", "image #"+imageSpanIndex+" updated");
         article.inlineImages[imageSpanIndex] = image;   // TODO: save / load images in external storage
 
         image.setBounds(0, 0, contentTextViewWidth,     // TODO: format image captions
