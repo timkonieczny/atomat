@@ -67,7 +67,6 @@ public class ArticleFragment extends Fragment implements UpdateHeaderImageListen
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        contentTextViewWidth = view.getWidth()-contentTextView.getPaddingLeft()-contentTextView.getPaddingRight();
 
         /*MainActivity.toggle.setDrawerIndicatorEnabled(false);
         ((AppCompatActivity)getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -85,6 +84,8 @@ public class ArticleFragment extends Fragment implements UpdateHeaderImageListen
 
         contentTextView = (TextView)view.findViewById(R.id.article_content);
         spannableStringBuilder = new SpannableStringBuilder(article.content);
+
+        contentTextViewWidth = view.getWidth()-contentTextView.getPaddingLeft()-contentTextView.getPaddingRight();
 
         URLSpan[] links = spannableStringBuilder.getSpans(0, article.content.length(), URLSpan.class);
         likelyUrls = new ArrayList<>(links.length-1);
