@@ -31,7 +31,7 @@ class SourceUpdater {
             new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ssX", Locale.US),
             new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX", Locale.US)
     };
-    private Pattern imgWithWhitespace, img;
+    private Pattern imgWithWhitespacePattern, imgPattern, stylePattern;
     protected Source source;
     private boolean updateSource;
 
@@ -57,8 +57,9 @@ class SourceUpdater {
 
             initializeTagDictionaries();
 
-            imgWithWhitespace = Pattern.compile("\\A\\s*<img(.*?)/>\\s*");  // <img ... /> at beginning of input, including trailing whitespaces
-            img = Pattern.compile("<img(?:.*?)src=\"(.*?)\"(?:.*?)/>"); // src attribute of <img ... />
+            imgWithWhitespacePattern = Pattern.compile("\\A\\s*<img(.*?)/>\\s*");  // <imgPattern ... /> at beginning of input, including trailing whitespaces
+            imgPattern = Pattern.compile("<img(?:.*?)src=\"(.*?)\"(?:.*?)/>"); // src attribute of <imgPattern ... />
+            stylePattern = Pattern.compile("<style>(?:.*?)</style>"); // src attribute of <imgPattern ... />
 
             XmlPullParser parser = Xml.newPullParser();
             parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
@@ -152,7 +153,7 @@ class SourceUpdater {
                 article.title = readTag(parser, name);
             }else if(entryContentTags.contains(name)){
                 article.content = readTag(parser, name);
-                Matcher matcher = img.matcher(article.content);
+                Matcher matcher = imgPattern.matcher(article.content);
                 if (matcher.find()) {
                     article.headerImage = matcher.group(1);
                 }
@@ -170,11 +171,15 @@ class SourceUpdater {
                                 editable.setSpan(new RelativeSizeSpan(13.0f/15), startPosition, endPosition, Spannable.SPAN_MARK_MARK);
                                 editable.setSpan(new ForegroundColorSpan(Color.parseColor("#616161")), startPosition, endPosition, Spannable.SPAN_MARK_MARK);
                             }
+                        }else if(tagName.equalsIgnoreCase("style")){
+
                         }
                     }
                 };
                 // FIXME: ignore style tags
-                article.content = Html.fromHtml(imgWithWhitespace.matcher(article.content).replaceFirst(""), Html.FROM_HTML_MODE_COMPACT, null, figcaptionHandler);
+                String content = imgWithWhitespacePattern.matcher(article.content).replaceFirst("");
+                content = stylePattern.matcher(content).replaceAll("");
+                article.content = Html.fromHtml(content, Html.FROM_HTML_MODE_COMPACT, null, figcaptionHandler);
             }else if(entryLinkTags.contains(name)){
                 String linkUrl = parser.getAttributeValue(null, "href");
                 if(linkUrl!=null) {
