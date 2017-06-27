@@ -17,7 +17,6 @@ import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
 import android.text.style.ImageSpan;
 import android.text.style.URLSpan;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -148,7 +147,6 @@ public class ArticleFragment extends Fragment implements UpdateHeaderImageListen
         for(int i = 0; i < images.length; i++) {
             try {
                 UpdateImageTask updateImageTask = new UpdateImageTask(this, i, getResources());
-                Log.d("ArticleFragment", images[i].getSource());
                 updateImageTask.execute(new URL(images[i].getSource()));
             } catch (MalformedURLException e) {
                 e.printStackTrace();
@@ -179,14 +177,18 @@ public class ArticleFragment extends Fragment implements UpdateHeaderImageListen
 
     @Override
     public void onImageUpdated(Drawable image, int imageSpanIndex) {
-        Log.d("ArticleFragment", "image #"+imageSpanIndex+" updated");
         article.inlineImages[imageSpanIndex] = image;   // TODO: save / load images in external storage
 
-        image.setBounds(0, 0, contentTextViewWidth,     // TODO: format image captions
-                (image.getMinimumHeight()*contentTextViewWidth)/image.getMinimumWidth()
+        article.inlineImages[imageSpanIndex].setBounds(
+                0,
+                0,
+                contentTextViewWidth,
+                (article.inlineImages[imageSpanIndex].getMinimumHeight() * contentTextViewWidth) / article.inlineImages[imageSpanIndex].getMinimumWidth()
         );
+
+        spannableStringBuilder.removeSpan(images[imageSpanIndex]);
         spannableStringBuilder.setSpan(
-                new ImageSpan(image),
+                new ImageSpan(article.inlineImages[imageSpanIndex]),
                 spannableStringBuilder.getSpanStart(images[imageSpanIndex]),
                 spannableStringBuilder.getSpanEnd(images[imageSpanIndex]),
                 spannableStringBuilder.getSpanFlags(images[imageSpanIndex]));

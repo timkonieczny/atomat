@@ -171,12 +171,9 @@ class SourceUpdater {
                                 editable.setSpan(new RelativeSizeSpan(13.0f/15), startPosition, endPosition, Spannable.SPAN_MARK_MARK);
                                 editable.setSpan(new ForegroundColorSpan(Color.parseColor("#616161")), startPosition, endPosition, Spannable.SPAN_MARK_MARK);
                             }
-                        }else if(tagName.equalsIgnoreCase("style")){
-
                         }
                     }
                 };
-                // FIXME: ignore style tags
                 String content = imgWithWhitespacePattern.matcher(article.content).replaceFirst("");
                 content = stylePattern.matcher(content).replaceAll("");
                 article.content = Html.fromHtml(content, Html.FROM_HTML_MODE_COMPACT, null, figcaptionHandler);
@@ -260,7 +257,7 @@ class SourceUpdater {
         }
     }
 
-    private void initializeTagDictionaries() {
+    private void initializeTagDictionaries() {  // FIXME: call toLowerCase() on all parsed tags
         feedTags = createHashSet("feed", "channel");
         feedTitleTags = createHashSet("title");
         feedIconTags = createHashSet("icon");                           // missing
