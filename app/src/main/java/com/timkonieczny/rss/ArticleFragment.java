@@ -178,20 +178,18 @@ public class ArticleFragment extends Fragment implements UpdateHeaderImageListen
     @Override
     public void onImageUpdated(Drawable image, int imageSpanIndex) {
         article.inlineImages[imageSpanIndex] = image;   // TODO: save / load images in external storage
-
         article.inlineImages[imageSpanIndex].setBounds(
                 0,
                 0,
                 contentTextViewWidth,
                 (article.inlineImages[imageSpanIndex].getMinimumHeight() * contentTextViewWidth) / article.inlineImages[imageSpanIndex].getMinimumWidth()
         );
-
-        spannableStringBuilder.removeSpan(images[imageSpanIndex]);
         spannableStringBuilder.setSpan(
                 new ImageSpan(article.inlineImages[imageSpanIndex]),
                 spannableStringBuilder.getSpanStart(images[imageSpanIndex]),
                 spannableStringBuilder.getSpanEnd(images[imageSpanIndex]),
                 spannableStringBuilder.getSpanFlags(images[imageSpanIndex]));
+        spannableStringBuilder.removeSpan(images[imageSpanIndex]);
         contentTextView.setText(spannableStringBuilder);
     }
 }
