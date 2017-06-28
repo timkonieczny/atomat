@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TextInputLayout;
+import android.support.v7.app.ActionBar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewAnimationUtils;
@@ -48,6 +49,9 @@ public class SourcesFragment extends Fragment implements FeedListener{
     @Override
     public void onViewCreated(final View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        ActionBar actionBar = ((MainActivity)getActivity()).getSupportActionBar();
+        if(actionBar!=null) actionBar.setTitle(R.string.title_fragment_sources);
 
         sharedPreferences = getActivity().getPreferences(Context.MODE_PRIVATE);
 

@@ -12,6 +12,7 @@ import android.support.customtabs.CustomTabsIntent;
 import android.support.customtabs.CustomTabsService;
 import android.support.customtabs.CustomTabsServiceConnection;
 import android.support.customtabs.CustomTabsSession;
+import android.support.v7.app.ActionBar;
 import android.text.SpannableStringBuilder;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
@@ -83,6 +84,9 @@ public class ArticleFragment extends Fragment implements UpdateHeaderImageListen
         MainActivity.toggle.syncState();*/
 
         article = MainActivity.articles.get(arguments.getInt("index"));
+
+        ActionBar actionBar = ((MainActivity)getActivity()).getSupportActionBar();
+        if(actionBar!=null) actionBar.setTitle(article.title);
 
         headerImage = (ImageView) view.findViewById(R.id.article_header);
         sourceTitle = (TextView) view.findViewById(R.id.source_title);
