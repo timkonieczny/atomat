@@ -5,20 +5,24 @@
         <item
             android:id="@+id/nav_news"
             android:icon="@drawable/ic_rss_feed_black_24dp"
-            android:title="News" />
+            android:title="@string/nav_news_title" />
         <item
             android:id="@+id/nav_sources"
             android:icon="@drawable/ic_cloud_black_24dp"
-            android:title="Sources" />
+            android:title="@string/nav_sources_title" />
+        <item
+            android:id="@+id/nav_preferences"
+            android:icon="@drawable/ic_settings_black_24dp"
+            android:title="@string/nav_settings_title" />
     </group>
 
-    <item android:title="Settings">
+    <!--<item android:title="Settings">
         <menu>
             <item
                 android:id="@+id/nav_preferences"
                 android:icon="@drawable/ic_settings_black_24dp"
                 android:title="Preferences" />
         </menu>
-    </item>
+    </item>-->
 
 </menu>
