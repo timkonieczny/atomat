@@ -5,7 +5,7 @@
         <item>@string/pref_theme_option_dark_theme</item>
     </string-array>
     <string-array name="pref_theme_values">
-        <item>light_data</item>
-        <item>dark_data</item>
+        <item>false</item>
+        <item>true</item>
     </string-array>
 </resources>
