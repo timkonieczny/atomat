@@ -1,6 +1,7 @@
 package com.timkonieczny.rss;
 
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
@@ -11,6 +12,7 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
 
 import java.util.ArrayList;
@@ -34,33 +36,35 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
 
-        setTheme();
+        // onCreate() is called when recreate() is being called.
+        // No point in running this code if everything needs to be rebuilt anyway.
+        if(setTheme()) {
+            setContentView(R.layout.activity_main);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+            Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+            setSupportActionBar(toolbar);
 
+            DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+            toggle = new ActionBarDrawerToggle(
+                    this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+            drawer.addDrawerListener(toggle);
+            toggle.syncState();
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.addDrawerListener(toggle);
-        toggle.syncState();
+            NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+            navigationView.setNavigationItemSelectedListener(this);
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
-
-        if(!isFragmentSelected) {
-            if (goToSettings) {
-                onNavigationItemSelected(navigationView.getMenu().findItem(R.id.nav_preferences));
-                navigationView.getMenu().findItem(R.id.nav_preferences).setChecked(true);
-                goToSettings = false;
-            }else{
-                onNavigationItemSelected(navigationView.getMenu().findItem(R.id.nav_news));
-                navigationView.getMenu().findItem(R.id.nav_news).setChecked(true);
+            if (!isFragmentSelected) {
+                if (goToSettings) {
+                    onNavigationItemSelected(navigationView.getMenu().findItem(R.id.nav_preferences));
+                    navigationView.getMenu().findItem(R.id.nav_preferences).setChecked(true);
+                    goToSettings = false;
+                } else {
+                    onNavigationItemSelected(navigationView.getMenu().findItem(R.id.nav_news));
+                    navigationView.getMenu().findItem(R.id.nav_news).setChecked(true);
+                }
+                isFragmentSelected = true;
             }
-            isFragmentSelected = true;
         }
     }
 
@@ -95,16 +99,111 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
-    public void setTheme(){
+    // returns true if mode was already applied
+    public boolean setTheme() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        if(sharedPreferences.getBoolean("pref_day_night_theme", true)) {
+
+        int configBefore = getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
+        int delegateBefore = AppCompatDelegate.getDefaultNightMode();
+        if (sharedPreferences.getBoolean("pref_day_night_theme", true)) {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_AUTO);
-        }else {
+            overviewFragment = null;    // Make Listeners invalid because system-calculated day/night times can't be accessed
+        } else {
             if (sharedPreferences.getString("pref_theme_dark", "false").equals("true")) {
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
             } else {
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
             }
+        }
+
+        int configAfter = getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
+        int delegateAfter = AppCompatDelegate.getDefaultNightMode();
+
+        // optimized if statement
+        return delegateBefore == AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM ||
+                delegateBefore == delegateAfter ||
+                configBefore == configAfter &&
+                        (delegateBefore == AppCompatDelegate.MODE_NIGHT_AUTO ||
+                                delegateAfter == AppCompatDelegate.MODE_NIGHT_AUTO);
+
+        /* un-optimized if statement
+        if(delegateBefore == AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM){
+            return true;    // returns on first Activity initialization, before theme is applied
+        }else if(delegateBefore == delegateAfter){
+            return true;
+        }else if(configBefore == configAfter &&
+                (delegateBefore == AppCompatDelegate.MODE_NIGHT_AUTO ||
+                        delegateAfter == AppCompatDelegate.MODE_NIGHT_AUTO)){
+            return true;
+        }else{
+            return false;
+        }*/
+
+        /*
+        * VALUES BEFORE AND AFTER CHANGING APP THEME
+        *
+        * ISDARK
+        * switch to daynight (day)
+        * before    Configuration.UI_MODE_NIGHT_YES   AppCompatDelegate.MODE_NIGHT_YES
+        * after     Configuration.UI_MODE_NIGHT_YES   AppCompatDelegate.MODE_NIGHT_AUTO
+        * before    Configuration.UI_MODE_NIGHT_NO    AppCompatDelegate.MODE_NIGHT_AUTO
+        * after     Configuration.UI_MODE_NIGHT_NO    AppCompatDelegate.MODE_NIGHT_AUTO
+        *
+        * switch from daynight (day)
+        * before    Configuration.UI_MODE_NIGHT_NO    AppCompatDelegate.MODE_NIGHT_AUTO
+        * after     Configuration.UI_MODE_NIGHT_NO    AppCompatDelegate.MODE_NIGHT_YES
+        * before    Configuration.UI_MODE_NIGHT_YES   AppCompatDelegate.MODE_NIGHT_YES
+        * after     Configuration.UI_MODE_NIGHT_YES   AppCompatDelegate.MODE_NIGHT_YES
+        *
+        * switch to light
+        * before    Configuration.UI_MODE_NIGHT_YES   AppCompatDelegate.MODE_NIGHT_YES
+        * after     Configuration.UI_MODE_NIGHT_YES   AppCompatDelegate.MODE_NIGHT_NO
+        * before    Configuration.UI_MODE_NIGHT_NO    AppCompatDelegate.MODE_NIGHT_NO
+        * after     Configuration.UI_MODE_NIGHT_NO    AppCompatDelegate.MODE_NIGHT_NO
+        *
+        * ISLIGHT
+        * switch to daynight (day)
+        * before:   Configuration.UI_MODE_NIGHT_NO    AppCompatDelegate.MODE_NIGHT_NO
+        * after:    Configuration.UI_MODE_NIGHT_NO    AppCompatDelegate.MODE_NIGHT_AUTO
+        *
+        * switch from daynight (day)
+        * before:   Configuration.UI_MODE_NIGHT_NO    AppCompatDelegate.MODE_NIGHT_AUTO
+        * after:    Configuration.UI_MODE_NIGHT_NO    AppCompatDelegate.MODE_NIGHT_NO
+        *
+        * switch to dark
+        * before:   Configuration.UI_MODE_NIGHT_NO    AppCompatDelegate.MODE_NIGHT_NO
+        * after:    Configuration.UI_MODE_NIGHT_NO    AppCompatDelegate.MODE_NIGHT_YES
+        * before:   Configuration.UI_MODE_NIGHT_YES   AppCompatDelegate.MODE_NIGHT_YES
+        * after:    Configuration.UI_MODE_NIGHT_YES   AppCompatDelegate.MODE_NIGHT_YES
+        *
+        * */
+    }
+
+    private void printCurrentStatus(){
+        switch (getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK) {
+            case Configuration.UI_MODE_NIGHT_NO:
+                Log.d("MainActivity", "Configuration.UI_MODE_NIGHT_NO");
+                break;
+            case Configuration.UI_MODE_NIGHT_YES:
+                Log.d("MainActivity", "Configuration.UI_MODE_NIGHT_YES");
+                break;
+            case Configuration.UI_MODE_NIGHT_UNDEFINED:
+                Log.d("MainActivity", "Configuration.UI_MODE_NIGHT_UNDEFINED");
+                break;
+        }
+        switch (AppCompatDelegate.getDefaultNightMode()){
+            case AppCompatDelegate.MODE_NIGHT_AUTO:
+                Log.d("MainActivity", "AppCompatDelegate.MODE_NIGHT_AUTO");
+                break;
+            case AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM:
+                Log.d("MainActivity", "AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM");
+                break;
+            case AppCompatDelegate.MODE_NIGHT_NO:
+                Log.d("MainActivity", "AppCompatDelegate.MODE_NIGHT_NO");
+                break;
+            case AppCompatDelegate.MODE_NIGHT_YES:
+                Log.d("MainActivity", "AppCompatDelegate.MODE_NIGHT_YES");
+                break;
         }
     }
 }

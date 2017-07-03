@@ -78,16 +78,6 @@ public class OverviewFragment extends Fragment implements FeedListener, UpdateHe
     }
 
     @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-    }
-
-    @Override
     public void onRefresh() {
         updateFeed();
     }

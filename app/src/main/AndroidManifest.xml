@@ -3,6 +3,8 @@
     package="com.timkonieczny.rss">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- for DayNight theme -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
     <application
         android:allowBackup="true"
