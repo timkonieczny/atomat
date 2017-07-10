@@ -1,6 +1,7 @@
 package com.timkonieczny.rss;
 
 import android.app.FragmentManager;
+import android.content.ContentValues;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 
@@ -66,6 +67,17 @@ class Feed extends AsyncTask<Void, Void, Boolean> {
 
                 if(MainActivity.sources.get(currentURL).isStub){
                     articles.addAll(sourceUpdater.parse(stream, MainActivity.sources.get(currentURL), true));
+
+                    MainActivity.dbManager.initializeDb();
+
+                    ContentValues values = new ContentValues();
+                    values.put(DbManager.SourcesTable.COLUMN_NAME_ID, sourceUpdater.source.id);
+                    values.put(DbManager.SourcesTable.COLUMN_NAME_URL, currentURL);
+                    values.put(DbManager.SourcesTable.COLUMN_NAME_TITLE, sourceUpdater.source.title);
+                    if(sourceUpdater.source.icon!=null) values.put(DbManager.SourcesTable.COLUMN_NAME_ICON, sourceUpdater.source.icon);
+                    values.put(DbManager.SourcesTable.COLUMN_NAME_LINK, sourceUpdater.source.link.toString());
+                    values.put(DbManager.SourcesTable.COLUMN_NAME_UPDATED, sourceUpdater.source.updated.getTime());
+                    MainActivity.dbManager.db.insert(DbManager.SourcesTable.TABLE_NAME, null, values);
 
                     SharedPreferences.Editor editor = sharedPreferences.edit();
                     editor.putString("sources", sharedPreferences.getString("sources", "") + " "+currentURL);
