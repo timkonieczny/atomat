@@ -1,6 +1,7 @@
 package com.timkonieczny.rss;
 
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -26,16 +27,7 @@ class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ArticleCardViewHolder
         holder.cardView.setOnClickListener(article.onClickListener);
 
         holder.sourceTitle.setText(article.source.title);
-        if(article.source.iconDrawable != null) {
-            holder.sourceTitle.setCompoundDrawablesWithIntrinsicBounds(article.source.iconDrawable, null, null, null);
-        }else if(article.source.iconFileName!=null){
-            article.source.loadIconFromInternalStorage();
-            holder.sourceTitle.setCompoundDrawablesWithIntrinsicBounds(article.source.iconDrawable, null, null, null);
-        }else if(article.source.icon != null){
-            article.source.setUpdateIconImageListener(this);
-        }else{  // remove old icon (this is a recycled view.)
-            holder.sourceTitle.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
-        }
+        holder.sourceTitle.setCompoundDrawablesWithIntrinsicBounds(article.source.getIconDrawable(this), null, null, null);
         holder.articleTitle.setText(article.title);
         holder.articleAuthor.setText(article.author);
 

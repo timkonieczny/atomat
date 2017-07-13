@@ -47,6 +47,15 @@ class Source {
         task.execute(this);
     }
 
+    Drawable getIconDrawable(UpdateIconImageListener listener){
+        if(iconDrawable != null) return iconDrawable;
+        else if(iconFileName!=null){
+            loadIconFromInternalStorage();
+            return iconDrawable;
+        }else if(icon != null) setUpdateIconImageListener(listener);
+        return null;
+    }
+
     void loadIconFromInternalStorage(){
         try {
             FileInputStream fileInputStream = context.openFileInput(iconFileName);

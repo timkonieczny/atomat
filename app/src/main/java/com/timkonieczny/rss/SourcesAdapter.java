@@ -51,13 +51,7 @@ class SourcesAdapter extends BaseAdapter implements UpdateIconImageListener {
         int backgroundColor = context.getResources().getColor(R.color.cardview_dark_background, context.getTheme());
 
         Source source = MainActivity.sources.get(position);
-        if(source.iconDrawable != null) iconImageView.setImageDrawable(source.iconDrawable);
-        else if(source.iconFileName!=null){
-            source.loadIconFromInternalStorage();
-            iconImageView.setImageDrawable(source.iconDrawable);
-        }else if(source.icon != null) source.setUpdateIconImageListener(this);
-        else iconImageView.setImageDrawable(null);
-
+        iconImageView.setImageDrawable(source.getIconDrawable(this));
         if(source.colorPalette != null) backgroundView.setBackgroundColor(source.colorPalette.getVibrantColor(backgroundColor));
         else backgroundView.setBackgroundColor(backgroundColor);
 
