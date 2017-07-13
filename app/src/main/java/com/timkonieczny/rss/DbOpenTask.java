@@ -2,19 +2,19 @@ package com.timkonieczny.rss;
 
 import android.os.AsyncTask;
 
-public class DbOpenTask extends AsyncTask<Void,Void,Void> {
+class DbOpenTask extends AsyncTask<Void,Void,Void> {
 
-    DbManager dbManager;
-    DbOpenListener dbOpenListener;
+    private DbManager dbManager;
+    private DbOpenListener dbOpenListener;
 
-    public DbOpenTask(DbManager dbManager, DbOpenListener dbOpenListener){
+    DbOpenTask(DbManager dbManager, DbOpenListener dbOpenListener){
         this.dbManager = dbManager;
         this.dbOpenListener = dbOpenListener;
     }
 
     @Override
     protected Void doInBackground(Void... params) {
-        dbManager.initializeDb();
+        dbManager.getDb();
         return null;
     }
 

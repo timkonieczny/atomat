@@ -162,11 +162,7 @@ public class ArticleFragment extends Fragment implements UpdateHeaderImageListen
         if(article.headerImageBitmap!=null) headerImage.setImageBitmap(article.headerImageBitmap);
         else if(article.headerImage!=null) article.setUpdateHeaderImageListener(this);
 
-        if(article.source.iconDrawable != null){
-            sourceTitle.setCompoundDrawablesWithIntrinsicBounds(article.source.iconDrawable, null, null, null);
-        }else if(article.source.icon != null){
-            article.source.setUpdateIconImageListener(this);
-        }
+        sourceTitle.setCompoundDrawablesWithIntrinsicBounds(article.source.getIconDrawable(this), null, null, null);
     }
 
     @Override

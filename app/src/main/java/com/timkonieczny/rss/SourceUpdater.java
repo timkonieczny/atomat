@@ -100,7 +100,6 @@ class SourceUpdater {
                         source.title = readTag(parser, name);
                     } else if (feedIconTags.contains(name)) {
                         source.icon = readTag(parser, name);
-                        source.updateIconImage();
                     } else if (feedUpdatedTags.contains(name)) {
                         source.updated = null;
                         ParsePosition parsePosition = new ParsePosition(0);
@@ -115,10 +114,10 @@ class SourceUpdater {
                     } else if (feedLinkTags.contains(name)) {
                         String linkUrl = parser.getAttributeValue(null, "href");
                         if(linkUrl!=null) {
-                            source.link = new URL(linkUrl);
+                            source.link = linkUrl;
                             parser.next();
                         }else
-                            source.link = new URL(readTag(parser, name));
+                            source.link = readTag(parser, name);
                     }else{
                         skip(parser);
                     }
@@ -127,7 +126,7 @@ class SourceUpdater {
                 }
             }
         }
-        if(source.id == null) source.id = source.link.toString();
+        if(source.id == null) source.id = source.link;
         for(int i = 0; i < articles.size(); i++){
             Article article = articles.get(i);
             article.source = source;

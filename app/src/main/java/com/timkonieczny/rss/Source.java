@@ -10,25 +10,22 @@ import android.support.v7.graphics.Palette;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.net.URL;
 import java.util.Date;
 
 class Source {
 
-    String title, icon, id, iconFileName;
-    URL link;
+    String title, icon, id, iconFileName, rssUrl, link;
     Bitmap iconBitmap;
     Drawable iconDrawable;
     Palette colorPalette;
     Date updated;
-    String rssUrl;
 
     private Resources resources;
     private Context context;
 
     private UpdateIconImageTask task;
 
-    Source(Resources resources, Context context, String url){
+    Source(Resources resources, Context context, String rssUrl){
         title = null;
         icon = null;
         id = null;
@@ -37,14 +34,25 @@ class Source {
         iconDrawable = null;
         colorPalette = null;
         updated = null;
-        rssUrl = url;
+        this.rssUrl = rssUrl;
         this.resources = resources;
         this.context = context;
+        task = null;
     }
 
-    void updateIconImage(){
-        task = new UpdateIconImageTask(resources, context);
-        task.execute(this);
+    Source(Resources resources, Context context, String rssUrl, String title, String icon, String id, String link, Date updated){
+        this.title = title;
+        this.icon = icon;
+        this.id = id;
+        this.link = link;
+        iconBitmap = null;
+        iconDrawable = null;
+        colorPalette = null;
+        this.updated = updated;
+        this.rssUrl = rssUrl;
+        this.resources = resources;
+        this.context = context;
+        task = null;
     }
 
     Drawable getIconDrawable(UpdateIconImageListener listener){
@@ -52,11 +60,17 @@ class Source {
         else if(iconFileName!=null){
             loadIconFromInternalStorage();
             return iconDrawable;
-        }else if(icon != null) setUpdateIconImageListener(listener);
+        }else if(icon != null){
+            if(task == null){
+                task = new UpdateIconImageTask(resources, context);
+                task.execute(this);
+            }
+            task.updateIconImageListener = listener;
+        }
         return null;
     }
 
-    void loadIconFromInternalStorage(){
+    private void loadIconFromInternalStorage(){
         try {
             FileInputStream fileInputStream = context.openFileInput(iconFileName);
             iconBitmap = BitmapFactory.decodeStream(fileInputStream);
@@ -68,16 +82,12 @@ class Source {
         }
     }
 
-    void setUpdateIconImageListener(UpdateIconImageListener listener){
-        task.updateIconImageListener = listener;
-    }
-
     @Override
     public String toString(){
         return "Title:\t\t\t"+title+
             "\nIcon:\t\t\t\t"+icon+
             "\nID:\t\t\t\t"+id+
-            "\nLink:\t\t\t\t"+ ((link==null) ? "null" : link.toString())+
+            "\nLink:\t\t\t\t"+ link+
             "\nIcon Bitmap:\t\t"+(iconBitmap != null)+
             "\nIcon Drawable:\t"+(iconDrawable != null)+
             "\nIcon File Name:\t"+iconFileName+

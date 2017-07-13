@@ -3,7 +3,6 @@ package com.timkonieczny.rss;
 import android.app.FragmentManager;
 import android.content.Context;
 import android.content.res.Resources;
-import android.database.Cursor;
 import android.os.AsyncTask;
 
 import org.xmlpull.v1.XmlPullParserException;
@@ -79,13 +78,7 @@ class Feed extends AsyncTask<Void, Void, Boolean> implements DbOpenListener{
     @Override
     protected final Boolean doInBackground(Void... params) {
         List<Article> articles = new ArrayList<>(0);
-        Cursor cursor = MainActivity.dbManager.getSources();
-
-        while (cursor.moveToNext()){
-//            MainActivity.dbManager.printSource(cursor);
-            MainActivity.dbManager.loadSource(cursor, resources, context);  // retrieves source from db and saves in mainactivity.sources
-        }
-
+        MainActivity.dbManager.loadSources(resources, context);
         for(int i = 0; i < MainActivity.sources.size(); i++){
             updateSource(MainActivity.sources.get(i), articles, false);
         }
