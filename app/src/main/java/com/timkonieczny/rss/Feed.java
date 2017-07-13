@@ -1,12 +1,10 @@
 package com.timkonieczny.rss;
 
 import android.app.FragmentManager;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.os.AsyncTask;
-import android.util.Log;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -18,9 +16,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 class Feed extends AsyncTask<Void, Void, Boolean> implements DbOpenListener{
 
@@ -82,28 +78,20 @@ class Feed extends AsyncTask<Void, Void, Boolean> implements DbOpenListener{
 
     @Override
     protected final Boolean doInBackground(Void... params) {
-
         List<Article> articles = new ArrayList<>(0);
-
         Cursor cursor = MainActivity.dbManager.getSources();
 
         while (cursor.moveToNext()){
-            MainActivity.dbManager.printSource(cursor);
+//            MainActivity.dbManager.printSource(cursor);
+            MainActivity.dbManager.loadSource(cursor, resources, context);  // retrieves source from db and saves in mainactivity.sources
+        }
 
-            // retrieves source from db and saves in mainactivity.sources
-            MainActivity.dbManager.loadSource(cursor, resources, context);
-
-
-            // reads feed and adds to db
-            updateSource(cursor.getString(cursor.getColumnIndexOrThrow(DbManager.SourcesTable.COLUMN_NAME_URL)), articles);
+        for(int i = 0; i < MainActivity.sources.size(); i++){
+            updateSource(MainActivity.sources.get(i), articles, false);
         }
 
 
-        if(newSource != null) updateSource(newSource, articles);
-        Log.d("Sources (FEED)", "doInBackground() mid1 " + MainActivity.sources.size());
-
-        //printSources();
-        Log.d("Sources (FEED)", "doInBackground() mid2 " + MainActivity.sources.size());
+        if(newSource != null) updateSource(new Source(resources, context, newSource), articles, true);
 
         Article article;
         for(int i = 0; i < articles.size(); i++){
@@ -117,43 +105,27 @@ class Feed extends AsyncTask<Void, Void, Boolean> implements DbOpenListener{
                 if(article.headerImage!=null) article.updateHeaderImage();
             }
         }
-        Log.d("Sources (FEED)", "doInBackground() mid3 " + MainActivity.sources.size());
 
         MainActivity.articles.addAll(articles);
         Collections.sort(MainActivity.articles, descending);
 
-        Log.d("Sources (FEED)", "doInBackground() end " + MainActivity.sources.size());
-
         return articles.size() > 0;
     }
 
-    private void updateSource(String currentURL, List<Article> articles){
+    private void updateSource(Source source, List<Article> articles, boolean isNew){
         try {
-            HttpURLConnection connection = (HttpURLConnection) (new URL(currentURL)).openConnection();
-
+            HttpURLConnection connection = (HttpURLConnection) (new URL(source.rssUrl)).openConnection();
             connection.setReadTimeout(10000);
             connection.setConnectTimeout(15000);
-
-            // Starts the query
             connection.connect();
             InputStream stream = connection.getInputStream();
 
             SourceUpdater sourceUpdater = new SourceUpdater();
+            articles.addAll(sourceUpdater.parse(stream, source, isNew));
 
-            if(!MainActivity.dbManager.sourceExists(currentURL)){
-
-                articles.addAll(sourceUpdater.parse(stream, new Source(resources, context, currentURL), true));
-
-                MainActivity.sources.put(sourceUpdater.source.rssUrl, sourceUpdater.source);    //adapter keys?
-                Log.d("Sources (FEED)", "cursor.getCount() == 0 " + MainActivity.sources.size());
-                SourcesAdapter.keys.add(sourceUpdater.source.rssUrl);
-
+            if(isNew){
+                MainActivity.sources.add(sourceUpdater.source);
                 MainActivity.dbManager.saveSource(sourceUpdater.source);
-
-                MainActivity.sources.get(currentURL).isStub = false;
-            }else{
-                // TODO: Display error: Source already added
-                articles.addAll(sourceUpdater.parse(stream, MainActivity.sources.get(currentURL), false));
             }
 
         } catch (IOException | XmlPullParserException e) {

@@ -1,17 +1,13 @@
 package com.timkonieczny.rss;
 
-
 import android.animation.Animator;
 import android.app.Fragment;
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.ActionBar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewAnimationUtils;
@@ -84,13 +80,10 @@ public class SourcesFragment extends Fragment implements FeedListener{
                     if (!httpPattern.matcher(url).find()) url = "http://" + url;
 //                    if (URLUtil.isValidUrl(url) && xmlPattern.matcher(url).find()) {
                     if (URLUtil.isValidUrl(url)) {
-                        if(MainActivity.sources.containsKey(url))
+                        if(MainActivity.sources.containsRssUrl(url))
                             urlTextInputLayout.setError("This website is already in your sources");
-                        else {
-                            SourcesAdapter.keys.add(url);
-
+                        else
                             new Feed(url, feedListener, getFragmentManager(), getContext(), getResources());
-                        }
                     } else urlTextInputLayout.setError("Enter an URL that points to an XML file");
                 }else urlTextInputLayout.setError("Enter a valid URL");
             }
@@ -150,6 +143,7 @@ public class SourcesFragment extends Fragment implements FeedListener{
     @Override
     public void onFeedUpdated(boolean hasNewArticles) {
         closeCircularReveal(view);
-        sourcesAdapter.notifyDataSetChanged();
+//        sourcesAdapter.notifyDataSetChanged();
+        sourcesAdapter.notifyDataSetInvalidated();
     }
 }

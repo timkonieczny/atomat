@@ -56,7 +56,7 @@ class DbManager extends SQLiteOpenHelper {
                 SourcesTable.COLUMN_NAME_UPDATED + " INT)");
     }
 
-    protected Cursor getSources(){
+    Cursor getSources(){
         String[] projection = {
                 SourcesTable._ID,
                 SourcesTable.COLUMN_NAME_ICON,
@@ -79,10 +79,10 @@ class DbManager extends SQLiteOpenHelper {
         );
     }
 
-    protected void loadSource(Cursor cursor, Resources resources, Context context){
+    void loadSource(Cursor cursor, Resources resources, Context context){
         String url = cursor.getString(cursor.getColumnIndexOrThrow(DbManager.SourcesTable.COLUMN_NAME_URL));
-        if(!MainActivity.sources.containsKey(url)) {    // only create source if it doesn't exist yet
-            Source source = new Source(resources, context, cursor.getString(cursor.getColumnIndexOrThrow(DbManager.SourcesTable.COLUMN_NAME_URL)));
+        if(!MainActivity.sources.containsRssUrl(url)) {    // only create source if it doesn't exist yet
+            Source source = new Source(resources, context, url);
             source.id = cursor.getString(cursor.getColumnIndexOrThrow(DbManager.SourcesTable.COLUMN_NAME_ID));
 
             String link = cursor.getString(cursor.getColumnIndexOrThrow(DbManager.SourcesTable.COLUMN_NAME_LINK));
@@ -94,20 +94,17 @@ class DbManager extends SQLiteOpenHelper {
 
             source.title = cursor.getString(cursor.getColumnIndexOrThrow(DbManager.SourcesTable.COLUMN_NAME_TITLE));
             source.icon = cursor.getString(cursor.getColumnIndexOrThrow(DbManager.SourcesTable.COLUMN_NAME_ICON));
-//            if(Objects.equals(source.icon, "null")) source.icon = null; // TODO: null is probably returned if empty cell https://stackoverflow.com/questions/21804254/how-to-get-null-value-from-sqlite-database-in-android
+            // If icon cell of source is empty, null is returned.
             source.iconFileName = cursor.getString(cursor.getColumnIndexOrThrow(DbManager.SourcesTable.COLUMN_NAME_ICON_FILE));
-//            if(Objects.equals(source.iconFileName, "null")) source.iconFileName = null;
 
             long updated = cursor.getLong(cursor.getColumnIndexOrThrow(DbManager.SourcesTable.COLUMN_NAME_UPDATED));
             if (updated != -1) source.updated = new Date(updated);
 
-            Log.d("Feed", source.toString());
-
-            MainActivity.sources.put(source.rssUrl, source);
+            MainActivity.sources.add(source);
         }
     }
 
-    protected void saveSource(Source source){
+    void saveSource(Source source){
         ContentValues values = new ContentValues();
         values.put(DbManager.SourcesTable.COLUMN_NAME_ID, source.id);
         values.put(DbManager.SourcesTable.COLUMN_NAME_URL, source.rssUrl);
@@ -139,7 +136,7 @@ class DbManager extends SQLiteOpenHelper {
         );
     }
 
-    protected void saveSourceIcon(String iconFileName, String url){
+    void saveSourceIcon(String iconFileName, String url){
         MainActivity.dbManager.initializeDb();
         ContentValues values = new ContentValues();
         values.put(DbManager.SourcesTable.COLUMN_NAME_ICON_FILE, iconFileName);
@@ -147,7 +144,7 @@ class DbManager extends SQLiteOpenHelper {
                 DbManager.SourcesTable.COLUMN_NAME_URL + "= ?", new String[]{url});
     }
 
-    class SourcesTable implements BaseColumns {
+    private class SourcesTable implements BaseColumns {
         static final String TABLE_NAME = "sources";
         static final String COLUMN_NAME_URL = "url";
         static final String COLUMN_NAME_ID = "id";

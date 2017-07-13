@@ -1,7 +1,5 @@
 package com.timkonieczny.rss;
 
-import android.app.Activity;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -20,12 +18,10 @@ class UpdateIconImageTask extends AsyncTask<Source, Void, Source> {
     UpdateIconImageListener updateIconImageListener = null;
     private Resources resources;
     private Context context;
-    private String rssUrl;
 
-    UpdateIconImageTask(Resources resources, Context context, String rssUrl){
+    UpdateIconImageTask(Resources resources, Context context){
         this.resources = resources;
         this.context = context;
-        this.rssUrl = rssUrl;
     }
 
     @Override

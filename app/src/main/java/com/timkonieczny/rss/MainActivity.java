@@ -16,13 +16,12 @@ import android.util.Log;
 import android.view.MenuItem;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     protected static ArrayList<Article> articles = null;
-    protected static HashMap<String, Source> sources = null;
+    protected static SourcesList sources = null;
 
     protected static ActionBarDrawerToggle toggle;
     protected static boolean goToSettings = false;
@@ -136,57 +135,56 @@ public class MainActivity extends AppCompatActivity
                         (delegateBefore == AppCompatDelegate.MODE_NIGHT_AUTO ||
                                 delegateAfter == AppCompatDelegate.MODE_NIGHT_AUTO);
 
-        /* un-optimized if statement
-        if(delegateBefore == AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM){
-            return true;    // returns on first Activity initialization, before theme is applied
-        }else if(delegateBefore == delegateAfter){
-            return true;
-        }else if(configBefore == configAfter &&
-                (delegateBefore == AppCompatDelegate.MODE_NIGHT_AUTO ||
-                        delegateAfter == AppCompatDelegate.MODE_NIGHT_AUTO)){
-            return true;
-        }else{
-            return false;
-        }*/
-
-        /*
-        * VALUES BEFORE AND AFTER CHANGING APP THEME
-        *
-        * ISDARK
-        * switch to daynight (day)
-        * before    Configuration.UI_MODE_NIGHT_YES   AppCompatDelegate.MODE_NIGHT_YES
-        * after     Configuration.UI_MODE_NIGHT_YES   AppCompatDelegate.MODE_NIGHT_AUTO
-        * before    Configuration.UI_MODE_NIGHT_NO    AppCompatDelegate.MODE_NIGHT_AUTO
-        * after     Configuration.UI_MODE_NIGHT_NO    AppCompatDelegate.MODE_NIGHT_AUTO
-        *
-        * switch from daynight (day)
-        * before    Configuration.UI_MODE_NIGHT_NO    AppCompatDelegate.MODE_NIGHT_AUTO
-        * after     Configuration.UI_MODE_NIGHT_NO    AppCompatDelegate.MODE_NIGHT_YES
-        * before    Configuration.UI_MODE_NIGHT_YES   AppCompatDelegate.MODE_NIGHT_YES
-        * after     Configuration.UI_MODE_NIGHT_YES   AppCompatDelegate.MODE_NIGHT_YES
-        *
-        * switch to light
-        * before    Configuration.UI_MODE_NIGHT_YES   AppCompatDelegate.MODE_NIGHT_YES
-        * after     Configuration.UI_MODE_NIGHT_YES   AppCompatDelegate.MODE_NIGHT_NO
-        * before    Configuration.UI_MODE_NIGHT_NO    AppCompatDelegate.MODE_NIGHT_NO
-        * after     Configuration.UI_MODE_NIGHT_NO    AppCompatDelegate.MODE_NIGHT_NO
-        *
-        * ISLIGHT
-        * switch to daynight (day)
-        * before:   Configuration.UI_MODE_NIGHT_NO    AppCompatDelegate.MODE_NIGHT_NO
-        * after:    Configuration.UI_MODE_NIGHT_NO    AppCompatDelegate.MODE_NIGHT_AUTO
-        *
-        * switch from daynight (day)
-        * before:   Configuration.UI_MODE_NIGHT_NO    AppCompatDelegate.MODE_NIGHT_AUTO
-        * after:    Configuration.UI_MODE_NIGHT_NO    AppCompatDelegate.MODE_NIGHT_NO
-        *
-        * switch to dark
-        * before:   Configuration.UI_MODE_NIGHT_NO    AppCompatDelegate.MODE_NIGHT_NO
-        * after:    Configuration.UI_MODE_NIGHT_NO    AppCompatDelegate.MODE_NIGHT_YES
-        * before:   Configuration.UI_MODE_NIGHT_YES   AppCompatDelegate.MODE_NIGHT_YES
-        * after:    Configuration.UI_MODE_NIGHT_YES   AppCompatDelegate.MODE_NIGHT_YES
-        *
-        * */
+//         un-optimized if statement
+//        if(delegateBefore == AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM){
+//            return true;    // returns on first Activity initialization, before theme is applied
+//        }else if(delegateBefore == delegateAfter){
+//            return true;
+//        }else if(configBefore == configAfter &&
+//                (delegateBefore == AppCompatDelegate.MODE_NIGHT_AUTO ||
+//                        delegateAfter == AppCompatDelegate.MODE_NIGHT_AUTO)){
+//            return true;
+//        }else{
+//            return false;
+//        }
+//
+//        * VALUES BEFORE AND AFTER CHANGING APP THEME
+//        *
+//        * ISDARK
+//        * switch to daynight (day)
+//        * before    Configuration.UI_MODE_NIGHT_YES   AppCompatDelegate.MODE_NIGHT_YES
+//        * after     Configuration.UI_MODE_NIGHT_YES   AppCompatDelegate.MODE_NIGHT_AUTO
+//        * before    Configuration.UI_MODE_NIGHT_NO    AppCompatDelegate.MODE_NIGHT_AUTO
+//        * after     Configuration.UI_MODE_NIGHT_NO    AppCompatDelegate.MODE_NIGHT_AUTO
+//        *
+//        * switch from daynight (day)
+//        * before    Configuration.UI_MODE_NIGHT_NO    AppCompatDelegate.MODE_NIGHT_AUTO
+//        * after     Configuration.UI_MODE_NIGHT_NO    AppCompatDelegate.MODE_NIGHT_YES
+//        * before    Configuration.UI_MODE_NIGHT_YES   AppCompatDelegate.MODE_NIGHT_YES
+//        * after     Configuration.UI_MODE_NIGHT_YES   AppCompatDelegate.MODE_NIGHT_YES
+//        *
+//        * switch to light
+//        * before    Configuration.UI_MODE_NIGHT_YES   AppCompatDelegate.MODE_NIGHT_YES
+//        * after     Configuration.UI_MODE_NIGHT_YES   AppCompatDelegate.MODE_NIGHT_NO
+//        * before    Configuration.UI_MODE_NIGHT_NO    AppCompatDelegate.MODE_NIGHT_NO
+//        * after     Configuration.UI_MODE_NIGHT_NO    AppCompatDelegate.MODE_NIGHT_NO
+//        *
+//        * ISLIGHT
+//        * switch to daynight (day)
+//        * before:   Configuration.UI_MODE_NIGHT_NO    AppCompatDelegate.MODE_NIGHT_NO
+//        * after:    Configuration.UI_MODE_NIGHT_NO    AppCompatDelegate.MODE_NIGHT_AUTO
+//        *
+//        * switch from daynight (day)
+//        * before:   Configuration.UI_MODE_NIGHT_NO    AppCompatDelegate.MODE_NIGHT_AUTO
+//        * after:    Configuration.UI_MODE_NIGHT_NO    AppCompatDelegate.MODE_NIGHT_NO
+//        *
+//        * switch to dark
+//        * before:   Configuration.UI_MODE_NIGHT_NO    AppCompatDelegate.MODE_NIGHT_NO
+//        * after:    Configuration.UI_MODE_NIGHT_NO    AppCompatDelegate.MODE_NIGHT_YES
+//        * before:   Configuration.UI_MODE_NIGHT_YES   AppCompatDelegate.MODE_NIGHT_YES
+//        * after:    Configuration.UI_MODE_NIGHT_YES   AppCompatDelegate.MODE_NIGHT_YES
+//        *
+//        *
     }
 
     private void printCurrentStatus(){

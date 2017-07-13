@@ -21,7 +21,6 @@ class Source {
     Drawable iconDrawable;
     Palette colorPalette;
     Date updated;
-    boolean isStub;
     String rssUrl;
 
     private Resources resources;
@@ -38,14 +37,13 @@ class Source {
         iconDrawable = null;
         colorPalette = null;
         updated = null;
-        isStub = true;
         rssUrl = url;
         this.resources = resources;
         this.context = context;
     }
 
     void updateIconImage(){
-        task = new UpdateIconImageTask(resources, context, rssUrl);
+        task = new UpdateIconImageTask(resources, context);
         task.execute(this);
     }
 
@@ -74,7 +72,6 @@ class Source {
             "\nIcon Bitmap:\t\t"+(iconBitmap != null)+
             "\nIcon Drawable:\t"+(iconDrawable != null)+
             "\nIcon File Name:\t"+iconFileName+
-            "\nisStub:\t\t\t"+isStub+
             "\nRSS URL:\t\t\t"+rssUrl+
             "\nUpdated:\t\t\t"+((updated==null) ? "null" : updated.toString());
     }
