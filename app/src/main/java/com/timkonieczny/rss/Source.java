@@ -22,7 +22,7 @@ class Source {
     Palette colorPalette;
     Date updated;
     boolean isStub;
-    private String rssUrl;
+    String rssUrl;
 
     private Resources resources;
     private Context context;

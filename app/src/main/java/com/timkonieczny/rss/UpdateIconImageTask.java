@@ -1,6 +1,7 @@
 package com.timkonieczny.rss;
 
 import android.app.Activity;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -37,11 +38,7 @@ class UpdateIconImageTask extends AsyncTask<Source, Void, Source> {
 
             saveImageInInternalStorage(sources[0]);
 
-            ((Activity)context)
-                    .getPreferences(Context.MODE_PRIVATE)
-                    .edit()
-                    .putString(rssUrl+"_iconFileName", sources[0].iconFileName)
-                    .apply();
+            MainActivity.dbManager.saveSourceIcon(sources[0].iconFileName, sources[0].rssUrl);
 
         } catch (IOException e) {
             e.printStackTrace();

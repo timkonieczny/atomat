@@ -9,6 +9,7 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,7 +21,10 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 
-public class OverviewFragment extends Fragment implements FeedListener, UpdateHeaderImageListener, UpdateIconImageListener, SwipeRefreshLayout.OnRefreshListener{
+public class OverviewFragment
+        extends Fragment
+        implements FeedListener, UpdateHeaderImageListener, UpdateIconImageListener,
+        SwipeRefreshLayout.OnRefreshListener{
 
     FeedAdapter feedAdapter;
     Comparator<Article> descending;
@@ -44,8 +48,7 @@ public class OverviewFragment extends Fragment implements FeedListener, UpdateHe
             }
         };
 
-        if(!isInitialRefreshDone) getSourcesFromSharedPreferences();
-
+        if(MainActivity.sources == null) MainActivity.sources = new HashMap<>();
         if(MainActivity.articles == null) MainActivity.articles = new ArrayList<>();
 
         feedAdapter = new FeedAdapter();
@@ -104,15 +107,11 @@ public class OverviewFragment extends Fragment implements FeedListener, UpdateHe
     }
 
     public void updateFeed(){
-
         // TODO: The Verge: Feed only contains article previews. But ID is also a feed URL containing full articles.
-
-//        MainActivity.sources.put("https://www.theverge.com/rss/index.xml", new Source(this, getResources()));
-        (new Feed(this, getFragmentManager(), getActivity().getPreferences(Context.MODE_PRIVATE))).execute();
+        new Feed(this, getFragmentManager(), getContext(), getResources());
     }
 
     public void getSourcesFromSharedPreferences(){
-        if(MainActivity.sources == null) MainActivity.sources = new HashMap<>();
 
         SharedPreferences sharedPreferences = getActivity().getPreferences(Context.MODE_PRIVATE);
 

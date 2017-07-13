@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+//class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ArticleCardViewHolder> implements UpdateHeaderImageListener, UpdateIconImageListener{
 class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ArticleCardViewHolder> implements UpdateHeaderImageListener, UpdateIconImageListener{
 
     FeedAdapter(){}

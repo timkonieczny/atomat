@@ -1,6 +1,7 @@
 package com.timkonieczny.rss;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,6 +31,7 @@ class SourcesAdapter extends BaseAdapter implements UpdateIconImageListener {
 
     @Override
     public int getCount() {
+        Log.d("SourcesAdapter", "getCount() "+MainActivity.sources.size());
         return MainActivity.sources.size();
     }
 
@@ -45,6 +47,7 @@ class SourcesAdapter extends BaseAdapter implements UpdateIconImageListener {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
+        Log.d("SourcesAdapter", "getView()");
         gridView = (GridView) parent;
         View view;
 
@@ -59,6 +62,7 @@ class SourcesAdapter extends BaseAdapter implements UpdateIconImageListener {
         int backgroundColor = context.getResources().getColor(R.color.cardview_dark_background, context.getTheme());
 
         Source source = MainActivity.sources.get(keys.get(position));
+        Log.d("SourcesAdapter", MainActivity.sources.get(keys.get(position)).toString());
         if(source.iconDrawable != null) iconImageView.setImageDrawable(source.iconDrawable);
         else if(source.iconFileName!=null){
             source.loadIconFromInternalStorage();

@@ -11,6 +11,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.ActionBar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewAnimationUtils;
@@ -28,13 +29,12 @@ public class SourcesFragment extends Fragment implements FeedListener{
     private Pattern httpPattern = Pattern.compile("\\Ahttp(s)?+://");
     private Pattern xmlPattern = Pattern.compile("\\.xml\\Z");
 
+    private View view;
     private View fab;
     private EditText urlEditText;
     private TextInputLayout urlTextInputLayout;
 
     private SourcesAdapter sourcesAdapter;
-
-    private SharedPreferences sharedPreferences;
 
     public SourcesFragment() {}
 
@@ -50,10 +50,10 @@ public class SourcesFragment extends Fragment implements FeedListener{
     public void onViewCreated(final View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        this.view = view;
+
         ActionBar actionBar = ((MainActivity)getActivity()).getSupportActionBar();
         if(actionBar!=null) actionBar.setTitle(R.string.title_fragment_sources);
-
-        sharedPreferences = getActivity().getPreferences(Context.MODE_PRIVATE);
 
         GridView gridView = (GridView) view.findViewById(R.id.sources_grid);
         sourcesAdapter = new SourcesAdapter(getContext());
@@ -87,11 +87,9 @@ public class SourcesFragment extends Fragment implements FeedListener{
                         if(MainActivity.sources.containsKey(url))
                             urlTextInputLayout.setError("This website is already in your sources");
                         else {
-                            MainActivity.sources.put(url, new Source(getResources(), getContext(), url));
                             SourcesAdapter.keys.add(url);
 
-                            (new Feed(feedListener, getFragmentManager(), sharedPreferences)).execute();
-                            closeCircularReveal(view);
+                            new Feed(url, feedListener, getFragmentManager(), getContext(), getResources());
                         }
                     } else urlTextInputLayout.setError("Enter an URL that points to an XML file");
                 }else urlTextInputLayout.setError("Enter a valid URL");
@@ -151,6 +149,7 @@ public class SourcesFragment extends Fragment implements FeedListener{
 
     @Override
     public void onFeedUpdated(boolean hasNewArticles) {
+        closeCircularReveal(view);
         sourcesAdapter.notifyDataSetChanged();
     }
 }
