@@ -29,33 +29,57 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:gravity="center"
-        android:padding="16dp">
-
-        <android.support.design.widget.TextInputLayout
-            android:id="@+id/text_input_layout_url"
+        android:padding="16dp"
+        android:gravity="center">
+        <LinearLayout
+            android:id="@+id/add_source_input_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/feed_url"
-            android:labelFor="@+id/feed_url_edit_text">
-            <EditText
-                android:id="@id/feed_url_edit_text"
+            android:orientation="vertical">
+            <android.support.design.widget.TextInputLayout
+                android:id="@+id/text_input_layout_url"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:imeActionLabel="Label"
-                android:inputType="textUri" />
-        </android.support.design.widget.TextInputLayout>
-        <Button
-            android:layout_marginTop="24dp"
-            android:layout_marginEnd="4dp"
+                android:hint="@string/feed_url"
+                android:labelFor="@+id/feed_url_edit_text">
+                <EditText
+                    android:id="@id/feed_url_edit_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:imeActionLabel="Label"
+                    android:inputType="textUri" />
+            </android.support.design.widget.TextInputLayout>
+            <Button
+                android:layout_marginTop="24dp"
+                android:layout_marginEnd="4dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:text="@string/add"
+                android:id="@+id/add_source_button"
+                android:textColor="@color/colorWhite"
+                android:background="@color/colorAccent"/>
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/add_source_loading_layout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="end"
-            android:text="@string/add"
-            android:id="@+id/add_source_button"
-            android:textColor="@color/colorWhite"
-            android:background="@color/colorAccent"/>
-
+            android:orientation="vertical"
+            android:gravity="center"
+            android:visibility="gone">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAlignment="center"
+                android:textSize="20sp"
+                android:layout_marginBottom="16dp"
+                android:text="@string/creating_source_loading"/>
+            <ProgressBar
+                style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+                android:indeterminate="true"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
     </LinearLayout>
 
     <android.support.design.widget.FloatingActionButton

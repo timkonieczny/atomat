@@ -15,6 +15,7 @@ import android.view.ViewGroup;
 import android.webkit.URLUtil;
 import android.widget.EditText;
 import android.widget.GridView;
+import android.widget.LinearLayout;
 
 import java.util.regex.Pattern;
 
@@ -29,6 +30,7 @@ public class SourcesFragment extends Fragment implements FeedListener{
     private View fab;
     private EditText urlEditText;
     private TextInputLayout urlTextInputLayout;
+    private LinearLayout sourceInputLayout, sourceLoadingLayout;
 
     private SourcesAdapter sourcesAdapter;
 
@@ -70,6 +72,9 @@ public class SourcesFragment extends Fragment implements FeedListener{
 
         urlEditText = (EditText) view.findViewById(R.id.feed_url_edit_text);
         urlTextInputLayout = (TextInputLayout) view.findViewById(R.id.text_input_layout_url);
+        sourceInputLayout = (LinearLayout) view.findViewById(R.id.add_source_input_layout);
+        sourceLoadingLayout = (LinearLayout) view.findViewById(R.id.add_source_loading_layout);
+
         final FeedListener feedListener = this;
         view.findViewById(R.id.add_source_button).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -82,8 +87,11 @@ public class SourcesFragment extends Fragment implements FeedListener{
                     if (URLUtil.isValidUrl(url)) {
                         if(MainActivity.sources.containsRssUrl(url))
                             urlTextInputLayout.setError("This website is already in your sources");
-                        else
+                        else {
+                            sourceInputLayout.setVisibility(View.GONE);
+                            sourceLoadingLayout.setVisibility(View.VISIBLE);
                             new Feed(url, feedListener, getFragmentManager(), getContext(), getResources());
+                        }
                     } else urlTextInputLayout.setError("Enter an URL that points to an XML file");
                 }else urlTextInputLayout.setError("Enter a valid URL");
             }
@@ -124,6 +132,8 @@ public class SourcesFragment extends Fragment implements FeedListener{
 
             @Override
             public void onAnimationEnd(Animator animation) {
+                sourceLoadingLayout.setVisibility(View.GONE);
+                sourceInputLayout.setVisibility(View.VISIBLE);
                 urlEditText.setText("");
                 revealingView.setVisibility(View.GONE);
             }
@@ -143,7 +153,6 @@ public class SourcesFragment extends Fragment implements FeedListener{
     @Override
     public void onFeedUpdated(boolean hasNewArticles) {
         closeCircularReveal(view);
-//        sourcesAdapter.notifyDataSetChanged();
-        sourcesAdapter.notifyDataSetInvalidated();
+        sourcesAdapter.notifyDataSetChanged();
     }
 }
