@@ -27,7 +27,7 @@ public class SourcesFragment extends Fragment implements FeedListener{
     private Pattern xmlPattern = Pattern.compile("\\.xml\\Z");
 
     private View view;
-    private View fab;
+    private FloatingActionButton fab;
     private EditText urlEditText;
     private TextInputLayout urlTextInputLayout;
     private LinearLayout sourceInputLayout, sourceLoadingLayout;
@@ -57,16 +57,13 @@ public class SourcesFragment extends Fragment implements FeedListener{
         sourcesAdapter = new SourcesAdapter(getContext());
         gridView.setAdapter(sourcesAdapter);
 
-        fab = view.findViewById(R.id.add_source_fab);
+        fab = (FloatingActionButton) view.findViewById(R.id.add_source_fab);
 
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(isLayoutRevealed){
-                    closeCircularReveal(view);
-                }else {
-                    openCircularReveal(view);
-                }
+                openCircularReveal(view);
+                fab.hide();
             }
         });
 
@@ -74,6 +71,12 @@ public class SourcesFragment extends Fragment implements FeedListener{
         urlTextInputLayout = (TextInputLayout) view.findViewById(R.id.text_input_layout_url);
         sourceInputLayout = (LinearLayout) view.findViewById(R.id.add_source_input_layout);
         sourceLoadingLayout = (LinearLayout) view.findViewById(R.id.add_source_loading_layout);
+        view.findViewById(R.id.close_circular_reveal_button).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                closeCircularReveal(view);
+            }
+        });
 
         final FeedListener feedListener = this;
         view.findViewById(R.id.add_source_button).setOnClickListener(new View.OnClickListener() {
@@ -109,8 +112,8 @@ public class SourcesFragment extends Fragment implements FeedListener{
                 0,
                 (float) Math.hypot(view.getWidth(), view.getHeight()));
         revealingView.setVisibility(View.VISIBLE);
-        ((FloatingActionButton)fab).setImageDrawable(getActivity().getDrawable(R.drawable.ic_add_to_close));
-        ((AnimationDrawable)((FloatingActionButton)fab).getDrawable()).start();
+        fab.setImageDrawable(getActivity().getDrawable(R.drawable.ic_add_to_close));
+        ((AnimationDrawable)fab.getDrawable()).start();
         animator.start();
         isLayoutRevealed = !isLayoutRevealed;
     }
@@ -136,6 +139,7 @@ public class SourcesFragment extends Fragment implements FeedListener{
                 sourceInputLayout.setVisibility(View.VISIBLE);
                 urlEditText.setText("");
                 revealingView.setVisibility(View.GONE);
+                fab.show();
             }
 
             @Override
@@ -144,8 +148,8 @@ public class SourcesFragment extends Fragment implements FeedListener{
             @Override
             public void onAnimationRepeat(Animator animation) {}
         });
-        ((FloatingActionButton)fab).setImageDrawable(getActivity().getDrawable(R.drawable.ic_close_to_add));
-        ((AnimationDrawable)((FloatingActionButton)fab).getDrawable()).start();
+        fab.setImageDrawable(getActivity().getDrawable(R.drawable.ic_close_to_add));
+        ((AnimationDrawable)fab.getDrawable()).start();
         animator.start();
         isLayoutRevealed = !isLayoutRevealed;
     }

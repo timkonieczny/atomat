@@ -6,4 +6,5 @@
     <color name="colorHintDark">#B3B3B3</color>
     <color name="colorWhite">#FFFFFF</color>
     <color name="colorCircularReveal">@color/cardview_light_background</color>
+    <color name="colorBorderlessButton">#212121</color>
 </resources>
