@@ -22,7 +22,6 @@ import java.util.regex.Pattern;
 
 public class SourcesFragment extends Fragment implements FeedListener{
 
-    private boolean isLayoutRevealed = false;
     private Pattern httpPattern = Pattern.compile("\\Ahttp(s)?+://");
     private Pattern xmlPattern = Pattern.compile("\\.xml\\Z");
 
@@ -31,6 +30,7 @@ public class SourcesFragment extends Fragment implements FeedListener{
     private EditText urlEditText;
     private TextInputLayout urlTextInputLayout;
     private LinearLayout sourceInputLayout, sourceLoadingLayout;
+    private View revealingView;
 
     private SourcesAdapter sourcesAdapter;
 
@@ -71,6 +71,7 @@ public class SourcesFragment extends Fragment implements FeedListener{
         urlTextInputLayout = (TextInputLayout) view.findViewById(R.id.text_input_layout_url);
         sourceInputLayout = (LinearLayout) view.findViewById(R.id.add_source_input_layout);
         sourceLoadingLayout = (LinearLayout) view.findViewById(R.id.add_source_loading_layout);
+        revealingView = view.findViewById(R.id.fab_content);
         view.findViewById(R.id.close_circular_reveal_button).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -102,26 +103,23 @@ public class SourcesFragment extends Fragment implements FeedListener{
     }
 
     void openCircularReveal(View view){
-        View revealingView = view.findViewById(R.id.fab_content);
-
-        view.findViewById(R.id.feed_url_edit_text).requestFocus();
-        Animator animator = ViewAnimationUtils.createCircularReveal(
-                revealingView,
-                view.getRight(),
-                view.getBottom(),
-                0,
-                (float) Math.hypot(view.getWidth(), view.getHeight()));
-        revealingView.setVisibility(View.VISIBLE);
-        fab.setImageDrawable(getActivity().getDrawable(R.drawable.ic_add_to_close));
-        ((AnimationDrawable)fab.getDrawable()).start();
-        animator.start();
-        isLayoutRevealed = !isLayoutRevealed;
+        if(revealingView.getVisibility() == View.GONE){     // This avoids fab pressing during hide() animation
+            urlEditText.requestFocus();
+            Animator animator = ViewAnimationUtils.createCircularReveal(
+                    revealingView,
+                    view.getRight(),
+                    view.getBottom(),
+                    0,
+                    (float) Math.hypot(view.getWidth(), view.getHeight()));
+            revealingView.setVisibility(View.VISIBLE);
+            fab.setImageDrawable(getActivity().getDrawable(R.drawable.ic_add_to_close));
+            ((AnimationDrawable) fab.getDrawable()).start();
+            animator.start();
+        }
     }
 
     void closeCircularReveal(View view){
-        final View revealingView = view.findViewById(R.id.fab_content);
-
-        view.findViewById(R.id.feed_url_edit_text).clearFocus();
+        urlEditText.clearFocus();
         Animator animator = ViewAnimationUtils.createCircularReveal(
                 revealingView,
                 view.getRight(),
@@ -151,7 +149,6 @@ public class SourcesFragment extends Fragment implements FeedListener{
         fab.setImageDrawable(getActivity().getDrawable(R.drawable.ic_close_to_add));
         ((AnimationDrawable)fab.getDrawable()).start();
         animator.start();
-        isLayoutRevealed = !isLayoutRevealed;
     }
 
     @Override
