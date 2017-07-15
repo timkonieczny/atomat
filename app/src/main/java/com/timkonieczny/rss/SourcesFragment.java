@@ -2,6 +2,7 @@ package com.timkonieczny.rss;
 
 import android.animation.Animator;
 import android.app.Fragment;
+import android.content.Context;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -12,6 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.webkit.URLUtil;
 import android.widget.EditText;
 import android.widget.GridView;
@@ -120,6 +122,10 @@ public class SourcesFragment extends Fragment implements FeedListener{
 
     void closeCircularReveal(View view){
         urlEditText.clearFocus();
+
+        ((InputMethodManager)getActivity().getSystemService(Context.INPUT_METHOD_SERVICE))
+                .hideSoftInputFromWindow(urlEditText.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+
         Animator animator = ViewAnimationUtils.createCircularReveal(
                 revealingView,
                 view.getRight(),
