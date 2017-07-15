@@ -122,6 +122,7 @@ public class SourcesFragment extends Fragment implements FeedListener{
 
     void closeCircularReveal(View view){
         urlEditText.clearFocus();
+        urlTextInputLayout.setError(null);
 
         ((InputMethodManager)getActivity().getSystemService(Context.INPUT_METHOD_SERVICE))
                 .hideSoftInputFromWindow(urlEditText.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
