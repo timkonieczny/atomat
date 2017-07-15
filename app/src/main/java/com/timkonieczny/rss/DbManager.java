@@ -68,8 +68,9 @@ class DbManager extends SQLiteOpenHelper {
             if (!MainActivity.sources.containsRssUrl(url)) {    // only create source if it doesn't exist yet
                 MainActivity.sources.add(new Source(resources, context, url,
                         cursor.getString(cursor.getColumnIndexOrThrow(SourcesTable.COLUMN_NAME_TITLE)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(SourcesTable.COLUMN_NAME_LINK)),
                         cursor.getString(cursor.getColumnIndexOrThrow(SourcesTable.COLUMN_NAME_ICON)),
-                        cursor.getString(cursor.getColumnIndexOrThrow(SourcesTable.COLUMN_NAME_LINK))
+                        cursor.getString(cursor.getColumnIndexOrThrow(SourcesTable.COLUMN_NAME_ICON_FILE))
                 ));
             }
         }
@@ -98,7 +99,6 @@ class DbManager extends SQLiteOpenHelper {
         Log.d("DbManager",
                 SourcesTable._ID + " = " + cursor.getLong(cursor.getColumnIndexOrThrow(SourcesTable._ID)) + "\n" +
                         SourcesTable.COLUMN_NAME_ICON + " = " + cursor.getString(cursor.getColumnIndexOrThrow(SourcesTable.COLUMN_NAME_ICON)) + "\n" +
-                        SourcesTable.COLUMN_NAME_ICON + " = " + (cursor.getString(cursor.getColumnIndexOrThrow(SourcesTable.COLUMN_NAME_ICON))==null) + "\n" +
                         SourcesTable.COLUMN_NAME_ICON_FILE + " = " + cursor.getString(cursor.getColumnIndexOrThrow(SourcesTable.COLUMN_NAME_ICON_FILE)) + "\n" +
                         SourcesTable.COLUMN_NAME_LINK + " = " + cursor.getString(cursor.getColumnIndexOrThrow(SourcesTable.COLUMN_NAME_LINK)) + "\n" +
                         SourcesTable.COLUMN_NAME_TITLE + " = " + cursor.getString(cursor.getColumnIndexOrThrow(SourcesTable.COLUMN_NAME_TITLE)) + "\n" +

@@ -51,7 +51,7 @@ class UpdateIconImageTask extends AsyncTask<Source, Void, Source> {
     private void saveImageInInternalStorage(Source source) throws IOException {
         source.iconFileName = (source.title.replaceAll("[^a-zA-Z_0-9]", "")+System.currentTimeMillis()).toLowerCase()+".jpg";
         FileOutputStream fileOutputStream = context.openFileOutput(source.iconFileName, Context.MODE_PRIVATE);
-        source.iconBitmap.compress(Bitmap.CompressFormat.JPEG, 90, fileOutputStream);
+        source.iconBitmap.compress(Bitmap.CompressFormat.JPEG, 100, fileOutputStream);
         fileOutputStream.close();
     }
 }

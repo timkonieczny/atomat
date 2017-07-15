@@ -36,10 +36,11 @@ class Source {
         task = null;
     }
 
-    Source(Resources resources, Context context, String rssUrl, String title, String icon, /*String id,*/ String link/*, Date updated*/){
+    Source(Resources resources, Context context, String rssUrl, String title, String link, String icon, String iconFileName){
         this.title = title;
-        this.icon = icon;
         this.link = link;
+        this.icon = icon;
+        this.iconFileName = iconFileName;
         iconBitmap = null;
         iconDrawable = null;
         colorPalette = null;
