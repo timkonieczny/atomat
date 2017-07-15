@@ -10,15 +10,13 @@ import android.support.v7.graphics.Palette;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Date;
 
 class Source {
 
-    String title, icon, id, iconFileName, rssUrl, link;
+    String title, icon, iconFileName, rssUrl, link;
     Bitmap iconBitmap;
     Drawable iconDrawable;
     Palette colorPalette;
-    Date updated;
 
     private Resources resources;
     private Context context;
@@ -28,27 +26,23 @@ class Source {
     Source(Resources resources, Context context, String rssUrl){
         title = null;
         icon = null;
-        id = null;
         link = null;
         iconBitmap = null;
         iconDrawable = null;
         colorPalette = null;
-        updated = null;
         this.rssUrl = rssUrl;
         this.resources = resources;
         this.context = context;
         task = null;
     }
 
-    Source(Resources resources, Context context, String rssUrl, String title, String icon, String id, String link, Date updated){
+    Source(Resources resources, Context context, String rssUrl, String title, String icon, /*String id,*/ String link/*, Date updated*/){
         this.title = title;
         this.icon = icon;
-        this.id = id;
         this.link = link;
         iconBitmap = null;
         iconDrawable = null;
         colorPalette = null;
-        this.updated = updated;
         this.rssUrl = rssUrl;
         this.resources = resources;
         this.context = context;
@@ -86,12 +80,10 @@ class Source {
     public String toString(){
         return "Title:\t\t\t"+title+
             "\nIcon:\t\t\t\t"+icon+
-            "\nID:\t\t\t\t"+id+
             "\nLink:\t\t\t\t"+ link+
             "\nIcon Bitmap:\t\t"+(iconBitmap != null)+
             "\nIcon Drawable:\t"+(iconDrawable != null)+
             "\nIcon File Name:\t"+iconFileName+
-            "\nRSS URL:\t\t\t"+rssUrl+
-            "\nUpdated:\t\t\t"+((updated==null) ? "null" : updated.toString());
+            "\nRSS URL:\t\t\t"+rssUrl;
     }
 }

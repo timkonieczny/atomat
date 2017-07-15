@@ -21,7 +21,7 @@ class Feed extends AsyncTask<Void, Void, Boolean> implements DbOpenListener{
 
     private FeedListener feedListener;
 
-    private HashSet<String> existingIds;
+    private HashSet<String> existingLinks;
     private Comparator<Article> descending;
 
     private FragmentManager fragmentManager;
@@ -45,7 +45,7 @@ class Feed extends AsyncTask<Void, Void, Boolean> implements DbOpenListener{
             }
         };
 
-        existingIds = getExistingArticlesIds();
+        existingLinks = getExistingArticlesLinks();
 
         (new DbOpenTask(MainActivity.dbManager, this)).execute();
     }
@@ -65,7 +65,7 @@ class Feed extends AsyncTask<Void, Void, Boolean> implements DbOpenListener{
             }
         };
 
-        existingIds = getExistingArticlesIds();
+        existingLinks = getExistingArticlesLinks();
 
         (new DbOpenTask(MainActivity.dbManager, this)).execute();
     }
@@ -89,8 +89,7 @@ class Feed extends AsyncTask<Void, Void, Boolean> implements DbOpenListener{
         Article article;
         for(int i = 0; i < articles.size(); i++){
             article = articles.get(i);
-            article.uniqueId = article.source.id + "_" + article.id;
-            if(existingIds.contains(article.uniqueId)){
+            if(existingLinks.contains(article.link)){
                 articles.remove(i);
                 i--;
             }else{
@@ -132,11 +131,11 @@ class Feed extends AsyncTask<Void, Void, Boolean> implements DbOpenListener{
         if(feedListener!=null) feedListener.onFeedUpdated(hasNewArticles);
     }
 
-    private HashSet<String> getExistingArticlesIds(){
-        HashSet<String> ids = new HashSet<>();
+    private HashSet<String> getExistingArticlesLinks(){
+        HashSet<String> links = new HashSet<>();
         for(int i = 0; i < MainActivity.articles.size(); i++){
-            ids.add(MainActivity.articles.get(i).uniqueId);
+            links.add(MainActivity.articles.get(i).link);
         }
-        return ids;
+        return links;
     }
 }

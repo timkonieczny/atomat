@@ -5,15 +5,13 @@ import android.graphics.drawable.Drawable;
 import android.support.v7.graphics.Palette;
 import android.view.View;
 
-import java.net.URL;
 import java.util.Date;
 
 class Article {
 
     Date published;
-    String title, id, author, uniqueId, headerImage;
+    String title, author, headerImage, link;
     CharSequence content;
-    URL link;
     Bitmap headerImageBitmap = null;
     Palette colorPalette;
     Source source;
@@ -35,11 +33,8 @@ class Article {
     public String toString(){
         return "Title: " + title +
                 "\nAuthors: " + author +
-//                "\nContent: " + content +
                 "\nLink: " + link +
-                "\nID: " + id +
                 "\nheaderImage: " + headerImage +
-                "\nPublished: " + published.toString() +
-                "\nuniqueID: " + uniqueId;
+                "\nPublished: " + published.toString();
     }
 }

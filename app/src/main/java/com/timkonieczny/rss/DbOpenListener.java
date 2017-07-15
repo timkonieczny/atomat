@@ -1,6 +1,6 @@
 package com.timkonieczny.rss;
 
-public interface DbOpenListener {
+interface DbOpenListener {
 
-    public void onDbOpened();
+    void onDbOpened();
 }

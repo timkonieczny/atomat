@@ -14,7 +14,6 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -38,8 +37,6 @@ class SourceUpdater {
     private HashSet<String> feedTags;
     private HashSet<String> feedTitleTags;
     private HashSet<String> feedIconTags;
-    private HashSet<String> feedUpdatedTags;
-    private HashSet<String> feedIdTags;
     private HashSet<String> feedLinkTags;
 
     private HashSet<String> entryTags;
@@ -47,7 +44,6 @@ class SourceUpdater {
     private HashSet<String> entryTitleTags;
     private HashSet<String> entryContentTags;
     private HashSet<String> entryLinkTags;
-    private HashSet<String> entryIdTags;
     private HashSet<String> entryAuthorTags;
 
     List<Article> parse(InputStream in, Source source, boolean updateSource) throws XmlPullParserException, IOException {
@@ -73,7 +69,6 @@ class SourceUpdater {
                     return readFeed(parser);
                 }
             }
-//            return readFeed(parser);
             return null;
         } finally {
             in.close();
@@ -100,17 +95,6 @@ class SourceUpdater {
                         source.title = readTag(parser, name);
                     } else if (feedIconTags.contains(name)) {
                         source.icon = readTag(parser, name);
-                    } else if (feedUpdatedTags.contains(name)) {
-                        source.updated = null;
-                        ParsePosition parsePosition = new ParsePosition(0);
-                        int i = 0;
-                        String dateString = readTag(parser, name);
-                        while(source.updated == null && i < dateFormats.length){
-                            source.updated = dateFormats[i].parse(dateString, parsePosition);
-                            i++;
-                        }
-                    } else if (feedIdTags.contains(name)) {
-                        source.id = readTag(parser, name);
                     } else if (feedLinkTags.contains(name)) {
                         String linkUrl = parser.getAttributeValue(null, "href");
                         if(linkUrl!=null) {
@@ -126,11 +110,9 @@ class SourceUpdater {
                 }
             }
         }
-        if(source.id == null) source.id = source.link;
         for(int i = 0; i < articles.size(); i++){
             Article article = articles.get(i);
             article.source = source;
-            article.uniqueId = source.id + "_" + article.id;
         }
         return articles;
     }
@@ -177,14 +159,9 @@ class SourceUpdater {
                 content = stylePattern.matcher(content).replaceAll("");
                 article.content = Html.fromHtml(content, Html.FROM_HTML_MODE_COMPACT, null, figcaptionHandler);
             }else if(entryLinkTags.contains(name)){
-                String linkUrl = parser.getAttributeValue(null, "href");
-                if(linkUrl!=null) {
-                    article.link = new URL(linkUrl);
-                    parser.next();
-                }else
-                    article.link = new URL(readTag(parser, name));
-            }else if(entryIdTags.contains(name)){
-                article.id = readTag(parser, name);
+                article.link = parser.getAttributeValue(null, "href");
+                if(article.link!=null) parser.next();
+                else article.link = readTag(parser, name);
             }else if(entryAuthorTags.contains(name)){
                 article.author = readAuthors(parser);
             }else if(entryPublishedTags.contains(name)){
@@ -260,8 +237,6 @@ class SourceUpdater {
         feedTags = createHashSet("feed", "channel");
         feedTitleTags = createHashSet("title");
         feedIconTags = createHashSet("icon");                           // missing
-        feedUpdatedTags = createHashSet("updated", "lastBuildDate");
-        feedIdTags = createHashSet("id");                               // missing
         feedLinkTags = createHashSet("link");                           // different encoding
 
         entryTags = createHashSet("entry", "item");
@@ -269,7 +244,6 @@ class SourceUpdater {
         entryTitleTags = createHashSet("title");
         entryContentTags = createHashSet("content", "content:encoded"); // different encoding
         entryLinkTags = createHashSet("link");                          // different encoding
-        entryIdTags = createHashSet("id", "guid");
         entryAuthorTags = createHashSet("author", "dc:creator");        // different encoding
     }
 
