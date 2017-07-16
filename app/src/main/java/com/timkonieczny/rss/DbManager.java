@@ -50,13 +50,6 @@ class DbManager extends SQLiteOpenHelper {
                 SourcesTable.COLUMN_NAME_ICON +         " TEXT," +
                 SourcesTable.COLUMN_NAME_ICON_FILE +    " TEXT," +
                 SourcesTable.COLUMN_NAME_LINK +         " TEXT)");
-        Log.d("DbManager", "CREATE TABLE " + SourcesTable.TABLE_NAME + " (" +
-                SourcesTable._ID +                      " INTEGER PRIMARY KEY," +
-                SourcesTable.COLUMN_NAME_URL +          " TEXT," +
-                SourcesTable.COLUMN_NAME_TITLE +        " TEXT," +
-                SourcesTable.COLUMN_NAME_ICON +         " TEXT," +
-                SourcesTable.COLUMN_NAME_ICON_FILE +    " TEXT," +
-                SourcesTable.COLUMN_NAME_LINK +         " TEXT)");
 
         db.execSQL("CREATE TABLE " + ArticlesTable.TABLE_NAME + " (" +
                 ArticlesTable._ID +                             " INTEGER PRIMARY KEY," +
@@ -100,7 +93,6 @@ class DbManager extends SQLiteOpenHelper {
     }
 
     void saveSource(Source source){
-        Log.d("DbManager", "Saving source: "+source.title);
         getDb();
         ContentValues values = new ContentValues();
         values.put(SourcesTable.COLUMN_NAME_URL, source.rssUrl);
@@ -110,12 +102,11 @@ class DbManager extends SQLiteOpenHelper {
         db.insert(SourcesTable.TABLE_NAME, null, values);
     }
 
-    void saveSourceIcon(String iconFileName, String url){
+    void updateValue(String table, String column, String value, String whereColumn, String whereValue){
         getDb();
         ContentValues values = new ContentValues();
-        values.put(SourcesTable.COLUMN_NAME_ICON_FILE, iconFileName);
-        db.update(SourcesTable.TABLE_NAME, values,
-                SourcesTable.COLUMN_NAME_URL + "= ?", new String[]{url});
+        values.put(column, value);
+        db.update(table, values, whereColumn + "= ?", new String[]{whereValue});
     }
 
     private void printSource(Cursor cursor){
@@ -152,48 +143,26 @@ class DbManager extends SQLiteOpenHelper {
             values.put(ArticlesTable.COLUMN_NAME_PUBLISHED, articles.get(i).published.getTime());
             values.put(ArticlesTable.COLUMN_NAME_CONTENT, articles.get(i).content);
             values.put(ArticlesTable.COLUMN_NAME_HEADER_IMAGE, articles.get(i).headerImage);
-//            values.put(ArticlesTable.COLUMN_NAME_HEADER_IMAGE_FILE, null);
-//            values.put(ArticlesTable.COLUMN_NAME_INLINE_IMAGES, null);
-//            values.put(ArticlesTable.COLUMN_NAME_INLINE_IMAGES_FILES, null);
             db.insert(ArticlesTable.TABLE_NAME, null, values);
         }
     }
 
-    void saveInlineImageFile(String imageFileName, String link){
+    void appendString(String string, String link, String column){
         getDb();
 
-        Cursor cursor = db.query(ArticlesTable.TABLE_NAME, new String[]{ArticlesTable.COLUMN_NAME_INLINE_IMAGES_FILES},
+        Cursor cursor = db.query(ArticlesTable.TABLE_NAME, new String[]{column},
                 ArticlesTable.COLUMN_NAME_LINK+"= ?", new String[]{link}, null, null, null);
         cursor.moveToFirst();
-        String columnValue = cursor.getString(cursor.getColumnIndexOrThrow(ArticlesTable.COLUMN_NAME_INLINE_IMAGES_FILES));
+        String columnValue = cursor.getString(cursor.getColumnIndexOrThrow(column));
         cursor.close();
 
-        if(columnValue == null) columnValue = imageFileName;
-        else if(!columnValue.contains(imageFileName)) columnValue+=" "+imageFileName;
+        if(columnValue == null) columnValue = string;
+        else if(!columnValue.contains(string)) columnValue+=" "+string;
 
-        ContentValues values = new ContentValues();
-        values.put(ArticlesTable.COLUMN_NAME_INLINE_IMAGES_FILES, columnValue);
-        db.update(ArticlesTable.TABLE_NAME, values, ArticlesTable.COLUMN_NAME_LINK + "= ?", new String[]{link});
+        updateValue(ArticlesTable.TABLE_NAME, column, columnValue, ArticlesTable.COLUMN_NAME_LINK, link);
     }
 
-    void saveInlineImageUrl(String imageUrl, String link){
-        getDb();
-
-        Cursor cursor = db.query(ArticlesTable.TABLE_NAME, new String[]{ArticlesTable.COLUMN_NAME_INLINE_IMAGES},
-                ArticlesTable.COLUMN_NAME_LINK+"= ?", new String[]{link}, null, null, null);
-        cursor.moveToFirst();
-        String columnValue = cursor.getString(cursor.getColumnIndexOrThrow(ArticlesTable.COLUMN_NAME_INLINE_IMAGES));
-        cursor.close();
-
-        if(columnValue == null) columnValue = imageUrl;
-        else if(!columnValue.contains(imageUrl)) columnValue+=" "+imageUrl;
-
-        ContentValues values = new ContentValues();
-        values.put(ArticlesTable.COLUMN_NAME_INLINE_IMAGES, columnValue);
-        db.update(ArticlesTable.TABLE_NAME, values, ArticlesTable.COLUMN_NAME_LINK + "= ?", new String[]{link});
-    }
-
-    private class SourcesTable implements BaseColumns {
+    class SourcesTable implements BaseColumns {
         static final String TABLE_NAME = "sources";
         static final String COLUMN_NAME_URL = "url";
         static final String COLUMN_NAME_TITLE = "title";
@@ -202,7 +171,7 @@ class DbManager extends SQLiteOpenHelper {
         static final String COLUMN_NAME_LINK = "link";
     }
 
-    private class ArticlesTable implements BaseColumns {
+    class ArticlesTable implements BaseColumns {
         static final String TABLE_NAME = "articles";
         static final String COLUMN_NAME_LINK = "link";
         static final String COLUMN_NAME_SOURCE_ID = "source_url";

@@ -34,7 +34,10 @@ class UpdateIconImageTask extends AsyncTask<Source, Void, Source> {
 
             saveImageInInternalStorage(sources[0]);
 
-            MainActivity.dbManager.saveSourceIcon(sources[0].iconFileName, sources[0].rssUrl);
+            // save icon file name in db
+            MainActivity.dbManager.updateValue(DbManager.SourcesTable.TABLE_NAME,
+                    DbManager.SourcesTable.COLUMN_NAME_ICON_FILE, sources[0].iconFileName,
+                    DbManager.SourcesTable.COLUMN_NAME_URL, sources[0].rssUrl);
 
         } catch (IOException e) {
             e.printStackTrace();

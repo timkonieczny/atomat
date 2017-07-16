@@ -38,8 +38,10 @@ class UpdateImageTask extends AsyncTask<URL, Void, Drawable> {
             article.inlineImagesFileNames[imageSpanIndex] = (article.title.replaceAll("[^a-zA-Z_0-9]", "")+System.currentTimeMillis()).toLowerCase()+".jpg";
             saveImageInInternalStorage(image, article.inlineImagesFileNames[imageSpanIndex]);
 
-            MainActivity.dbManager.saveInlineImageUrl(article.inlineImages[imageSpanIndex], article.link);
-            MainActivity.dbManager.saveInlineImageFile(article.inlineImagesFileNames[imageSpanIndex], article.link);
+//            MainActivity.dbManager.saveInlineImageUrl(article.inlineImages[imageSpanIndex], article.link);
+//            MainActivity.dbManager.saveInlineImageFile(article.inlineImagesFileNames[imageSpanIndex], article.link);
+            MainActivity.dbManager.appendString(article.inlineImages[imageSpanIndex], article.link, DbManager.ArticlesTable.COLUMN_NAME_INLINE_IMAGES);
+            MainActivity.dbManager.appendString(article.inlineImagesFileNames[imageSpanIndex], article.link, DbManager.ArticlesTable.COLUMN_NAME_INLINE_IMAGES_FILES);
 
             return new BitmapDrawable(resources, image);
         } catch (IOException e) {
