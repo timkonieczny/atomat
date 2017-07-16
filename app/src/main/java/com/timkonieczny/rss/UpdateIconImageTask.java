@@ -15,13 +15,17 @@ import java.net.URL;
 
 class UpdateIconImageTask extends AsyncTask<Source, Void, Source> {
 
-    UpdateIconImageListener updateIconImageListener = null;
+//    UpdateIconImageListener updateIconImageListener = null;
     private Resources resources;
     private Context context;
+    private ImageListener imageListener;
+    private String fileName;
 
-    UpdateIconImageTask(Resources resources, Context context){
+    UpdateIconImageTask(Resources resources, Context context, ImageListener imageListener, String fileName){
         this.resources = resources;
         this.context = context;
+        this.imageListener = imageListener;
+        this.fileName = fileName;
     }
 
     @Override
@@ -32,8 +36,9 @@ class UpdateIconImageTask extends AsyncTask<Source, Void, Source> {
             sources[0].iconDrawable = new BitmapDrawable(resources, sources[0].iconBitmap);
             sources[0].colorPalette = (new Palette.Builder(sources[0].iconBitmap)).generate();
 
-            saveImageInInternalStorage(sources[0]);
+            saveImageInInternalStorage(sources[0].iconBitmap);
 
+            // TODO: create POJO image class. pass that class instead of source
             // save icon file name in db
             MainActivity.dbManager.updateValue(DbManager.SourcesTable.TABLE_NAME,
                     DbManager.SourcesTable.COLUMN_NAME_ICON_FILE, sources[0].iconFileName,
@@ -48,13 +53,12 @@ class UpdateIconImageTask extends AsyncTask<Source, Void, Source> {
     @Override
     protected void onPostExecute(Source source) {
         super.onPostExecute(source);
-        if(updateIconImageListener!=null) updateIconImageListener.onIconImageUpdated(source);
+        imageListener.onImageLoaded(0, null);
     }
 
-    private void saveImageInInternalStorage(Source source) throws IOException {
-        source.iconFileName = (source.title.replaceAll("[^a-zA-Z_0-9]", "")+System.currentTimeMillis()).toLowerCase()+".jpg";
-        FileOutputStream fileOutputStream = context.openFileOutput(source.iconFileName, Context.MODE_PRIVATE);
-        source.iconBitmap.compress(Bitmap.CompressFormat.JPEG, 100, fileOutputStream);
+    private void saveImageInInternalStorage(Bitmap bitmap) throws IOException {
+        FileOutputStream fileOutputStream = context.openFileOutput(fileName, Context.MODE_PRIVATE);
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fileOutputStream);
         fileOutputStream.close();
     }
 }

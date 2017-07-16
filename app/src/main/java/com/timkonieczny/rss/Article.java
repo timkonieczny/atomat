@@ -16,7 +16,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Date;
 
-class Article {
+class Article implements ImageListener{
 
     Date published;
     String title, author, headerImage, link, content;
@@ -27,6 +27,9 @@ class Article {
     Drawable[] inlineImagesDrawables;
     String[] inlineImages;
     String[] inlineImagesFileNames;
+    UpdateImageListener[] updateImageListeners;
+    UpdateImageListener updateImageListener;
+    UpdateHeaderImageListener updateHeaderImageListener;
 
     private UpdateHeaderImageTask task;
 
@@ -36,13 +39,14 @@ class Article {
     }
 
     void setUpdateHeaderImageListener(UpdateHeaderImageListener listener){
-        task.updateHeaderImageListener = listener;
+        updateHeaderImageListener = listener;
     }
 
     void getImageDrawables(UpdateImageListener listener, Resources resources, Context context){
+        updateImageListener = listener;
         for(int i = 0; i < inlineImages.length; i++){
             if(inlineImagesDrawables[i] != null){
-                Log.d("Article", "loading inline image from drawable");
+                Log.d("Article", "loading inli1ne image from drawable");
                 listener.onImageUpdated(inlineImagesDrawables[i], i);
             }else if(inlineImagesFileNames[i] != null){
                 Log.d("Article", "loading inline image from internal storage");
@@ -50,7 +54,8 @@ class Article {
             }else {
                 try {
                     Log.d("Article", "loading inline image from internet");
-                    UpdateImageTask updateImageTask = new UpdateImageTask(listener, i, resources, context, this);
+                    UpdateImageTask updateImageTask = new UpdateImageTask(this, i, resources, context, this);
+//                    UpdateImageTask updateImageTask = new UpdateImageTask(listener, i, resources, context, this);
                     updateImageTask.execute(new URL(inlineImages[i]));
                 } catch (MalformedURLException e) {
                     e.printStackTrace();
@@ -78,5 +83,11 @@ class Article {
                 "\nLink: " + link +
                 "\nheaderImage: " + headerImage +
                 "\nPublished: " + published.toString();
+    }
+
+    @Override
+    public void onImageLoaded(int index, Drawable drawable) {
+        if(index==-1) updateHeaderImageListener.onHeaderImageUpdated(this);
+        else updateImageListener.onImageUpdated(drawable, index);
     }
 }

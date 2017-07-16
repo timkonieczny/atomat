@@ -11,7 +11,7 @@ import android.support.v7.graphics.Palette;
 import java.io.FileInputStream;
 import java.io.IOException;
 
-class Source {
+class Source implements ImageListener{
 
     String title, icon, iconFileName, rssUrl, link;
     Bitmap iconBitmap;
@@ -22,6 +22,7 @@ class Source {
     private Context context;
 
     private UpdateIconImageTask task;
+    private UpdateIconImageListener updateIconImageListener;
 
     Source(Resources resources, Context context, String rssUrl){
         title = null;
@@ -57,10 +58,11 @@ class Source {
             return iconDrawable;
         }else if(icon != null){
             if(task == null){
-                task = new UpdateIconImageTask(resources, context);
+                iconFileName = (title.replaceAll("[^a-zA-Z_0-9]", "")+System.currentTimeMillis()).toLowerCase()+".jpg";
+                task = new UpdateIconImageTask(resources, context, this, iconFileName);
                 task.execute(this);
             }
-            task.updateIconImageListener = listener;
+            updateIconImageListener = listener;
         }
         return null;
     }
@@ -86,5 +88,10 @@ class Source {
             "\nIcon Drawable:\t"+(iconDrawable != null)+
             "\nIcon File Name:\t"+iconFileName+
             "\nRSS URL:\t\t\t"+rssUrl;
+    }
+
+    @Override
+    public void onImageLoaded(int index, Drawable drawable) {
+        updateIconImageListener.onIconImageUpdated(this);
     }
 }
