@@ -9,6 +9,8 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
 import android.util.Log;
 
+import java.util.List;
+
 class DbManager extends SQLiteOpenHelper {
 
     private static final String DB_NAME = "atomat.db";
@@ -21,7 +23,7 @@ class DbManager extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        createSourceTable(db);
+        createTables(db);
     }
 
     @Override
@@ -40,14 +42,34 @@ class DbManager extends SQLiteOpenHelper {
         if(db == null) db = getWritableDatabase();
     }
 
-    private void createSourceTable(SQLiteDatabase db){
+    private void createTables(SQLiteDatabase db){
         db.execSQL("CREATE TABLE " + SourcesTable.TABLE_NAME + " (" +
-                SourcesTable._ID + " INTEGER," +
-                SourcesTable.COLUMN_NAME_URL + " TEXT PRIMARY KEY," +
-                SourcesTable.COLUMN_NAME_TITLE + " TEXT," +
-                SourcesTable.COLUMN_NAME_ICON + " TEXT," +
-                SourcesTable.COLUMN_NAME_ICON_FILE + " TEXT," +
-                SourcesTable.COLUMN_NAME_LINK + " TEXT)");
+                SourcesTable._ID +                      " INTEGER PRIMARY KEY," +
+                SourcesTable.COLUMN_NAME_URL +          " TEXT," +
+                SourcesTable.COLUMN_NAME_TITLE +        " TEXT," +
+                SourcesTable.COLUMN_NAME_ICON +         " TEXT," +
+                SourcesTable.COLUMN_NAME_ICON_FILE +    " TEXT," +
+                SourcesTable.COLUMN_NAME_LINK +         " TEXT)");
+        Log.d("DbManager", "CREATE TABLE " + SourcesTable.TABLE_NAME + " (" +
+                SourcesTable._ID +                      " INTEGER PRIMARY KEY," +
+                SourcesTable.COLUMN_NAME_URL +          " TEXT," +
+                SourcesTable.COLUMN_NAME_TITLE +        " TEXT," +
+                SourcesTable.COLUMN_NAME_ICON +         " TEXT," +
+                SourcesTable.COLUMN_NAME_ICON_FILE +    " TEXT," +
+                SourcesTable.COLUMN_NAME_LINK +         " TEXT)");
+
+        db.execSQL("CREATE TABLE " + ArticlesTable.TABLE_NAME + " (" +
+                ArticlesTable._ID +                             " INTEGER PRIMARY KEY," +
+                ArticlesTable.COLUMN_NAME_LINK +                " TEXT," +
+                ArticlesTable.COLUMN_NAME_SOURCE_ID +           " INTEGER," +
+                ArticlesTable.COLUMN_NAME_TITLE +               " TEXT," +
+                ArticlesTable.COLUMN_NAME_AUTHOR +              " TEXT," +
+                ArticlesTable.COLUMN_NAME_PUBLISHED +           " INTEGER," +
+                ArticlesTable.COLUMN_NAME_CONTENT +             " TEXT," +
+                ArticlesTable.COLUMN_NAME_HEADER_IMAGE +        " TEXT," +
+                ArticlesTable.COLUMN_NAME_HEADER_IMAGE_FILE +   " TEXT," +
+                ArticlesTable.COLUMN_NAME_INLINE_IMAGES +       " TEXT," +
+                ArticlesTable.COLUMN_NAME_INLINE_IMAGES_FILES + " TEXT)");
     }
 
     void loadSources(Resources resources, Context context){
@@ -78,6 +100,7 @@ class DbManager extends SQLiteOpenHelper {
     }
 
     void saveSource(Source source){
+        Log.d("DbManager", "Saving source: "+source.title);
         getDb();
         ContentValues values = new ContentValues();
         values.put(SourcesTable.COLUMN_NAME_URL, source.rssUrl);
@@ -106,6 +129,70 @@ class DbManager extends SQLiteOpenHelper {
         );
     }
 
+    //    TODO: save header image file
+
+    void saveArticles(List<Article> articles){
+        getDb();
+        for(int i = 0; i < articles.size(); i++) {
+            
+            Cursor cursor = db.query(
+                    SourcesTable.TABLE_NAME,
+                    new String[]{SourcesTable._ID},
+                    SourcesTable.COLUMN_NAME_URL+"=?",
+                    new String[]{articles.get(i).source.rssUrl},
+                    null, null, null, null);
+            cursor.moveToFirst();
+            long sourceId = cursor.getLong(cursor.getColumnIndexOrThrow(SourcesTable._ID));
+            cursor.close();
+            ContentValues values = new ContentValues();
+            values.put(ArticlesTable.COLUMN_NAME_LINK, articles.get(i).link);
+            values.put(ArticlesTable.COLUMN_NAME_SOURCE_ID, sourceId);
+            values.put(ArticlesTable.COLUMN_NAME_TITLE, articles.get(i).title);
+            values.put(ArticlesTable.COLUMN_NAME_AUTHOR, articles.get(i).author);
+            values.put(ArticlesTable.COLUMN_NAME_PUBLISHED, articles.get(i).published.getTime());
+            values.put(ArticlesTable.COLUMN_NAME_CONTENT, articles.get(i).content);
+            values.put(ArticlesTable.COLUMN_NAME_HEADER_IMAGE, articles.get(i).headerImage);
+//            values.put(ArticlesTable.COLUMN_NAME_HEADER_IMAGE_FILE, null);
+//            values.put(ArticlesTable.COLUMN_NAME_INLINE_IMAGES, null);
+//            values.put(ArticlesTable.COLUMN_NAME_INLINE_IMAGES_FILES, null);
+            db.insert(ArticlesTable.TABLE_NAME, null, values);
+        }
+    }
+
+    void saveInlineImageFile(String imageFileName, String link){
+        getDb();
+
+        Cursor cursor = db.query(ArticlesTable.TABLE_NAME, new String[]{ArticlesTable.COLUMN_NAME_INLINE_IMAGES_FILES},
+                ArticlesTable.COLUMN_NAME_LINK+"= ?", new String[]{link}, null, null, null);
+        cursor.moveToFirst();
+        String columnValue = cursor.getString(cursor.getColumnIndexOrThrow(ArticlesTable.COLUMN_NAME_INLINE_IMAGES_FILES));
+        cursor.close();
+
+        if(columnValue == null) columnValue = imageFileName;
+        else if(!columnValue.contains(imageFileName)) columnValue+=" "+imageFileName;
+
+        ContentValues values = new ContentValues();
+        values.put(ArticlesTable.COLUMN_NAME_INLINE_IMAGES_FILES, columnValue);
+        db.update(ArticlesTable.TABLE_NAME, values, ArticlesTable.COLUMN_NAME_LINK + "= ?", new String[]{link});
+    }
+
+    void saveInlineImageUrl(String imageUrl, String link){
+        getDb();
+
+        Cursor cursor = db.query(ArticlesTable.TABLE_NAME, new String[]{ArticlesTable.COLUMN_NAME_INLINE_IMAGES},
+                ArticlesTable.COLUMN_NAME_LINK+"= ?", new String[]{link}, null, null, null);
+        cursor.moveToFirst();
+        String columnValue = cursor.getString(cursor.getColumnIndexOrThrow(ArticlesTable.COLUMN_NAME_INLINE_IMAGES));
+        cursor.close();
+
+        if(columnValue == null) columnValue = imageUrl;
+        else if(!columnValue.contains(imageUrl)) columnValue+=" "+imageUrl;
+
+        ContentValues values = new ContentValues();
+        values.put(ArticlesTable.COLUMN_NAME_INLINE_IMAGES, columnValue);
+        db.update(ArticlesTable.TABLE_NAME, values, ArticlesTable.COLUMN_NAME_LINK + "= ?", new String[]{link});
+    }
+
     private class SourcesTable implements BaseColumns {
         static final String TABLE_NAME = "sources";
         static final String COLUMN_NAME_URL = "url";
@@ -113,5 +200,19 @@ class DbManager extends SQLiteOpenHelper {
         static final String COLUMN_NAME_ICON = "icon";
         static final String COLUMN_NAME_ICON_FILE = "icon_file";
         static final String COLUMN_NAME_LINK = "link";
+    }
+
+    private class ArticlesTable implements BaseColumns {
+        static final String TABLE_NAME = "articles";
+        static final String COLUMN_NAME_LINK = "link";
+        static final String COLUMN_NAME_SOURCE_ID = "source_url";
+        static final String COLUMN_NAME_TITLE = "title";
+        static final String COLUMN_NAME_AUTHOR = "author";
+        static final String COLUMN_NAME_PUBLISHED = "published";
+        static final String COLUMN_NAME_CONTENT = "content";
+        static final String COLUMN_NAME_HEADER_IMAGE = "header_image";
+        static final String COLUMN_NAME_HEADER_IMAGE_FILE = "header_image_file";
+        static final String COLUMN_NAME_INLINE_IMAGES = "inline_images";
+        static final String COLUMN_NAME_INLINE_IMAGES_FILES = "inline_images_files";
     }
 }

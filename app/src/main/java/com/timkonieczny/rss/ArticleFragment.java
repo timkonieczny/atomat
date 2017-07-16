@@ -2,6 +2,7 @@ package com.timkonieczny.rss;
 
 import android.app.Fragment;
 import android.content.ComponentName;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -13,10 +14,15 @@ import android.support.customtabs.CustomTabsService;
 import android.support.customtabs.CustomTabsServiceConnection;
 import android.support.customtabs.CustomTabsSession;
 import android.support.v7.app.ActionBar;
+import android.text.Editable;
+import android.text.Html;
+import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
+import android.text.style.ForegroundColorSpan;
 import android.text.style.ImageSpan;
+import android.text.style.RelativeSizeSpan;
 import android.text.style.URLSpan;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,8 +31,8 @@ import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import java.net.MalformedURLException;
-import java.net.URL;
+import org.xml.sax.XMLReader;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,7 +55,6 @@ public class ArticleFragment extends Fragment implements UpdateHeaderImageListen
     private CustomTabsIntent.Builder builder;
     private ImageSpan[] images;
     private TextView contentTextView;
-    private int contentTextViewWidth;
     private SpannableStringBuilder spannableStringBuilder;
     private Article article;
 
@@ -69,12 +74,10 @@ public class ArticleFragment extends Fragment implements UpdateHeaderImageListen
     @Override
     public void onViewCreated(final View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
-        view.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+        if(MainActivity.viewWidth == 0) view.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             public void onGlobalLayout() {
                 view.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-
-                contentTextViewWidth = view.getWidth()-contentTextView.getPaddingLeft()-contentTextView.getPaddingRight();
+                MainActivity.viewWidth = view.getWidth();
             }
         });
 
@@ -96,9 +99,25 @@ public class ArticleFragment extends Fragment implements UpdateHeaderImageListen
         sourceTitle.setText(article.source.title);
 
         contentTextView = (TextView)view.findViewById(R.id.article_content);
-        spannableStringBuilder = new SpannableStringBuilder(article.content);
+        Html.TagHandler figcaptionHandler = new Html.TagHandler() {
+            int startPosition, endPosition;
+            @Override
+            public void handleTag(boolean opening, String tagName, Editable editable, XMLReader xmlReader) {
+                if(tagName.equalsIgnoreCase("figcaption")){
+                    if(opening) startPosition = editable.length();
+                    else{
+                        endPosition = editable.length();    // 13sp = caption font size; 15sp = body font size
+                        editable.setSpan(new RelativeSizeSpan(13.0f/15), startPosition, endPosition, Spannable.SPAN_MARK_MARK);
+                        editable.setSpan(new ForegroundColorSpan(Color.parseColor("#616161")), startPosition, endPosition, Spannable.SPAN_MARK_MARK);
+                    }
+                }
+            }
+        };
+        CharSequence content = Html.fromHtml(article.content, Html.FROM_HTML_MODE_COMPACT, null, figcaptionHandler);
 
-        URLSpan[] links = spannableStringBuilder.getSpans(0, article.content.length(), URLSpan.class);
+        spannableStringBuilder = new SpannableStringBuilder(content);
+
+        URLSpan[] links = spannableStringBuilder.getSpans(0, content.length(), URLSpan.class);
         likelyUrls = new ArrayList<>(links.length-1);
         mostLikelyUrl = null;
         for(int i = 0; i < links.length; i++) {
@@ -146,16 +165,17 @@ public class ArticleFragment extends Fragment implements UpdateHeaderImageListen
         contentTextView.setText(spannableStringBuilder);
         contentTextView.setMovementMethod(LinkMovementMethod.getInstance());
 
-        images = spannableStringBuilder.getSpans(0, article.content.length(), ImageSpan.class);
-        article.inlineImages = new Drawable[images.length];
-        for(int i = 0; i < images.length; i++) {
-            try {
-                UpdateImageTask updateImageTask = new UpdateImageTask(this, i, getResources());
-                updateImageTask.execute(new URL(images[i].getSource()));
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
+        images = spannableStringBuilder.getSpans(0, content.length(), ImageSpan.class);
+        if(article.inlineImagesDrawables == null) article.inlineImagesDrawables = new Drawable[images.length];
+        if(article.inlineImagesFileNames == null) article.inlineImagesFileNames = new String[images.length];
+        if(article.inlineImages == null) {
+            article.inlineImages = new String[images.length];
+            for (int i = 0; i < images.length; i++) {
+                article.inlineImages[i] = images[i].getSource();
             }
         }
+
+        article.getImageDrawables(this, getResources(), getContext());
 
         // TODO: Handle non-image media
 
@@ -177,15 +197,14 @@ public class ArticleFragment extends Fragment implements UpdateHeaderImageListen
 
     @Override
     public void onImageUpdated(Drawable image, int imageSpanIndex) {
-        article.inlineImages[imageSpanIndex] = image;   // TODO: save / load images in external storage
-        article.inlineImages[imageSpanIndex].setBounds(
-                0,
-                0,
-                contentTextViewWidth,
-                (article.inlineImages[imageSpanIndex].getMinimumHeight() * contentTextViewWidth) / article.inlineImages[imageSpanIndex].getMinimumWidth()
-        );
+        article.inlineImagesDrawables[imageSpanIndex] = image;
+        int imageWidth = MainActivity.viewWidth-contentTextView.getPaddingLeft()-contentTextView.getPaddingRight();
+        int imageHeight = (article.inlineImagesDrawables[imageSpanIndex].getMinimumHeight() *
+                (MainActivity.viewWidth-contentTextView.getPaddingLeft()-contentTextView.getPaddingRight())) /
+                article.inlineImagesDrawables[imageSpanIndex].getMinimumWidth();
+        article.inlineImagesDrawables[imageSpanIndex].setBounds(0, 0, imageWidth, imageHeight);
         spannableStringBuilder.setSpan(
-                new ImageSpan(article.inlineImages[imageSpanIndex]),
+                new ImageSpan(article.inlineImagesDrawables[imageSpanIndex]),
                 spannableStringBuilder.getSpanStart(images[imageSpanIndex]),
                 spannableStringBuilder.getSpanEnd(images[imageSpanIndex]),
                 spannableStringBuilder.getSpanFlags(images[imageSpanIndex]));

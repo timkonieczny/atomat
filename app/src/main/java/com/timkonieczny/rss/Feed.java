@@ -98,6 +98,7 @@ class Feed extends AsyncTask<Void, Void, Boolean> implements DbOpenListener{
             }
         }
 
+        MainActivity.dbManager.saveArticles(articles);
         MainActivity.articles.addAll(articles);
         Collections.sort(MainActivity.articles, descending);
 

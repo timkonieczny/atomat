@@ -33,6 +33,7 @@ public class MainActivity extends AppCompatActivity
     private SourcesFragment sourcesFragment = null;
     private SettingsFragment settingsFragment = null;
 
+    protected static int viewWidth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
