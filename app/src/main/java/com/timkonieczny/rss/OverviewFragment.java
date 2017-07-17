@@ -16,7 +16,7 @@ import java.util.Comparator;
 
 public class OverviewFragment
         extends Fragment
-        implements FeedListener, UpdateHeaderImageListener, UpdateIconImageListener,
+        implements FeedListener, SourceChangedListener,
         SwipeRefreshLayout.OnRefreshListener{
 
     FeedAdapter feedAdapter;
@@ -79,28 +79,21 @@ public class OverviewFragment
     }
 
     @Override
-    public void onIconImageUpdated(Source source) {
-        feedAdapter.notifyDataSetChanged();     // This is fine since icon only needs to be loaded once.
+    public void onSourceChanged(Source source) {    // updating the whole data set is fine since
+        feedAdapter.notifyDataSetChanged();         // icon only needs to be loaded once
     }
 
     @Override
-    public void onHeaderImageUpdated(Article article) {
-
-    }
-
-    @Override
-    public void onFeedUpdated(boolean hasNewArticles) { // TODO: Save article header and content in storage
+    public void onFeedUpdated(boolean hasNewArticles) {
         isInitialRefreshDone = true;
-        if(hasNewArticles)
-            feedAdapter.notifyDataSetChanged();
-        else
-            noUpdatesSnackbar.show();
+        if(hasNewArticles) feedAdapter.notifyDataSetChanged();
+        else noUpdatesSnackbar.show();
 
         swipeRefreshLayout.setRefreshing(false);
     }
 
     public void updateFeed(){
         // TODO: The Verge: Feed only contains article previews. But ID is also a feed URL containing full articles.
-        new Feed(this, getFragmentManager(), getContext(), getResources());
+        new Feed(getContext(), getResources(), this, getFragmentManager());
     }
 }

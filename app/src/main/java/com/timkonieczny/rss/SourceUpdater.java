@@ -1,5 +1,7 @@
 package com.timkonieczny.rss;
 
+import android.content.Context;
+import android.content.res.Resources;
 import android.util.Xml;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -26,6 +28,8 @@ class SourceUpdater {
     private Pattern imgWithWhitespacePattern, imgPattern, stylePattern;
     protected Source source;
     private boolean updateSource;
+    private Context context;
+    private Resources resources;
 
     private HashSet<String> feedTags;
     private HashSet<String> feedTitleTags;
@@ -39,33 +43,35 @@ class SourceUpdater {
     private HashSet<String> entryLinkTags;
     private HashSet<String> entryAuthorTags;
 
-    List<Article> parse(InputStream in, Source source, boolean updateSource) throws XmlPullParserException, IOException {
-        try {
-            this.updateSource = updateSource;
-            this.source = source;
+    SourceUpdater(Context context, Resources resources){
+        this.context = context;
+        this.resources = resources;
+    }
 
-            initializeTagDictionaries();
+    List<Article> parse(InputStream inputStream, Source source, boolean updateSource)
+            throws XmlPullParserException, IOException {
 
-            imgWithWhitespacePattern = Pattern.compile("\\A\\s*<img(.*?)/>\\s*");  // <imgPattern ... /> at beginning of input, including trailing whitespaces
-            imgPattern = Pattern.compile("<img(?:.*?)src=\"(.*?)\"(?:.*?)/>"); // src attribute of <imgPattern ... />
-            stylePattern = Pattern.compile("<style>(?:.*?)</style>"); // src attribute of <imgPattern ... />
+        this.updateSource = updateSource;
+        this.source = source;
+        initializeTagDictionaries();
+        imgWithWhitespacePattern = Pattern.compile("\\A\\s*<img(.*?)/>\\s*");  // <imgPattern ... /> at beginning of input, including trailing whitespaces
+        imgPattern = Pattern.compile("<img(?:.*?)src=\"(.*?)\"(?:.*?)/>"); // src attribute of <imgPattern ... />
+        stylePattern = Pattern.compile("<style>(?:.*?)</style>"); // src attribute of <imgPattern ... />
+        XmlPullParser parser = Xml.newPullParser();
+        parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
+        parser.setInput(inputStream, null);
 
-            XmlPullParser parser = Xml.newPullParser();
-            parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
-            parser.setInput(in, null);
-
-            while (parser.next() != XmlPullParser.END_TAG) {
-                if (parser.getEventType() != XmlPullParser.START_TAG) {
-                    continue;
-                }
-                if(feedTags.contains(parser.getName())){
-                    return readFeed(parser);
-                }
+        while (parser.next() != XmlPullParser.END_TAG) {
+            if (parser.getEventType() != XmlPullParser.START_TAG) {
+                continue;
             }
-            return null;
-        } finally {
-            in.close();
+            if(feedTags.contains(parser.getName())){
+                return readFeed(parser);
+            }
         }
+
+        inputStream.close();
+        return null;
     }
 
     private List<Article> readFeed(XmlPullParser parser) throws XmlPullParserException, IOException {
@@ -87,7 +93,7 @@ class SourceUpdater {
                     if (feedTitleTags.contains(name)) {
                         source.title = readTag(parser, name);
                     } else if (feedIconTags.contains(name)) {
-                        source.icon = readTag(parser, name);
+                        source.icon.url = readTag(parser, name);
                     } else if (feedLinkTags.contains(name)) {
                         String linkUrl = parser.getAttributeValue(null, "href");
                         if(linkUrl!=null) {
@@ -114,7 +120,7 @@ class SourceUpdater {
     // off  to their respective methods for processing. Otherwise, skips the tag.
     private Article readEntry(XmlPullParser parser) throws XmlPullParserException, IOException {
 
-        Article article = new Article();
+        Article article = new Article(context, resources);
 
         parser.require(XmlPullParser.START_TAG, null, parser.getName());
         while (parser.next() != XmlPullParser.END_TAG) {
@@ -128,7 +134,7 @@ class SourceUpdater {
             }else if(entryContentTags.contains(name)){
                 article.content = readTag(parser, name);
                 Matcher matcher = imgPattern.matcher(article.content);
-                if (matcher.find()) article.headerImage = matcher.group(1);
+                if (matcher.find()) article.header.url = matcher.group(1);
                 String content = imgWithWhitespacePattern.matcher(article.content).replaceFirst("");
                 content = stylePattern.matcher(content).replaceAll("");
                 article.content = content;

@@ -3,7 +3,6 @@ package com.timkonieczny.rss;
 import android.app.Fragment;
 import android.content.ComponentName;
 import android.graphics.Color;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -40,7 +39,7 @@ import java.util.List;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class ArticleFragment extends Fragment implements UpdateHeaderImageListener, UpdateIconImageListener, UpdateImageListener{
+public class ArticleFragment extends Fragment implements ArticleChangedListener, SourceChangedListener/*, ImageListener*/{
 
     private Bundle arguments;
 
@@ -58,9 +57,7 @@ public class ArticleFragment extends Fragment implements UpdateHeaderImageListen
     private SpannableStringBuilder spannableStringBuilder;
     private Article article;
 
-    public ArticleFragment() {
-        // Required empty public constructor
-    }
+    public ArticleFragment() {}
 
 
     @Override
@@ -99,6 +96,7 @@ public class ArticleFragment extends Fragment implements UpdateHeaderImageListen
         sourceTitle.setText(article.source.title);
 
         contentTextView = (TextView)view.findViewById(R.id.article_content);
+
         Html.TagHandler figcaptionHandler = new Html.TagHandler() {
             int startPosition, endPosition;
             @Override
@@ -166,49 +164,52 @@ public class ArticleFragment extends Fragment implements UpdateHeaderImageListen
         contentTextView.setMovementMethod(LinkMovementMethod.getInstance());
 
         images = spannableStringBuilder.getSpans(0, content.length(), ImageSpan.class);
-        if(article.inlineImagesDrawables == null) article.inlineImagesDrawables = new Drawable[images.length];
-        if(article.inlineImagesFileNames == null) article.inlineImagesFileNames = new String[images.length];
-        if(article.inlineImages == null) {
-            article.inlineImages = new String[images.length];
-            for (int i = 0; i < images.length; i++) {
-                article.inlineImages[i] = images[i].getSource();
+
+
+        if(article.inlineImages == null){
+            article.inlineImages = new Image[images.length];
+            for(int i = 0; i < article.inlineImages.length; i++){
+                article.inlineImages[i] = new Image();
+                article.inlineImages[i].url = images[i].getSource();
             }
         }
 
-        article.getImageDrawables(this, getResources(), getContext());
+        for(int i = 0; i < article.inlineImages.length; i++){
+            if(article.getImage(this, i) != null){
+                setInlineImage(i);
+            }
+        }
 
         // TODO: Handle non-image media
 
-        if(article.headerImageBitmap!=null) headerImage.setImageBitmap(article.headerImageBitmap);
-        else if(article.headerImage!=null) article.setUpdateHeaderImageListener(this);
+        headerImage.setImageDrawable(article.getImage(this, Article.HEADER));
 
         sourceTitle.setCompoundDrawablesWithIntrinsicBounds(article.source.getIconDrawable(this), null, null, null);
     }
 
     @Override
-    public void onIconImageUpdated(Source source) {
-        sourceTitle.setCompoundDrawablesWithIntrinsicBounds(source.iconDrawable, null, null, null);
+    public void onSourceChanged(Source source) {
+        sourceTitle.setCompoundDrawablesWithIntrinsicBounds(source.icon.drawable, null, null, null);
     }
 
     @Override
-    public void onHeaderImageUpdated(Article article) {
-        headerImage.setImageBitmap(article.headerImageBitmap);
+    public void onArticleChanged(Article article, int flag) {
+        if(flag == Article.HEADER) headerImage.setImageDrawable(article.header.drawable);
+        else setInlineImage(flag);
     }
 
-    @Override
-    public void onImageUpdated(Drawable image, int imageSpanIndex) {
-        article.inlineImagesDrawables[imageSpanIndex] = image;
+    private void setInlineImage(int index){
         int imageWidth = MainActivity.viewWidth-contentTextView.getPaddingLeft()-contentTextView.getPaddingRight();
-        int imageHeight = (article.inlineImagesDrawables[imageSpanIndex].getMinimumHeight() *
+        int imageHeight = (article.inlineImages[index].drawable.getMinimumHeight() *
                 (MainActivity.viewWidth-contentTextView.getPaddingLeft()-contentTextView.getPaddingRight())) /
-                article.inlineImagesDrawables[imageSpanIndex].getMinimumWidth();
-        article.inlineImagesDrawables[imageSpanIndex].setBounds(0, 0, imageWidth, imageHeight);
+                article.inlineImages[index].drawable.getMinimumWidth();
+        article.inlineImages[index].drawable.setBounds(0, 0, imageWidth, imageHeight);
         spannableStringBuilder.setSpan(
-                new ImageSpan(article.inlineImagesDrawables[imageSpanIndex]),
-                spannableStringBuilder.getSpanStart(images[imageSpanIndex]),
-                spannableStringBuilder.getSpanEnd(images[imageSpanIndex]),
-                spannableStringBuilder.getSpanFlags(images[imageSpanIndex]));
-        spannableStringBuilder.removeSpan(images[imageSpanIndex]);
+                new ImageSpan(article.inlineImages[index].drawable),
+                spannableStringBuilder.getSpanStart(images[index]),
+                spannableStringBuilder.getSpanEnd(images[index]),
+                spannableStringBuilder.getSpanFlags(images[index]));
+        spannableStringBuilder.removeSpan(images[index]);
         contentTextView.setText(spannableStringBuilder);
     }
 }

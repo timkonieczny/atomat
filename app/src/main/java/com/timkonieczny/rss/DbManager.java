@@ -65,7 +65,7 @@ class DbManager extends SQLiteOpenHelper {
                 ArticlesTable.COLUMN_NAME_INLINE_IMAGES_FILES + " TEXT)");
     }
 
-    void loadSources(Resources resources, Context context){
+    void loadSources(Resources resources, Context context){     // TODO: loadArticles
         getDb();
         // Get sources from Db
         String[] projection = {
@@ -77,11 +77,10 @@ class DbManager extends SQLiteOpenHelper {
 
         // Convert sources to Source objects
         while (cursor.moveToNext()) {
-            printSource(cursor);
             String url = cursor.getString(cursor.getColumnIndexOrThrow(SourcesTable.COLUMN_NAME_URL));
 
             if (!MainActivity.sources.containsRssUrl(url)) {    // only create source if it doesn't exist yet
-                MainActivity.sources.add(new Source(resources, context, url,
+                MainActivity.sources.add(new Source(context, resources, url,
                         cursor.getString(cursor.getColumnIndexOrThrow(SourcesTable.COLUMN_NAME_TITLE)),
                         cursor.getString(cursor.getColumnIndexOrThrow(SourcesTable.COLUMN_NAME_LINK)),
                         cursor.getString(cursor.getColumnIndexOrThrow(SourcesTable.COLUMN_NAME_ICON)),
@@ -97,7 +96,7 @@ class DbManager extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
         values.put(SourcesTable.COLUMN_NAME_URL, source.rssUrl);
         values.put(SourcesTable.COLUMN_NAME_TITLE, source.title);
-        if(source.icon!=null) values.put(SourcesTable.COLUMN_NAME_ICON, source.icon);
+        if(source.icon.url!=null) values.put(SourcesTable.COLUMN_NAME_ICON, source.icon.url);
         values.put(SourcesTable.COLUMN_NAME_LINK, source.link);
         db.insert(SourcesTable.TABLE_NAME, null, values);
     }
@@ -120,8 +119,6 @@ class DbManager extends SQLiteOpenHelper {
         );
     }
 
-    //    TODO: save header image file
-
     void saveArticles(List<Article> articles){
         getDb();
         for(int i = 0; i < articles.size(); i++) {
@@ -142,7 +139,7 @@ class DbManager extends SQLiteOpenHelper {
             values.put(ArticlesTable.COLUMN_NAME_AUTHOR, articles.get(i).author);
             values.put(ArticlesTable.COLUMN_NAME_PUBLISHED, articles.get(i).published.getTime());
             values.put(ArticlesTable.COLUMN_NAME_CONTENT, articles.get(i).content);
-            values.put(ArticlesTable.COLUMN_NAME_HEADER_IMAGE, articles.get(i).headerImage);
+            values.put(ArticlesTable.COLUMN_NAME_HEADER_IMAGE, articles.get(i).header.url);
             db.insert(ArticlesTable.TABLE_NAME, null, values);
         }
     }

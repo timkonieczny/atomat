@@ -9,9 +9,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ArticleCardViewHolder> implements UpdateHeaderImageListener, UpdateIconImageListener{
-
-    FeedAdapter(){}
+class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ArticleCardViewHolder>
+        implements ArticleChangedListener, SourceChangedListener {
 
     @Override
     public ArticleCardViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -29,12 +28,10 @@ class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ArticleCardViewHolder
         holder.sourceTitle.setCompoundDrawablesWithIntrinsicBounds(article.source.getIconDrawable(this), null, null, null);
         holder.articleTitle.setText(article.title);
         holder.articleAuthor.setText(article.author);
+        holder.articleHeader.setImageDrawable(article.getImage(this, Article.HEADER));
 
-        if(article.headerImageBitmap!=null) holder.articleHeader.setImageBitmap(article.headerImageBitmap);
-        else if(article.headerImage!=null) article.setUpdateHeaderImageListener(this);
-
-        if(article.colorPalette!=null) {
-            int color = article.colorPalette.getDarkVibrantColor(Color.DKGRAY);
+        if(article.header.palette!=null) {
+            int color = article.header.palette.getDarkVibrantColor(Color.DKGRAY);
             holder.articleHeader.setColorFilter(Color.argb(128, Color.red(color), Color.green(color), Color.blue(color)));
         }
     }
@@ -45,7 +42,7 @@ class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ArticleCardViewHolder
     }
 
     @Override
-    public void onHeaderImageUpdated(Article article) {
+    public void onArticleChanged(Article article, int flag) {
         int index = MainActivity.articles.indexOf(article);
         if(index>=0)
             notifyItemChanged(index);   // Article card exists already and only needs to update
@@ -54,7 +51,7 @@ class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ArticleCardViewHolder
     }
 
     @Override
-    public void onIconImageUpdated(Source source) {
+    public void onSourceChanged(Source source) {
         notifyDataSetChanged();
     }
 

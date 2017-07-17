@@ -96,7 +96,7 @@ public class SourcesFragment extends Fragment implements FeedListener{
                         else {
                             sourceInputLayout.setVisibility(View.GONE);
                             sourceLoadingLayout.setVisibility(View.VISIBLE);
-                            new Feed(url, feedListener, getFragmentManager(), getContext(), getResources());
+                            new Feed(getContext(), getResources(), feedListener, getFragmentManager(), url);
                         }
                     } else urlTextInputLayout.setError("Enter an URL that points to an XML file");
                 }else urlTextInputLayout.setError("Enter a valid URL");

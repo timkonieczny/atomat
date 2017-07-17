@@ -9,7 +9,7 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-class SourcesAdapter extends BaseAdapter implements UpdateIconImageListener {
+class SourcesAdapter extends BaseAdapter implements SourceChangedListener {
 
     private LayoutInflater layoutInflater;
     private GridView gridView;
@@ -40,11 +40,8 @@ class SourcesAdapter extends BaseAdapter implements UpdateIconImageListener {
         gridView = (GridView) parent;
         View view;
 
-        if (convertView == null) {
-            view = layoutInflater.inflate(R.layout.source_item, parent, false);
-        } else {
-            view = convertView;
-        }
+        if (convertView == null) view = layoutInflater.inflate(R.layout.source_item, parent, false);
+        else view = convertView;
 
         ImageView iconImageView = (ImageView) view.findViewById(R.id.source_icon);
         View backgroundView = view.findViewById(R.id.source_background);
@@ -52,7 +49,7 @@ class SourcesAdapter extends BaseAdapter implements UpdateIconImageListener {
 
         Source source = MainActivity.sources.get(position);
         iconImageView.setImageDrawable(source.getIconDrawable(this));
-        if(source.colorPalette != null) backgroundView.setBackgroundColor(source.colorPalette.getVibrantColor(backgroundColor));
+        if(source.icon.palette != null) backgroundView.setBackgroundColor(source.icon.palette.getVibrantColor(backgroundColor));
         else backgroundView.setBackgroundColor(backgroundColor);
 
         ((TextView)view.findViewById(R.id.source_title)).setText(source.title);
@@ -61,7 +58,7 @@ class SourcesAdapter extends BaseAdapter implements UpdateIconImageListener {
     }
 
     @Override
-    public void onIconImageUpdated(Source source) {
+    public void onSourceChanged(Source source) {
         gridView.invalidateViews();
     }
 }

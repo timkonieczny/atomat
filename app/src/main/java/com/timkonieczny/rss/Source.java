@@ -2,96 +2,58 @@ package com.timkonieczny.rss;
 
 import android.content.Context;
 import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.support.v7.graphics.Palette;
-
-import java.io.FileInputStream;
-import java.io.IOException;
 
 class Source implements ImageListener{
 
-    String title, icon, iconFileName, rssUrl, link;
-    Bitmap iconBitmap;
-    Drawable iconDrawable;
-    Palette colorPalette;
+    String title, rssUrl, link;
+    Image icon;
 
     private Resources resources;
-    private Context context;
+    Context context;
 
-    private UpdateIconImageTask task;
-    private UpdateIconImageListener updateIconImageListener;
+    private SourceChangedListener sourceChangedListener;
 
-    Source(Resources resources, Context context, String rssUrl){
+    private final int ICON = -1;
+
+    Source(Context context, Resources resources, String rssUrl){
         title = null;
-        icon = null;
         link = null;
-        iconBitmap = null;
-        iconDrawable = null;
-        colorPalette = null;
         this.rssUrl = rssUrl;
         this.resources = resources;
         this.context = context;
-        task = null;
+        icon = new Image();
     }
 
-    Source(Resources resources, Context context, String rssUrl, String title, String link, String icon, String iconFileName){
+    Source(Context context, Resources resources, String rssUrl, String title, String link, String iconUrl, String iconFileName){
+        this(context, resources, rssUrl);
         this.title = title;
         this.link = link;
-        this.icon = icon;
-        this.iconFileName = iconFileName;
-        iconBitmap = null;
-        iconDrawable = null;
-        colorPalette = null;
-        this.rssUrl = rssUrl;
-        this.resources = resources;
-        this.context = context;
-        task = null;
+        this.icon.url = iconUrl;
+        this.icon.fileName = iconFileName;
     }
 
-    Drawable getIconDrawable(UpdateIconImageListener listener){
-        if(iconDrawable != null) return iconDrawable;
-        else if(iconFileName!=null){
-            loadIconFromInternalStorage();
-            return iconDrawable;
-        }else if(icon != null){
-            if(task == null){
-                iconFileName = (title.replaceAll("[^a-zA-Z_0-9]", "")+System.currentTimeMillis()).toLowerCase()+".jpg";
-                task = new UpdateIconImageTask(resources, context, this, iconFileName);
-                task.execute(this);
-            }
-            updateIconImageListener = listener;
-        }
-        return null;
-    }
-
-    private void loadIconFromInternalStorage(){
-        try {
-            FileInputStream fileInputStream = context.openFileInput(iconFileName);
-            iconBitmap = BitmapFactory.decodeStream(fileInputStream);
-            fileInputStream.close();
-            iconDrawable = new BitmapDrawable(context.getResources(), iconBitmap);
-            colorPalette = (new Palette.Builder(iconBitmap)).generate();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    Drawable getIconDrawable(SourceChangedListener sourceChangedListener){
+        this.sourceChangedListener = sourceChangedListener;
+        return icon.getDrawable(context, resources, this, title, ICON);
     }
 
     @Override
     public String toString(){
         return "Title:\t\t\t"+title+
-            "\nIcon:\t\t\t\t"+icon+
+            "\nIcon:\t\t\t\t"+ icon.url+
             "\nLink:\t\t\t\t"+ link+
-            "\nIcon Bitmap:\t\t"+(iconBitmap != null)+
-            "\nIcon Drawable:\t"+(iconDrawable != null)+
-            "\nIcon File Name:\t"+iconFileName+
+            "\nIcon Drawable:\t"+(icon.drawable != null)+
+            "\nIcon File Name:\t"+ icon.fileName +
             "\nRSS URL:\t\t\t"+rssUrl;
     }
 
     @Override
-    public void onImageLoaded(int index, Drawable drawable) {
-        updateIconImageListener.onIconImageUpdated(this);
+    public void onImageLoaded(int index) {
+        // save icon file name in db
+        MainActivity.dbManager.updateValue(DbManager.SourcesTable.TABLE_NAME,
+                DbManager.SourcesTable.COLUMN_NAME_ICON_FILE, icon.fileName,
+                DbManager.SourcesTable.COLUMN_NAME_URL, rssUrl);
+        sourceChangedListener.onSourceChanged(this);
     }
 }

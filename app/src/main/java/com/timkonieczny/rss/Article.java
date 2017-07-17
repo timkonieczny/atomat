@@ -2,78 +2,37 @@ package com.timkonieczny.rss;
 
 import android.content.Context;
 import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.support.v7.graphics.Palette;
-import android.util.Log;
 import android.view.View;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Date;
 
 class Article implements ImageListener{
 
     Date published;
-    String title, author, headerImage, link, content;
-    Bitmap headerImageBitmap = null;
-    Palette colorPalette;
+    String title, author, link, content;
     Source source;
     View.OnClickListener onClickListener;
-    Drawable[] inlineImagesDrawables;
-    String[] inlineImages;
-    String[] inlineImagesFileNames;
-    UpdateImageListener[] updateImageListeners;
-    UpdateImageListener updateImageListener;
-    UpdateHeaderImageListener updateHeaderImageListener;
+    private ArticleChangedListener articleChangedListener;
 
-    private UpdateHeaderImageTask task;
+    Image header;
+    Image[] inlineImages;
 
-    void updateHeaderImage() {
-        task = new UpdateHeaderImageTask();
-        task.execute(this);
+    private Context context;
+    private Resources resources;
+
+    static final int HEADER = -1;
+
+    Article(Context context, Resources resources){
+        header = new Image();
+        this.context = context;
+        this.resources = resources;
     }
 
-    void setUpdateHeaderImageListener(UpdateHeaderImageListener listener){
-        updateHeaderImageListener = listener;
-    }
-
-    void getImageDrawables(UpdateImageListener listener, Resources resources, Context context){
-        updateImageListener = listener;
-        for(int i = 0; i < inlineImages.length; i++){
-            if(inlineImagesDrawables[i] != null){
-                Log.d("Article", "loading inli1ne image from drawable");
-                listener.onImageUpdated(inlineImagesDrawables[i], i);
-            }else if(inlineImagesFileNames[i] != null){
-                Log.d("Article", "loading inline image from internal storage");
-                listener.onImageUpdated(loadImageFromInternalStorage(context, inlineImagesFileNames[i]), i);
-            }else {
-                try {
-                    Log.d("Article", "loading inline image from internet");
-                    UpdateImageTask updateImageTask = new UpdateImageTask(this, i, resources, context, this);
-//                    UpdateImageTask updateImageTask = new UpdateImageTask(listener, i, resources, context, this);
-                    updateImageTask.execute(new URL(inlineImages[i]));
-                } catch (MalformedURLException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
-
-    private Drawable loadImageFromInternalStorage(Context context, String imageFileName){
-        try {
-            FileInputStream fileInputStream = context.openFileInput(imageFileName);
-            Bitmap bitmap = BitmapFactory.decodeStream(fileInputStream);
-            fileInputStream.close();
-            return new BitmapDrawable(context.getResources(), bitmap);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
+    Drawable getImage(ArticleChangedListener articleChangedListener, int index){
+        this.articleChangedListener = articleChangedListener;
+        if(index == HEADER) return header.getDrawable(context, resources, this, title, index);
+        else return inlineImages[index].getDrawable(context, resources, this, title, index);
     }
 
     @Override
@@ -81,13 +40,20 @@ class Article implements ImageListener{
         return "Title: " + title +
                 "\nAuthors: " + author +
                 "\nLink: " + link +
-                "\nheaderImage: " + headerImage +
+                "\nheader: " + header.url +
                 "\nPublished: " + published.toString();
     }
 
     @Override
-    public void onImageLoaded(int index, Drawable drawable) {
-        if(index==-1) updateHeaderImageListener.onHeaderImageUpdated(this);
-        else updateImageListener.onImageUpdated(drawable, index);
+    public void onImageLoaded(int index) {
+        if(index == HEADER) {
+            MainActivity.dbManager.updateValue(DbManager.ArticlesTable.TABLE_NAME,
+                    DbManager.ArticlesTable.COLUMN_NAME_HEADER_IMAGE_FILE, header.fileName,
+                    DbManager.ArticlesTable.COLUMN_NAME_LINK, link);
+        }else{
+            MainActivity.dbManager.appendString(inlineImages[index].url, link, DbManager.ArticlesTable.COLUMN_NAME_INLINE_IMAGES);
+            MainActivity.dbManager.appendString(inlineImages[index].fileName, link, DbManager.ArticlesTable.COLUMN_NAME_INLINE_IMAGES_FILES);
+        }
+        if (articleChangedListener != null) articleChangedListener.onArticleChanged(this, index);
     }
 }

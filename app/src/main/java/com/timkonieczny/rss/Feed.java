@@ -30,43 +30,23 @@ class Feed extends AsyncTask<Void, Void, Boolean> implements DbOpenListener{
 
     private String newSource;
 
-    Feed(Object listener, FragmentManager fragmentManager, Context context, Resources resources){
-
-        this.fragmentManager = fragmentManager;
-        this.context = context;
-        this.resources = resources;
-        this.feedListener = (FeedListener)listener;
-        this.newSource = null;
-
-        descending = new Comparator<Article>() {
-            @Override
-            public int compare(Article a1, Article a2) {
-                return a2.published.compareTo(a1.published);
-            }
-        };
-
-        existingLinks = getExistingArticlesLinks();
-
-        (new DbOpenTask(MainActivity.dbManager, this)).execute();
+    Feed(Context context, Resources resources, FeedListener feedListener, FragmentManager fragmentManager){
+        this(context, resources, feedListener, fragmentManager, null);
     }
 
-    Feed(String newSource, Object listener, FragmentManager fragmentManager, Context context, Resources resources){
-
-        this.fragmentManager = fragmentManager;
+    Feed(Context context, Resources resources, FeedListener feedListener, FragmentManager fragmentManager, String newSource){
         this.context = context;
         this.resources = resources;
-        this.feedListener = (FeedListener)listener;
+        this.feedListener = feedListener;
+        this.fragmentManager = fragmentManager;
         this.newSource = newSource;
-
         descending = new Comparator<Article>() {
             @Override
             public int compare(Article a1, Article a2) {
                 return a2.published.compareTo(a1.published);
             }
         };
-
-        existingLinks = getExistingArticlesLinks();
-
+        existingLinks = getExistingArticleLinks();
         (new DbOpenTask(MainActivity.dbManager, this)).execute();
     }
 
@@ -84,7 +64,7 @@ class Feed extends AsyncTask<Void, Void, Boolean> implements DbOpenListener{
         }
 
 
-        if(newSource != null) updateSource(new Source(resources, context, newSource), articles, true);
+        if(newSource != null) updateSource(new Source(context, resources, newSource), articles, true);
 
         Article article;
         for(int i = 0; i < articles.size(); i++){
@@ -94,7 +74,7 @@ class Feed extends AsyncTask<Void, Void, Boolean> implements DbOpenListener{
                 i--;
             }else{
                 article.onClickListener = new ArticleOnClickListener(article, fragmentManager);
-                if(article.headerImage!=null) article.updateHeaderImage();
+                article.getImage(null, Article.HEADER);
             }
         }
 
@@ -113,7 +93,7 @@ class Feed extends AsyncTask<Void, Void, Boolean> implements DbOpenListener{
             connection.connect();
             InputStream stream = connection.getInputStream();
 
-            SourceUpdater sourceUpdater = new SourceUpdater();
+            SourceUpdater sourceUpdater = new SourceUpdater(context, resources);
             articles.addAll(sourceUpdater.parse(stream, source, isNew));
 
             if(isNew){
@@ -132,7 +112,7 @@ class Feed extends AsyncTask<Void, Void, Boolean> implements DbOpenListener{
         if(feedListener!=null) feedListener.onFeedUpdated(hasNewArticles);
     }
 
-    private HashSet<String> getExistingArticlesLinks(){
+    private HashSet<String> getExistingArticleLinks(){
         HashSet<String> links = new HashSet<>();
         for(int i = 0; i < MainActivity.articles.size(); i++){
             links.add(MainActivity.articles.get(i).link);
