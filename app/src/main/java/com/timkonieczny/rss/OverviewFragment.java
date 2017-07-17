@@ -11,7 +11,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 
 public class OverviewFragment
@@ -42,7 +41,7 @@ public class OverviewFragment
         };
 
         if(MainActivity.sources == null) MainActivity.sources = new SourcesList();
-        if(MainActivity.articles == null) MainActivity.articles = new ArrayList<>();
+        if(MainActivity.articles == null) MainActivity.articles = new ArticlesList();
 
         feedAdapter = new FeedAdapter();
     }
@@ -84,12 +83,13 @@ public class OverviewFragment
     }
 
     @Override
-    public void onFeedUpdated(boolean hasNewArticles) {
-        isInitialRefreshDone = true;
-        if(hasNewArticles) feedAdapter.notifyDataSetChanged();
-        else noUpdatesSnackbar.show();
-
-        swipeRefreshLayout.setRefreshing(false);
+    public void onFeedUpdated(boolean hasNewArticles, boolean isUpdateComplete) {
+        if(isUpdateComplete) {
+            isInitialRefreshDone = true;
+            if (hasNewArticles) feedAdapter.notifyDataSetChanged();
+            else noUpdatesSnackbar.show();
+            swipeRefreshLayout.setRefreshing(false);
+        }else if(hasNewArticles) feedAdapter.notifyDataSetChanged();
     }
 
     public void updateFeed(){

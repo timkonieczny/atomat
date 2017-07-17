@@ -159,8 +159,10 @@ public class SourcesFragment extends Fragment implements FeedListener{
     }
 
     @Override
-    public void onFeedUpdated(boolean hasNewArticles) {
-        closeCircularReveal(view);
-        sourcesAdapter.notifyDataSetChanged();
+    public void onFeedUpdated(boolean hasNewArticles, boolean isUpdateComplete) {
+        if(isUpdateComplete) {
+            closeCircularReveal(view);
+            sourcesAdapter.notifyDataSetChanged();
+        }
     }
 }

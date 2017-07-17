@@ -15,12 +15,10 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 
-import java.util.ArrayList;
-
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    protected static ArrayList<Article> articles = null;
+    protected static ArticlesList articles = null;
     protected static SourcesList sources = null;
 
     protected static ActionBarDrawerToggle toggle;

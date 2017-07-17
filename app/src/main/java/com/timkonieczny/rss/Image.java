@@ -2,10 +2,12 @@ package com.timkonieczny.rss;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.support.v7.graphics.Palette;
+import android.util.Log;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -17,11 +19,15 @@ class Image{
     private ImageTask imageTask;
 
     Drawable getDrawable(Context context, Resources resources, ImageListener imageListener, String fileNameSeed, int index){
-        if(drawable != null) return drawable;
-        else if(this.fileName !=null){
+        if(drawable != null){
+            Log.d("Image", "loading from drawable");
+            return drawable;
+        }else if(this.fileName !=null){
+            Log.d("Image", "loading from internal storage");
             loadFromInternalStorage(context);
             return drawable;
         }else if(url != null){
+            Log.d("Image", "loading from web");
             if(imageTask == null) {
                 imageTask = new ImageTask(context, resources, index, generateFileName(fileNameSeed));
                 imageTask.execute(this);
@@ -34,9 +40,11 @@ class Image{
     private void loadFromInternalStorage(Context context){
         try {
             FileInputStream fileInputStream = context.openFileInput(fileName);
-            drawable = new BitmapDrawable(
-                    context.getResources(), BitmapFactory.decodeStream(fileInputStream));
+            Bitmap bitmap = BitmapFactory.decodeStream(fileInputStream);
             fileInputStream.close();
+
+            drawable = new BitmapDrawable(context.getResources(), bitmap);
+            palette = (new Palette.Builder(bitmap)).generate();
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -8,6 +8,7 @@ class Source implements ImageListener{
 
     String title, rssUrl, link;
     Image icon;
+    long dbId = -1;
 
     private Resources resources;
     Context context;
@@ -25,12 +26,13 @@ class Source implements ImageListener{
         icon = new Image();
     }
 
-    Source(Context context, Resources resources, String rssUrl, String title, String link, String iconUrl, String iconFileName){
+    Source(Context context, Resources resources, String rssUrl, String title, String link, String iconUrl, String iconFileName, long dbId){
         this(context, resources, rssUrl);
         this.title = title;
         this.link = link;
         this.icon.url = iconUrl;
         this.icon.fileName = iconFileName;
+        this.dbId = dbId;
     }
 
     Drawable getIconDrawable(SourceChangedListener sourceChangedListener){

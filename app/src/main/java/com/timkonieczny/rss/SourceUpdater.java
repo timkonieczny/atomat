@@ -1,5 +1,6 @@
 package com.timkonieczny.rss;
 
+import android.app.FragmentManager;
 import android.content.Context;
 import android.content.res.Resources;
 import android.util.Xml;
@@ -21,15 +22,14 @@ import java.util.regex.Pattern;
 
 class SourceUpdater {
 
-    private SimpleDateFormat[] dateFormats = new SimpleDateFormat[]{
-            new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ssX", Locale.US),
-            new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX", Locale.US)
-    };
+    private SimpleDateFormat[] dateFormats;
     private Pattern imgWithWhitespacePattern, imgPattern, stylePattern;
     protected Source source;
     private boolean updateSource;
     private Context context;
     private Resources resources;
+    private FragmentManager fragmentManager;
+    private XmlPullParser parser;
 
     private HashSet<String> feedTags;
     private HashSet<String> feedTitleTags;
@@ -43,9 +43,26 @@ class SourceUpdater {
     private HashSet<String> entryLinkTags;
     private HashSet<String> entryAuthorTags;
 
-    SourceUpdater(Context context, Resources resources){
+    SourceUpdater(Context context, Resources resources, FragmentManager fragmentManager) {
         this.context = context;
         this.resources = resources;
+        this.fragmentManager = fragmentManager;
+
+        initializeTagDictionaries();
+        imgWithWhitespacePattern = Pattern.compile("\\A\\s*<img(.*?)/>\\s*");  // <imgPattern ... /> at beginning of input, including trailing whitespaces
+        imgPattern = Pattern.compile("<img(?:.*?)src=\"(.*?)\"(?:.*?)/>"); // src attribute of <imgPattern ... />
+        stylePattern = Pattern.compile("<style>(?:.*?)</style>"); // src attribute of <imgPattern ... />
+        dateFormats = new SimpleDateFormat[]{
+                new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ssX", Locale.US),
+                new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX", Locale.US)
+        };
+
+        parser = Xml.newPullParser();
+        try {
+            parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
+        } catch (XmlPullParserException e) {
+            e.printStackTrace();
+        }
     }
 
     List<Article> parse(InputStream inputStream, Source source, boolean updateSource)
@@ -53,12 +70,6 @@ class SourceUpdater {
 
         this.updateSource = updateSource;
         this.source = source;
-        initializeTagDictionaries();
-        imgWithWhitespacePattern = Pattern.compile("\\A\\s*<img(.*?)/>\\s*");  // <imgPattern ... /> at beginning of input, including trailing whitespaces
-        imgPattern = Pattern.compile("<img(?:.*?)src=\"(.*?)\"(?:.*?)/>"); // src attribute of <imgPattern ... />
-        stylePattern = Pattern.compile("<style>(?:.*?)</style>"); // src attribute of <imgPattern ... />
-        XmlPullParser parser = Xml.newPullParser();
-        parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
         parser.setInput(inputStream, null);
 
         while (parser.next() != XmlPullParser.END_TAG) {
@@ -120,7 +131,7 @@ class SourceUpdater {
     // off  to their respective methods for processing. Otherwise, skips the tag.
     private Article readEntry(XmlPullParser parser) throws XmlPullParserException, IOException {
 
-        Article article = new Article(context, resources);
+        Article article = new Article(context, resources, fragmentManager);
 
         parser.require(XmlPullParser.START_TAG, null, parser.getName());
         while (parser.next() != XmlPullParser.END_TAG) {
@@ -216,15 +227,15 @@ class SourceUpdater {
     private void initializeTagDictionaries() {  // FIXME: call toLowerCase() on all parsed tags
         feedTags = createHashSet("feed", "channel");
         feedTitleTags = createHashSet("title");
-        feedIconTags = createHashSet("icon");                           // missing
-        feedLinkTags = createHashSet("link");                           // different encoding
+        feedIconTags = createHashSet("icon");
+        feedLinkTags = createHashSet("link");
 
         entryTags = createHashSet("entry", "item");
-        entryPublishedTags = createHashSet("published", "pubDate");     // different encoding
+        entryPublishedTags = createHashSet("published", "pubDate");
         entryTitleTags = createHashSet("title");
-        entryContentTags = createHashSet("content", "content:encoded"); // different encoding
-        entryLinkTags = createHashSet("link");                          // different encoding
-        entryAuthorTags = createHashSet("author", "dc:creator");        // different encoding
+        entryContentTags = createHashSet("content", "content:encoded");
+        entryLinkTags = createHashSet("link");
+        entryAuthorTags = createHashSet("author", "dc:creator");
     }
 
     private HashSet<String> createHashSet(String... strings){

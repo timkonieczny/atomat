@@ -17,17 +17,15 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 
-class Feed extends AsyncTask<Void, Void, Boolean> implements DbOpenListener{
+class Feed extends AsyncTask<Void, Boolean, Boolean> implements DbOpenListener{
 
-    private FeedListener feedListener;
-
-    private HashSet<String> existingLinks;
-    private Comparator<Article> descending;
-
-    private FragmentManager fragmentManager;
     private Context context;
     private Resources resources;
+    private FragmentManager fragmentManager;
+    private FeedListener feedListener;
+    private SourceUpdater sourceUpdater;
 
+    private Comparator<Article> descending;
     private String newSource;
 
     Feed(Context context, Resources resources, FeedListener feedListener, FragmentManager fragmentManager){
@@ -46,7 +44,7 @@ class Feed extends AsyncTask<Void, Void, Boolean> implements DbOpenListener{
                 return a2.published.compareTo(a1.published);
             }
         };
-        existingLinks = getExistingArticleLinks();
+        sourceUpdater = new SourceUpdater(context, resources, fragmentManager);
         (new DbOpenTask(MainActivity.dbManager, this)).execute();
     }
 
@@ -57,14 +55,20 @@ class Feed extends AsyncTask<Void, Void, Boolean> implements DbOpenListener{
 
     @Override
     protected final Boolean doInBackground(Void... params) {
+
+        int before = MainActivity.articles.size();
+        MainActivity.dbManager.load(resources, context, fragmentManager);
+        Collections.sort(MainActivity.articles, descending);
+        publishProgress(before != MainActivity.articles.size());
+
         List<Article> articles = new ArrayList<>(0);
-        MainActivity.dbManager.loadSources(resources, context);
         for(int i = 0; i < MainActivity.sources.size(); i++){
             updateSource(MainActivity.sources.get(i), articles, false);
         }
 
-
         if(newSource != null) updateSource(new Source(context, resources, newSource), articles, true);
+
+        HashSet<String> existingLinks = getExistingArticleLinks();
 
         Article article;
         for(int i = 0; i < articles.size(); i++){
@@ -72,13 +76,10 @@ class Feed extends AsyncTask<Void, Void, Boolean> implements DbOpenListener{
             if(existingLinks.contains(article.link)){
                 articles.remove(i);
                 i--;
-            }else{
-                article.onClickListener = new ArticleOnClickListener(article, fragmentManager);
-                article.getImage(null, Article.HEADER);
-            }
+            }else article.getImage(null, Article.HEADER);
         }
 
-        MainActivity.dbManager.saveArticles(articles);
+        MainActivity.dbManager.createArticles(articles);
         MainActivity.articles.addAll(articles);
         Collections.sort(MainActivity.articles, descending);
 
@@ -93,12 +94,11 @@ class Feed extends AsyncTask<Void, Void, Boolean> implements DbOpenListener{
             connection.connect();
             InputStream stream = connection.getInputStream();
 
-            SourceUpdater sourceUpdater = new SourceUpdater(context, resources);
             articles.addAll(sourceUpdater.parse(stream, source, isNew));
 
             if(isNew){
                 MainActivity.sources.add(sourceUpdater.source);
-                MainActivity.dbManager.saveSource(sourceUpdater.source);
+                MainActivity.dbManager.createSource(sourceUpdater.source);
             }
 
         } catch (IOException | XmlPullParserException e) {
@@ -107,9 +107,15 @@ class Feed extends AsyncTask<Void, Void, Boolean> implements DbOpenListener{
     }
 
     @Override
+    protected void onProgressUpdate(Boolean... hasNewArticles) {
+        super.onProgressUpdate(hasNewArticles);
+        feedListener.onFeedUpdated(hasNewArticles[0], false);
+    }
+
+    @Override
     protected void onPostExecute(Boolean hasNewArticles) {
         super.onPostExecute(hasNewArticles);
-        if(feedListener!=null) feedListener.onFeedUpdated(hasNewArticles);
+        feedListener.onFeedUpdated(hasNewArticles, true);
     }
 
     private HashSet<String> getExistingArticleLinks(){
