@@ -8,4 +8,18 @@
         <item>false</item>
         <item>true</item>
     </string-array>
+    <string-array name="pref_sync_keys">
+        <item>@string/pref_sync_option_1w</item>
+        <item>@string/pref_sync_option_2w</item>
+        <item>@string/pref_sync_option_3w</item>
+        <item>@string/pref_sync_option_1m</item>
+        <item>@string/pref_sync_option_2m</item>
+    </string-array>
+    <string-array name="pref_sync_values">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>8</item>
+    </string-array>
 </resources>

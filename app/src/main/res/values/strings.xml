@@ -33,6 +33,15 @@
     <string name="pref_theme_set">Set Theme</string>
     <string name="pref_theme_option_light_theme">Light Theme</string>
     <string name="pref_theme_option_dark_theme">Dark Theme</string>
+    <string name="pref_sync_category_title">Synchronization</string>
+    <string name="pref_sync_set_summary">Delete stories older than %s</string>
+    <string name="pref_sync_set">Auto Cleanup</string>
+    <string name="pref_sync_set_dialog">Delete stories older than</string>
+    <string name="pref_sync_option_1w">1 week</string>
+    <string name="pref_sync_option_2w">2 weeks</string>
+    <string name="pref_sync_option_3w">3 weeks</string>
+    <string name="pref_sync_option_1m">1 month</string>
+    <string name="pref_sync_option_2m">2 months</string>
 
     <!-- placeholder strings -->
     <!-- TODO: Remove placeholder strings -->

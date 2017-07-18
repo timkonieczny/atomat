@@ -57,7 +57,7 @@ class Feed extends AsyncTask<Void, Boolean, Boolean> implements DbOpenListener{
     protected final Boolean doInBackground(Void... params) {
 
         int before = MainActivity.articles.size();
-        MainActivity.dbManager.load(resources, context, fragmentManager);
+        MainActivity.dbManager.load(resources, context, fragmentManager); // TODO: get articles where published < date
         Collections.sort(MainActivity.articles, descending);
         publishProgress(before != MainActivity.articles.size());
 
@@ -73,7 +73,7 @@ class Feed extends AsyncTask<Void, Boolean, Boolean> implements DbOpenListener{
         Article article;
         for(int i = 0; i < articles.size(); i++){
             article = articles.get(i);
-            if(existingLinks.contains(article.link)){
+            if(existingLinks.contains(article.link)){   // TODO: check how old article is here and remove from array
                 articles.remove(i);
                 i--;
             }else article.getImage(null, Article.HEADER);
