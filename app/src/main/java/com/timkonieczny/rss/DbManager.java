@@ -66,10 +66,10 @@ class DbManager extends SQLiteOpenHelper {
                 ArticlesTable.COLUMN_NAME_INLINE_IMAGES_FILES + " TEXT)");
     }
 
-    void load(Resources resources, Context context, FragmentManager fragmentManager){
+    void load(Resources resources, Context context, FragmentManager fragmentManager, long articleLifetime){
         getDb();
         loadSources(resources, context);
-        loadArticles(resources, context, fragmentManager);
+        loadArticles(resources, context, fragmentManager, articleLifetime);
     }
 
     private void loadSources(Resources resources, Context context){
@@ -98,9 +98,10 @@ class DbManager extends SQLiteOpenHelper {
         cursor.close();
     }
 
-    private void loadArticles(Resources resources, Context context, FragmentManager fragmentManager){
+    private void loadArticles(Resources resources, Context context,
+                              FragmentManager fragmentManager, long articleLifetime){
         // Get sources from Db
-        String[] articlesProjection = {
+        String[] columns = {
                 ArticlesTable._ID,                              ArticlesTable.COLUMN_NAME_LINK,
                 ArticlesTable.COLUMN_NAME_SOURCE_ID,            ArticlesTable.COLUMN_NAME_TITLE,
                 ArticlesTable.COLUMN_NAME_AUTHOR,               ArticlesTable.COLUMN_NAME_PUBLISHED,
@@ -108,32 +109,64 @@ class DbManager extends SQLiteOpenHelper {
                 ArticlesTable.COLUMN_NAME_HEADER_IMAGE_FILE,    ArticlesTable.COLUMN_NAME_INLINE_IMAGES,
                 ArticlesTable.COLUMN_NAME_INLINE_IMAGES_FILES
         };
-        Cursor cursor = db.query(ArticlesTable.TABLE_NAME, articlesProjection, null, null, null, null, null);
+
+        // get valid articles
+        long validTime = System.currentTimeMillis()-articleLifetime;
+        Cursor cursor = db.query(ArticlesTable.TABLE_NAME, columns,
+                ArticlesTable.COLUMN_NAME_PUBLISHED+">=?", new String[]{String.valueOf(validTime)},
+                null, null, null);
 
         // Convert sources to Source objects
         while (cursor.moveToNext()) {
-
             int sourceDbId = cursor.getInt(cursor.getColumnIndexOrThrow(ArticlesTable.COLUMN_NAME_SOURCE_ID));
             String link = cursor.getString(cursor.getColumnIndexOrThrow(ArticlesTable.COLUMN_NAME_LINK));
-            if(MainActivity.sources.containsDbId(sourceDbId) && !MainActivity.articles.containsLink(link)){
+            long published = cursor.getLong(cursor.getColumnIndexOrThrow(ArticlesTable.COLUMN_NAME_PUBLISHED));
 
-                String[] inlineImageUrls = splitString(cursor.getString(cursor.getColumnIndexOrThrow(ArticlesTable.COLUMN_NAME_INLINE_IMAGES)));
-                String[] inlineImageFiles = splitString(cursor.getString(cursor.getColumnIndexOrThrow(ArticlesTable.COLUMN_NAME_INLINE_IMAGES_FILES)));
+            if(MainActivity.sources.containsDbId(sourceDbId) && published+articleLifetime > System.currentTimeMillis()){
+                if(!MainActivity.articles.containsLink(link)) {
+                    String[] inlineImageUrls = splitString(cursor.getString(cursor.getColumnIndexOrThrow(ArticlesTable.COLUMN_NAME_INLINE_IMAGES)));
+                    String[] inlineImageFiles = splitString(cursor.getString(cursor.getColumnIndexOrThrow(ArticlesTable.COLUMN_NAME_INLINE_IMAGES_FILES)));
 
-                Article article = new Article(context, resources, fragmentManager,
-                        cursor.getString(cursor.getColumnIndexOrThrow(ArticlesTable.COLUMN_NAME_TITLE)),
-                        cursor.getString(cursor.getColumnIndexOrThrow(ArticlesTable.COLUMN_NAME_AUTHOR)),
-                        link,
-                        new Date(cursor.getLong(cursor.getColumnIndexOrThrow(ArticlesTable.COLUMN_NAME_PUBLISHED))),
-                        cursor.getString(cursor.getColumnIndexOrThrow(ArticlesTable.COLUMN_NAME_CONTENT)),
-                        cursor.getString(cursor.getColumnIndexOrThrow(ArticlesTable.COLUMN_NAME_HEADER_IMAGE)),
-                        cursor.getString(cursor.getColumnIndexOrThrow(ArticlesTable.COLUMN_NAME_HEADER_IMAGE_FILE)),
-                        inlineImageUrls, inlineImageFiles, MainActivity.sources.getByDbId(sourceDbId));
-                article.getImage(null, Article.HEADER);
-                MainActivity.articles.add(article);
+                    Article article = new Article(context, resources, fragmentManager,
+                            cursor.getString(cursor.getColumnIndexOrThrow(ArticlesTable.COLUMN_NAME_TITLE)),
+                            cursor.getString(cursor.getColumnIndexOrThrow(ArticlesTable.COLUMN_NAME_AUTHOR)),
+                            link,
+                            new Date(published),
+                            cursor.getString(cursor.getColumnIndexOrThrow(ArticlesTable.COLUMN_NAME_CONTENT)),
+                            cursor.getString(cursor.getColumnIndexOrThrow(ArticlesTable.COLUMN_NAME_HEADER_IMAGE)),
+                            cursor.getString(cursor.getColumnIndexOrThrow(ArticlesTable.COLUMN_NAME_HEADER_IMAGE_FILE)),
+                            inlineImageUrls, inlineImageFiles, MainActivity.sources.getByDbId(sourceDbId));
+                    article.getImage(null, Article.HEADER);
+                    MainActivity.articles.add(article);
+                }
             }
         }
         cursor.close();
+
+        // delete invalid articles
+        deleteOldArticles(context, validTime);
+    }
+
+    private int deleteOldArticles(Context context, long validTime) {
+        Cursor cursor = db.query(ArticlesTable.TABLE_NAME,
+                new String[]{ArticlesTable.COLUMN_NAME_LINK,
+                        ArticlesTable.COLUMN_NAME_HEADER_IMAGE_FILE,
+                        ArticlesTable.COLUMN_NAME_INLINE_IMAGES_FILES},
+                ArticlesTable.COLUMN_NAME_PUBLISHED+"<?", new String[]{String.valueOf(validTime)}, null, null, null, null);
+        while(cursor.moveToNext()){
+            // delete from MainActivity.articles
+            String link = cursor.getString(cursor.getColumnIndexOrThrow(ArticlesTable.COLUMN_NAME_LINK));
+            if(MainActivity.articles.containsLink(link)) MainActivity.articles.removeByLink(link);
+            // delete header image file
+            context.deleteFile(cursor.getString(
+                    cursor.getColumnIndexOrThrow(ArticlesTable.COLUMN_NAME_HEADER_IMAGE_FILE)));
+            // delete inline image files
+            for (String inlineImage : cursor.getString(cursor.getColumnIndexOrThrow(ArticlesTable.COLUMN_NAME_INLINE_IMAGES_FILES)).split(" "))
+                context.deleteFile(inlineImage);
+        }
+        cursor.close();
+        // delete db entry
+        return db.delete(ArticlesTable.TABLE_NAME, ArticlesTable.COLUMN_NAME_PUBLISHED+"<?", new String[]{String.valueOf(validTime)});
     }
 
     private String[] splitString(String string){

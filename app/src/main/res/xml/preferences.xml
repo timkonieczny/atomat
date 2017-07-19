@@ -29,13 +29,13 @@
         android:key="pref_theme_category">
 
         <ListPreference
-            android:key="pref_sync_keys"
+            android:key="pref_sync"
             android:title="@string/pref_sync_set"
             android:summary="@string/pref_sync_set_summary"
             android:dialogTitle="@string/pref_sync_set"
             android:entries="@array/pref_sync_keys"
             android:entryValues="@array/pref_sync_values"
-            android:defaultValue="2" />
+            android:defaultValue="1209600" />
 
     </PreferenceCategory>
 

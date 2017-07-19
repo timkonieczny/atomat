@@ -28,4 +28,14 @@ class ArticlesList extends ArrayList<Article>{
     boolean containsLink(String link){
         return links.contains(link);
     }
+
+    void removeByLink(String link){
+        for(int i = 0; i < this.size(); i++){
+            if(this.get(i).link.equals(link)){
+                this.remove(i);
+                links.remove(link);
+                break;
+            }
+        }
+    }
 }
