@@ -84,14 +84,15 @@ class DbManager extends SQLiteOpenHelper {
         // Convert sources to Source objects
         while (cursor.moveToNext()) {
             String url = cursor.getString(cursor.getColumnIndexOrThrow(SourcesTable.COLUMN_NAME_URL));
+            Long dbId = cursor.getLong(cursor.getColumnIndexOrThrow(SourcesTable._ID));
 
-            if (!MainActivity.sources.containsRssUrl(url)) {    // only create source if it doesn't exist yet
+            if (!MainActivity.sources.containsDbId(dbId)) {    // only create source if it doesn't exist yet
                 MainActivity.sources.add(new Source(context, resources, url,
                         cursor.getString(cursor.getColumnIndexOrThrow(SourcesTable.COLUMN_NAME_TITLE)),
                         cursor.getString(cursor.getColumnIndexOrThrow(SourcesTable.COLUMN_NAME_LINK)),
                         cursor.getString(cursor.getColumnIndexOrThrow(SourcesTable.COLUMN_NAME_ICON)),
                         cursor.getString(cursor.getColumnIndexOrThrow(SourcesTable.COLUMN_NAME_ICON_FILE)),
-                        cursor.getInt(cursor.getColumnIndexOrThrow(SourcesTable._ID))
+                        dbId
                 ));
             }
         }
@@ -119,11 +120,12 @@ class DbManager extends SQLiteOpenHelper {
         // Convert sources to Source objects
         while (cursor.moveToNext()) {
             int sourceDbId = cursor.getInt(cursor.getColumnIndexOrThrow(ArticlesTable.COLUMN_NAME_SOURCE_ID));
+            long dbId = cursor.getLong(cursor.getColumnIndexOrThrow(ArticlesTable._ID));
             String link = cursor.getString(cursor.getColumnIndexOrThrow(ArticlesTable.COLUMN_NAME_LINK));
             long published = cursor.getLong(cursor.getColumnIndexOrThrow(ArticlesTable.COLUMN_NAME_PUBLISHED));
 
             if(MainActivity.sources.containsDbId(sourceDbId) && published+articleLifetime > System.currentTimeMillis()){
-                if(!MainActivity.articles.containsLink(link)) {
+                if(!MainActivity.articles.containsDbId(dbId)) {
                     String[] inlineImageUrls = splitString(cursor.getString(cursor.getColumnIndexOrThrow(ArticlesTable.COLUMN_NAME_INLINE_IMAGES)));
                     String[] inlineImageFiles = splitString(cursor.getString(cursor.getColumnIndexOrThrow(ArticlesTable.COLUMN_NAME_INLINE_IMAGES_FILES)));
 
@@ -135,7 +137,8 @@ class DbManager extends SQLiteOpenHelper {
                             cursor.getString(cursor.getColumnIndexOrThrow(ArticlesTable.COLUMN_NAME_CONTENT)),
                             cursor.getString(cursor.getColumnIndexOrThrow(ArticlesTable.COLUMN_NAME_HEADER_IMAGE)),
                             cursor.getString(cursor.getColumnIndexOrThrow(ArticlesTable.COLUMN_NAME_HEADER_IMAGE_FILE)),
-                            inlineImageUrls, inlineImageFiles, MainActivity.sources.getByDbId(sourceDbId));
+                            inlineImageUrls, inlineImageFiles, (Source) MainActivity.sources.getByDbId(sourceDbId),
+                            cursor.getInt(cursor.getColumnIndexOrThrow(ArticlesTable._ID)));
                     article.getImage(null, Article.HEADER);
                     MainActivity.articles.add(article);
                 }
@@ -149,14 +152,16 @@ class DbManager extends SQLiteOpenHelper {
 
     private int deleteOldArticles(Context context, long validTime) {
         Cursor cursor = db.query(ArticlesTable.TABLE_NAME,
-                new String[]{ArticlesTable.COLUMN_NAME_LINK,
+                new String[]{
+//                        ArticlesTable.COLUMN_NAME_LINK,
+                        ArticlesTable._ID,
                         ArticlesTable.COLUMN_NAME_HEADER_IMAGE_FILE,
                         ArticlesTable.COLUMN_NAME_INLINE_IMAGES_FILES},
                 ArticlesTable.COLUMN_NAME_PUBLISHED+"<?", new String[]{String.valueOf(validTime)}, null, null, null, null);
         while(cursor.moveToNext()){
             // delete from MainActivity.articles
-            String link = cursor.getString(cursor.getColumnIndexOrThrow(ArticlesTable.COLUMN_NAME_LINK));
-            if(MainActivity.articles.containsLink(link)) MainActivity.articles.removeByLink(link);
+            Long dbId = cursor.getLong(cursor.getColumnIndexOrThrow(ArticlesTable._ID));
+            if(MainActivity.articles.containsDbId(dbId)) MainActivity.articles.removeByDbId(dbId);
             // delete header image file
             context.deleteFile(cursor.getString(
                     cursor.getColumnIndexOrThrow(ArticlesTable.COLUMN_NAME_HEADER_IMAGE_FILE)));
@@ -211,25 +216,26 @@ class DbManager extends SQLiteOpenHelper {
     void createArticles(List<Article> articles){
         getDb();
         for(int i = 0; i < articles.size(); i++) {
+            Article article = articles.get(i);
 
             Cursor cursor = db.query(
                     SourcesTable.TABLE_NAME,
                     new String[]{SourcesTable._ID},
                     SourcesTable.COLUMN_NAME_URL+"=?",
-                    new String[]{articles.get(i).source.rssUrl},
+                    new String[]{article.source.rssUrl},
                     null, null, null, null);
             cursor.moveToFirst();
             long sourceId = cursor.getLong(cursor.getColumnIndexOrThrow(SourcesTable._ID));
             cursor.close();
             ContentValues values = new ContentValues();
-            values.put(ArticlesTable.COLUMN_NAME_LINK, articles.get(i).link);
+            values.put(ArticlesTable.COLUMN_NAME_LINK, article.link);
             values.put(ArticlesTable.COLUMN_NAME_SOURCE_ID, sourceId);
-            values.put(ArticlesTable.COLUMN_NAME_TITLE, articles.get(i).title);
-            values.put(ArticlesTable.COLUMN_NAME_AUTHOR, articles.get(i).author);
-            values.put(ArticlesTable.COLUMN_NAME_PUBLISHED, articles.get(i).published.getTime());
-            values.put(ArticlesTable.COLUMN_NAME_CONTENT, articles.get(i).content);
-            values.put(ArticlesTable.COLUMN_NAME_HEADER_IMAGE, articles.get(i).header.url);
-            db.insert(ArticlesTable.TABLE_NAME, null, values);
+            values.put(ArticlesTable.COLUMN_NAME_TITLE, article.title);
+            values.put(ArticlesTable.COLUMN_NAME_AUTHOR, article.author);
+            values.put(ArticlesTable.COLUMN_NAME_PUBLISHED, article.published.getTime());
+            values.put(ArticlesTable.COLUMN_NAME_CONTENT, article.content);
+            values.put(ArticlesTable.COLUMN_NAME_HEADER_IMAGE, article.header.url);
+            article.dbId = db.insert(ArticlesTable.TABLE_NAME, null, values);
         }
     }
 

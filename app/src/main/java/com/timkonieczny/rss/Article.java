@@ -8,7 +8,7 @@ import android.view.View;
 
 import java.util.Date;
 
-class Article implements ImageListener{
+class Article extends DbRow implements ImageListener{
 
     Date published;
     String title, author, link, content;
@@ -34,7 +34,7 @@ class Article implements ImageListener{
     Article(Context context, Resources resources, FragmentManager fragmentManager,
             String title, String author, String link, Date published, String content,
             String headerUrl, String headerFileName, String[] inlineImageUrls,
-            String[] inlineImageFileNames, Source source){
+            String[] inlineImageFileNames, Source source, int dbId){
 
         this(context, resources, fragmentManager);
         this.title = title;
@@ -43,6 +43,7 @@ class Article implements ImageListener{
         this.published = published;
         this.content = content;
         this.source = source;
+        this.dbId = dbId;
         this.header.url = headerUrl;
         this.header.fileName = headerFileName;
         if(inlineImageUrls != null) {

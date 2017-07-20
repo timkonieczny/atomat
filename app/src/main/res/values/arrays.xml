@@ -16,11 +16,11 @@
         <item>@string/pref_sync_option_2m</item>
     </string-array>
     <!--time in seconds-->
-    <integer-array name="pref_sync_values">
+    <string-array name="pref_sync_values">
         <item>604800</item>
         <item>1209600</item>
         <item>1814400</item>
         <item>2592000</item>
         <item>5184000</item>
-    </integer-array>
+    </string-array>
 </resources>

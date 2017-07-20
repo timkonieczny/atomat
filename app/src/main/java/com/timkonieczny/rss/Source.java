@@ -4,11 +4,10 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 
-class Source implements ImageListener{
+class Source extends DbRow implements ImageListener{
 
     String title, rssUrl, link;
     Image icon;
-    long dbId = -1;
 
     private Resources resources;
     Context context;

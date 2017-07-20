@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
-import android.util.Log;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -58,9 +57,9 @@ class Feed extends AsyncTask<Void, Boolean, Boolean> implements DbOpenListener{
     @Override
     protected final Boolean doInBackground(Void... params) {
 
-        long articleLifetime = PreferenceManager
+        long articleLifetime = Integer.parseInt(PreferenceManager
                 .getDefaultSharedPreferences(context)
-                .getInt("pref_sync", 1209600)*1000;
+                .getString("pref_sync", "1209600"))*1000;
 
         int before = MainActivity.articles.size();
         MainActivity.dbManager.load(resources, context, fragmentManager, articleLifetime);
