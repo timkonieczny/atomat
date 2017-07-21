@@ -94,6 +94,6 @@ public class OverviewFragment
 
     public void updateFeed(){
         // TODO: The Verge: Feed only contains article previews. But ID is also a feed URL containing full articles.
-        new Feed(getContext(), getResources(), this, getFragmentManager());
+        new Feed(getContext(), this, getFragmentManager());
     }
 }

@@ -1,7 +1,6 @@
 package com.timkonieczny.rss;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 
 class Source extends DbRow implements ImageListener{
@@ -9,24 +8,22 @@ class Source extends DbRow implements ImageListener{
     String title, rssUrl, link;
     Image icon;
 
-    private Resources resources;
     Context context;
 
     private SourceChangedListener sourceChangedListener;
 
     private final int ICON = -1;
 
-    Source(Context context, Resources resources, String rssUrl){
+    Source(Context context, String rssUrl){
         title = null;
         link = null;
         this.rssUrl = rssUrl;
-        this.resources = resources;
         this.context = context;
         icon = new Image();
     }
 
-    Source(Context context, Resources resources, String rssUrl, String title, String link, String iconUrl, String iconFileName, long dbId){
-        this(context, resources, rssUrl);
+    Source(Context context, String rssUrl, String title, String link, String iconUrl, String iconFileName, long dbId){
+        this(context, rssUrl);
         this.title = title;
         this.link = link;
         this.icon.url = iconUrl;
@@ -36,7 +33,7 @@ class Source extends DbRow implements ImageListener{
 
     Drawable getIconDrawable(SourceChangedListener sourceChangedListener){
         this.sourceChangedListener = sourceChangedListener;
-        return icon.getDrawable(context, resources, this, title, ICON);
+        return icon.getDrawable(context, this, title, ICON);
     }
 
     @Override

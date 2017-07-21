@@ -59,12 +59,7 @@ public class ArticleFragment extends Fragment implements ArticleChangedListener,
     @Override
     public void onViewCreated(final View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        if(MainActivity.viewWidth == 0) view.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-            public void onGlobalLayout() {
-                view.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                MainActivity.viewWidth = view.getWidth();
-            }
-        });
+
 
         /*MainActivity.toggle.setDrawerIndicatorEnabled(false);
         ((AppCompatActivity)getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -84,16 +79,28 @@ public class ArticleFragment extends Fragment implements ArticleChangedListener,
         sourceTitleTextView.setCompoundDrawablesWithIntrinsicBounds(article.source.getIconDrawable(this), null, null, null);
         contentTextView = (TextView)view.findViewById(R.id.article_content);
 
-        spannableStringBuilder = setInlineImages(new SpannableStringBuilder(Html.fromHtml(
-                article.content,Html.FROM_HTML_MODE_COMPACT, null, getCustomTagHandler())));
-        spannableStringBuilder = setInlineUrls(spannableStringBuilder);
 
-        contentTextView.setText(spannableStringBuilder);
-        contentTextView.setMovementMethod(LinkMovementMethod.getInstance());
+        spannableStringBuilder = new SpannableStringBuilder(Html.fromHtml(
+                article.content,Html.FROM_HTML_MODE_COMPACT, null, getCustomTagHandler()));
+        if(MainActivity.viewWidth == 0) view.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            public void onGlobalLayout() {
+                view.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                MainActivity.viewWidth = view.getWidth();
+                setInlineImages();
+                setInlineUrls();
+                contentTextView.setText(spannableStringBuilder);
+                contentTextView.setMovementMethod(LinkMovementMethod.getInstance());
+            }
+        }); else{
+            setInlineImages();
+            setInlineUrls();
+            contentTextView.setText(spannableStringBuilder);
+            contentTextView.setMovementMethod(LinkMovementMethod.getInstance());
+        }
         // TODO: Handle non-image media
     }
 
-    private SpannableStringBuilder setInlineUrls(SpannableStringBuilder spannableStringBuilder){
+    private void setInlineUrls(){
         ArrayList<URLSpan> links = new ArrayList<>(Arrays.asList(
                 spannableStringBuilder.getSpans(0, spannableStringBuilder.length(), URLSpan.class)));
         URLSpan link;
@@ -137,35 +144,32 @@ public class ArticleFragment extends Fragment implements ArticleChangedListener,
         }
         if(links.size()>0) CustomTabsClient.bindCustomTabsService(getContext(), "com.android.chrome",
                     getCustomTabsServiceConnection(mostLikelyUrl, likelyUrls));
-
-        return spannableStringBuilder;
     }
 
-    private SpannableStringBuilder setInlineImages(SpannableStringBuilder spannableStringBuilder){
+    private void setInlineImages(){
         imageSpans = spannableStringBuilder.getSpans(0, spannableStringBuilder.length(), ImageSpan.class);
 
         if(article.inlineImages == null){
-            article.inlineImages = new Image[imageSpans.length];
-            for(int i = 0; i < article.inlineImages.length; i++){
-                article.inlineImages[i] = new Image();
-                article.inlineImages[i].url = imageSpans[i].getSource();
+            article.inlineImages = new ArrayList<>();
+            for(int i = 0; i < imageSpans.length; i++){
+                article.inlineImages.add(new Image());
+                article.inlineImages.get(i).url = imageSpans[i].getSource();
             }
         }
 
-        for(int i = 0; i < article.inlineImages.length; i++){
+        for(int i = 0; i < article.inlineImages.size(); i++){
             if(article.getImage(this, i) != null) setInlineImage(i);
         }
-        return spannableStringBuilder;
     }
 
     private void setInlineImage(int index){
+        Image image = article.inlineImages.get(index);
         int imageWidth = MainActivity.viewWidth-contentTextView.getPaddingLeft()-contentTextView.getPaddingRight();
-        int imageHeight = (article.inlineImages[index].drawable.getMinimumHeight() *
+        int imageHeight = (image.drawable.getMinimumHeight() *
                 (MainActivity.viewWidth-contentTextView.getPaddingLeft()-contentTextView.getPaddingRight())) /
-                article.inlineImages[index].drawable.getMinimumWidth();
-        article.inlineImages[index].drawable.setBounds(0, 0, imageWidth, imageHeight);
-        spannableStringBuilder.setSpan(
-                new ImageSpan(article.inlineImages[index].drawable),
+                image.drawable.getMinimumWidth();
+        image.drawable.setBounds(0, 0, imageWidth, imageHeight);
+        spannableStringBuilder.setSpan(new ImageSpan(image.drawable),
                 spannableStringBuilder.getSpanStart(imageSpans[index]),
                 spannableStringBuilder.getSpanEnd(imageSpans[index]),
                 spannableStringBuilder.getSpanFlags(imageSpans[index]));

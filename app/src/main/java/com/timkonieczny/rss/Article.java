@@ -1,11 +1,12 @@
 package com.timkonieczny.rss;
 
 import android.app.FragmentManager;
+import android.content.ContentValues;
 import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.view.View;
 
+import java.util.ArrayList;
 import java.util.Date;
 
 class Article extends DbRow implements ImageListener{
@@ -17,26 +18,23 @@ class Article extends DbRow implements ImageListener{
     private ArticleChangedListener articleChangedListener;
 
     Image header;
-    Image[] inlineImages;
+    ArrayList<Image> inlineImages;
 
     private Context context;
-    private Resources resources;
 
     static final int HEADER = -1;
 
-    Article(Context context, Resources resources, FragmentManager fragmentManager){
+    Article(Context context, FragmentManager fragmentManager){
         header = new Image();
         this.context = context;
-        this.resources = resources;
         this.onClickListener = new ArticleOnClickListener(this, fragmentManager);
     }
 
-    Article(Context context, Resources resources, FragmentManager fragmentManager,
+    Article(Context context, FragmentManager fragmentManager,
             String title, String author, String link, Date published, String content,
-            String headerUrl, String headerFileName, String[] inlineImageUrls,
-            String[] inlineImageFileNames, Source source, int dbId){
+            Source source, long dbId){
 
-        this(context, resources, fragmentManager);
+        this(context, fragmentManager);
         this.title = title;
         this.author = author;
         this.link = link;
@@ -44,21 +42,12 @@ class Article extends DbRow implements ImageListener{
         this.content = content;
         this.source = source;
         this.dbId = dbId;
-        this.header.url = headerUrl;
-        this.header.fileName = headerFileName;
-        if(inlineImageUrls != null) {
-            inlineImages = new Image[inlineImageUrls.length];
-            for (int i = 0; i < this.inlineImages.length; i++) {
-                inlineImages[i].url = inlineImageUrls[i];
-                if(inlineImageFileNames != null) inlineImages[i].fileName = inlineImageFileNames[i];
-            }
-        }
     }
 
     Drawable getImage(ArticleChangedListener articleChangedListener, int index){
         this.articleChangedListener = articleChangedListener;
-        if(index == HEADER) return header.getDrawable(context, resources, this, title, index);
-        else return inlineImages[index].getDrawable(context, resources, this, title, index);
+        if(index == HEADER) return header.getDrawable(context, this, title, index);
+        else return inlineImages.get(index).getDrawable(context, this, title, index);
     }
 
     @Override
@@ -72,29 +61,22 @@ class Article extends DbRow implements ImageListener{
 
     @Override
     public void onImageLoaded(int index) {
+        ContentValues values = new ContentValues();
         if(index == HEADER) {
-            MainActivity.dbManager.updateValue(DbManager.ArticlesTable.TABLE_NAME,
-                    DbManager.ArticlesTable.COLUMN_NAME_HEADER_IMAGE_FILE, header.fileName,
-                    DbManager.ArticlesTable.COLUMN_NAME_LINK, link);
+            values.put(DbManager.ImagesTable.COLUMN_NAME_PATH, header.fileName);
+            values.put(DbManager.ImagesTable.COLUMN_NAME_WIDTH, header.width);
+            values.put(DbManager.ImagesTable.COLUMN_NAME_HEIGHT, header.height);
+            MainActivity.dbManager.updateImage(values, dbId, index);
         }else{
-            String inlineImageUrls = "";
-            String inlineImageFiles = "";
-            for (Image inlineImage : inlineImages) {
-                if (inlineImage.url != null) inlineImageUrls += " " + inlineImage.url;
-                else inlineImageUrls += " null";
-                if (inlineImage.fileName != null) inlineImageFiles += " " + inlineImage.fileName;
-                else inlineImageFiles += " null";
-            }
-            inlineImageUrls = inlineImageUrls.replaceFirst(" ", "");
-            inlineImageFiles = inlineImageFiles.replaceFirst(" ", "");
-            MainActivity.dbManager.updateValue(DbManager.ArticlesTable.TABLE_NAME,
-                    DbManager.ArticlesTable.COLUMN_NAME_INLINE_IMAGES, inlineImageUrls,
-                    DbManager.ArticlesTable.COLUMN_NAME_LINK+"= ?", link);
-
-            MainActivity.dbManager.updateValue(DbManager.ArticlesTable.TABLE_NAME,
-                    DbManager.ArticlesTable.COLUMN_NAME_INLINE_IMAGES_FILES, inlineImageFiles,
-                    DbManager.ArticlesTable.COLUMN_NAME_LINK+"= ?", link);
+            values.put(DbManager.ImagesTable.COLUMN_NAME_PATH, inlineImages.get(index).fileName);
+            values.put(DbManager.ImagesTable.COLUMN_NAME_INDEX, index);
+            values.put(DbManager.ImagesTable.COLUMN_NAME_ARTICLE_ID, dbId);
+            values.put(DbManager.ImagesTable.COLUMN_NAME_URL, inlineImages.get(index).url);
+            values.put(DbManager.ImagesTable.COLUMN_NAME_WIDTH, inlineImages.get(index).width);
+            values.put(DbManager.ImagesTable.COLUMN_NAME_HEIGHT, inlineImages.get(index).height);
+            MainActivity.dbManager.insertImage(values);
         }
+
         if (articleChangedListener != null) articleChangedListener.onArticleChanged(this, index);
     }
 }

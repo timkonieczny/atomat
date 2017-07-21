@@ -1,12 +1,9 @@
 package com.timkonieczny.rss;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
 import android.os.AsyncTask;
-import android.support.v7.graphics.Palette;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -16,14 +13,12 @@ import java.net.URL;
 class ImageTask extends AsyncTask<Image, Void, Void> {
 
     private Context context;
-    private Resources resources;
     ImageListener imageListener;
     private int index;
     private String fileName;
 
-    ImageTask(Context context, Resources resources, int index, String fileName){
+    ImageTask(Context context, int index, String fileName){
         this.index = index;
-        this.resources = resources;
         this.context = context;
         this.fileName = fileName;
     }
@@ -34,11 +29,10 @@ class ImageTask extends AsyncTask<Image, Void, Void> {
             InputStream stream = (new URL(images[0].url)).openStream();
             Bitmap bitmap = BitmapFactory.decodeStream(stream);
 
-            images[0].drawable = new BitmapDrawable(resources, bitmap);
-            images[0].palette = (new Palette.Builder(bitmap)).generate();
-
             saveImageInInternalStorage(bitmap);
             images[0].fileName = fileName;
+            images[0].width = bitmap.getWidth();
+            images[0].height = bitmap.getHeight();
         } catch (IOException e) {
             e.printStackTrace();
         }

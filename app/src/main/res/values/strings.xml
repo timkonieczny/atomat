@@ -6,6 +6,7 @@
     <string name="source_icon_image_descriptor">source icon image</string>
     <string name="cancel_adding_source">cancel adding source</string>
     <string name="action_settings">Settings</string>
+    <string name="source_options_image_descriptor">source options</string>
 
     <!-- activity / fragment names -->
     <string name="title_activity_main">Atomat</string>

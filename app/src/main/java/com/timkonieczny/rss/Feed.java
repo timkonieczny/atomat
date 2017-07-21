@@ -2,7 +2,6 @@ package com.timkonieczny.rss;
 
 import android.app.FragmentManager;
 import android.content.Context;
-import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 
@@ -21,7 +20,6 @@ import java.util.List;
 class Feed extends AsyncTask<Void, Boolean, Boolean> implements DbOpenListener{
 
     private Context context;
-    private Resources resources;
     private FragmentManager fragmentManager;
     private FeedListener feedListener;
     private SourceUpdater sourceUpdater;
@@ -29,13 +27,12 @@ class Feed extends AsyncTask<Void, Boolean, Boolean> implements DbOpenListener{
     private Comparator<Article> descending;
     private String newSource;
 
-    Feed(Context context, Resources resources, FeedListener feedListener, FragmentManager fragmentManager){
-        this(context, resources, feedListener, fragmentManager, null);
+    Feed(Context context, FeedListener feedListener, FragmentManager fragmentManager){
+        this(context, feedListener, fragmentManager, null);
     }
 
-    Feed(Context context, Resources resources, FeedListener feedListener, FragmentManager fragmentManager, String newSource){
+    Feed(Context context, FeedListener feedListener, FragmentManager fragmentManager, String newSource){
         this.context = context;
-        this.resources = resources;
         this.feedListener = feedListener;
         this.fragmentManager = fragmentManager;
         this.newSource = newSource;
@@ -45,7 +42,7 @@ class Feed extends AsyncTask<Void, Boolean, Boolean> implements DbOpenListener{
                 return a2.published.compareTo(a1.published);
             }
         };
-        sourceUpdater = new SourceUpdater(context, resources, fragmentManager);
+        sourceUpdater = new SourceUpdater(context, fragmentManager);
         (new DbOpenTask(MainActivity.dbManager, this)).execute();
     }
 
@@ -62,7 +59,7 @@ class Feed extends AsyncTask<Void, Boolean, Boolean> implements DbOpenListener{
                 .getString("pref_sync", "1209600"))*1000;
 
         int before = MainActivity.articles.size();
-        MainActivity.dbManager.load(resources, context, fragmentManager, articleLifetime);
+        MainActivity.dbManager.load(context, fragmentManager, articleLifetime);
         Collections.sort(MainActivity.articles, descending);
         publishProgress(before != MainActivity.articles.size());
 
@@ -71,7 +68,7 @@ class Feed extends AsyncTask<Void, Boolean, Boolean> implements DbOpenListener{
             updateSource(MainActivity.sources.get(i), articles, false);
         }
 
-        if(newSource != null) updateSource(new Source(context, resources, newSource), articles, true);
+        if(newSource != null) updateSource(new Source(context, newSource), articles, true);
 
         HashSet<String> existingLinks = getExistingArticleLinks();
 

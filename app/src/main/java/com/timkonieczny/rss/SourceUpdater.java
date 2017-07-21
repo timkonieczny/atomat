@@ -2,7 +2,6 @@ package com.timkonieczny.rss;
 
 import android.app.FragmentManager;
 import android.content.Context;
-import android.content.res.Resources;
 import android.util.Xml;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -27,7 +26,6 @@ class SourceUpdater {
     protected Source source;
     private boolean updateSource;
     private Context context;
-    private Resources resources;
     private FragmentManager fragmentManager;
     private XmlPullParser parser;
 
@@ -43,9 +41,8 @@ class SourceUpdater {
     private HashSet<String> entryLinkTags;
     private HashSet<String> entryAuthorTags;
 
-    SourceUpdater(Context context, Resources resources, FragmentManager fragmentManager) {
+    SourceUpdater(Context context, FragmentManager fragmentManager) {
         this.context = context;
-        this.resources = resources;
         this.fragmentManager = fragmentManager;
 
         initializeTagDictionaries();
@@ -131,7 +128,7 @@ class SourceUpdater {
     // off  to their respective methods for processing. Otherwise, skips the tag.
     private Article readEntry(XmlPullParser parser) throws XmlPullParserException, IOException {
 
-        Article article = new Article(context, resources, fragmentManager);
+        Article article = new Article(context, fragmentManager);
 
         parser.require(XmlPullParser.START_TAG, null, parser.getName());
         while (parser.next() != XmlPullParser.END_TAG) {
