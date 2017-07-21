@@ -18,7 +18,7 @@ import android.view.MenuItem;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    protected static ArticlesList articles = null;
+    protected static DbList<Article> articles = null;
     protected static SourcesList sources = null;
 
     protected static ActionBarDrawerToggle toggle;

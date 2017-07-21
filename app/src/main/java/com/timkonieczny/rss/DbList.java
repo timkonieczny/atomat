@@ -4,37 +4,31 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 
-class ArticlesList extends ArrayList<Article>{
+class DbList<T extends DbRow> extends ArrayList<T> {
 
     private HashSet<Long> dbIds;
 
-    ArticlesList(){
+    DbList(){
         super();
         dbIds = new HashSet<>();
     }
 
     @Override
-    public boolean add(Article article) {
-        dbIds.add(article.dbId);
-        return super.add(article);
+    public boolean add(T t) {
+        if(t.dbId != DbRow.DEFAULT_DB_ID) dbIds.add(t.dbId);
+        return super.add(t);
     }
 
     @Override
-    public boolean addAll(Collection<? extends Article> c) {
-        for (Object o : c){
-            dbIds.add(((Article)o).dbId);
-        }
+    public boolean addAll(Collection<? extends T> c) {
+        for (T t : c) if(t.dbId != DbRow.DEFAULT_DB_ID) dbIds.add(t.dbId);
         return super.addAll(c);
     }
 
-    boolean containsDbId(long dbId){
-        return dbIds.contains(dbId);
-    }
-
-    Article getByDbId(long dbId){
+    T getByDbId(long dbId){
         for(int i = 0; i < this.size(); i++){
-            Article article = this.get(i);
-            if(article.dbId == dbId) return article;
+            T t = this.get(i);
+            if(t.dbId == dbId) return t;
         }
         return null;
     }
@@ -47,5 +41,13 @@ class ArticlesList extends ArrayList<Article>{
                 break;
             }
         }
+    }
+
+    void addDbId(T t){
+        dbIds.add(t.dbId);
+    }
+
+    boolean containsDbId(long dbId){
+        return dbIds.contains(dbId);
     }
 }

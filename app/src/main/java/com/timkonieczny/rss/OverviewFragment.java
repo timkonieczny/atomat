@@ -41,7 +41,7 @@ public class OverviewFragment
         };
 
         if(MainActivity.sources == null) MainActivity.sources = new SourcesList();
-        if(MainActivity.articles == null) MainActivity.articles = new ArticlesList();
+        if(MainActivity.articles == null) MainActivity.articles = new DbList<>();
 
         feedAdapter = new FeedAdapter();
     }

@@ -1,5 +1,6 @@
 package com.timkonieczny.rss;
 
 class DbRow {
-    long dbId = -1;
+    static final int DEFAULT_DB_ID = -1;
+    long dbId = DEFAULT_DB_ID;
 }

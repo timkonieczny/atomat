@@ -137,7 +137,7 @@ class DbManager extends SQLiteOpenHelper {
                             cursor.getString(cursor.getColumnIndexOrThrow(ArticlesTable.COLUMN_NAME_CONTENT)),
                             cursor.getString(cursor.getColumnIndexOrThrow(ArticlesTable.COLUMN_NAME_HEADER_IMAGE)),
                             cursor.getString(cursor.getColumnIndexOrThrow(ArticlesTable.COLUMN_NAME_HEADER_IMAGE_FILE)),
-                            inlineImageUrls, inlineImageFiles, (Source) MainActivity.sources.getByDbId(sourceDbId),
+                            inlineImageUrls, inlineImageFiles, MainActivity.sources.getByDbId(sourceDbId),
                             cursor.getInt(cursor.getColumnIndexOrThrow(ArticlesTable._ID)));
                     article.getImage(null, Article.HEADER);
                     MainActivity.articles.add(article);
@@ -203,7 +203,7 @@ class DbManager extends SQLiteOpenHelper {
         values.put(SourcesTable.COLUMN_NAME_LINK, source.link);
         db.insert(SourcesTable.TABLE_NAME, null, values);
         source.dbId = getSourceId(source.rssUrl);
-        MainActivity.sources.addDbId(source.dbId);
+        MainActivity.sources.addDbId(source);
     }
 
     void updateValue(String table, String column, String value, String whereColumn, String whereValue){
