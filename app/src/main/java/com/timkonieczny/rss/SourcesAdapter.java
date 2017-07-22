@@ -1,12 +1,14 @@
 package com.timkonieczny.rss;
 
 import android.content.Context;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 
 class SourcesAdapter extends BaseAdapter implements SourceChangedListener {
@@ -38,7 +40,7 @@ class SourcesAdapter extends BaseAdapter implements SourceChangedListener {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         gridView = (GridView) parent;
-        View view;
+        final View view;
 
         if (convertView == null) view = layoutInflater.inflate(R.layout.source_item, parent, false);
         else view = convertView;
@@ -47,12 +49,22 @@ class SourcesAdapter extends BaseAdapter implements SourceChangedListener {
         View backgroundView = view.findViewById(R.id.source_background);
         int backgroundColor = context.getResources().getColor(R.color.cardview_dark_background, context.getTheme());
 
-        Source source = MainActivity.sources.get(position);
+        final Source source = MainActivity.sources.get(position);
         iconImageView.setImageDrawable(source.getIconDrawable(this));
         if(source.icon.palette != null) backgroundView.setBackgroundColor(source.icon.palette.getVibrantColor(backgroundColor));
         else backgroundView.setBackgroundColor(backgroundColor);
 
         ((TextView)view.findViewById(R.id.source_title)).setText(source.title);
+
+        view.findViewById(R.id.source_item_options_button).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                PopupMenu popupMenu = new PopupMenu(context, v, Gravity.NO_GRAVITY, R.attr.actionOverflowMenuStyle, 0);
+                popupMenu.setOnMenuItemClickListener(source);
+                popupMenu.inflate(R.menu.source_options_popup);
+                popupMenu.show();
+            }
+        });
 
         return view;
     }

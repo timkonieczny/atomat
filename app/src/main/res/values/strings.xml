@@ -27,6 +27,9 @@
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="creating_source_loading">Creating source</string>
 
+    <!-- source options entries -->
+    <string name="delete_source_menu_option">Delete source</string>
+
     <!-- strings related to settings -->
     <string name="pref_theme_category_title">Theme</string>
     <string name="pref_theme_day_night_title">DayNight</string>

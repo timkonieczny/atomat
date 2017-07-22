@@ -2,8 +2,11 @@ package com.timkonieczny.rss;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.util.Log;
+import android.view.MenuItem;
+import android.widget.PopupMenu;
 
-class Source extends DbRow implements ImageListener{
+class Source extends DbRow implements ImageListener, PopupMenu.OnMenuItemClickListener{
 
     String title, rssUrl, link;
     Image icon;
@@ -34,6 +37,10 @@ class Source extends DbRow implements ImageListener{
         return icon.getDrawable(context, this, title, Image.TYPE_ICON);
     }
 
+    private void destroy(){
+        Log.d("Source", "destroy "+title);
+    }
+
     @Override
     public String toString(){
         return "Title:\t\t\t"+title+
@@ -51,5 +58,11 @@ class Source extends DbRow implements ImageListener{
                 DbManager.SourcesTable.COLUMN_NAME_ICON_FILE, icon.fileName,
                 DbManager.SourcesTable.COLUMN_NAME_URL, rssUrl);
         sourceChangedListener.onSourceChanged(this);
+    }
+
+    @Override
+    public boolean onMenuItemClick(MenuItem item) {
+        destroy();
+        return true;
     }
 }
