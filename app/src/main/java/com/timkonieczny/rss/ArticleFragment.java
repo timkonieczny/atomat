@@ -82,21 +82,11 @@ public class ArticleFragment extends Fragment implements ArticleChangedListener,
 
         spannableStringBuilder = new SpannableStringBuilder(Html.fromHtml(
                 article.content,Html.FROM_HTML_MODE_COMPACT, null, getCustomTagHandler()));
-        if(MainActivity.viewWidth == 0) view.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-            public void onGlobalLayout() {
-                view.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                MainActivity.viewWidth = view.getWidth();
-                setInlineImages();
-                setInlineUrls();
-                contentTextView.setText(spannableStringBuilder);
-                contentTextView.setMovementMethod(LinkMovementMethod.getInstance());
-            }
-        }); else{
-            setInlineImages();
-            setInlineUrls();
-            contentTextView.setText(spannableStringBuilder);
-            contentTextView.setMovementMethod(LinkMovementMethod.getInstance());
-        }
+
+        setInlineImages();
+        setInlineUrls();
+        contentTextView.setText(spannableStringBuilder);
+        contentTextView.setMovementMethod(LinkMovementMethod.getInstance());
         // TODO: Handle non-image media
     }
 

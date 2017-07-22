@@ -2,6 +2,7 @@ package com.timkonieczny.rss;
 
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.graphics.Point;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
@@ -13,6 +14,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Display;
 import android.view.MenuItem;
 
 public class MainActivity extends AppCompatActivity
@@ -41,6 +43,10 @@ public class MainActivity extends AppCompatActivity
         // No point in running this code if everything needs to be rebuilt anyway.
         if(setTheme()) {
             setContentView(R.layout.activity_main);
+
+            Point size = new Point();
+            getWindowManager().getDefaultDisplay().getSize(size);
+            viewWidth = size.x;
 
             Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
             setSupportActionBar(toolbar);
