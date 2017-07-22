@@ -28,7 +28,7 @@ class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ArticleCardViewHolder
         holder.sourceTitle.setCompoundDrawablesWithIntrinsicBounds(article.source.getIconDrawable(this), null, null, null);
         holder.articleTitle.setText(article.title);
         holder.articleAuthor.setText(article.author);
-        holder.articleHeader.setImageDrawable(article.getImage(this, Article.HEADER));
+        holder.articleHeader.setImageDrawable(article.getImage(this, Image.TYPE_HEADER));
 
         if(article.header.palette!=null) {
             int color = article.header.palette.getDarkVibrantColor(Color.DKGRAY);

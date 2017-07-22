@@ -79,7 +79,7 @@ class Feed extends AsyncTask<Void, Boolean, Boolean> implements DbOpenListener{
                     article.published.getTime()<System.currentTimeMillis()-articleLifetime){
                 articles.remove(i);
                 i--;
-            }else article.getImage(null, Article.HEADER);
+            }else article.getImage(null, Image.TYPE_HEADER);
         }
 
         MainActivity.dbManager.createArticles(articles);

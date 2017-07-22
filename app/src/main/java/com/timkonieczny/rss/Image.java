@@ -10,11 +10,21 @@ import android.support.v7.graphics.Palette;
 import java.io.File;
 
 class Image extends DbRow{
+    static int TYPE_INLINE = 0;
+    static int TYPE_HEADER = -1;
+    static int TYPE_ICON = -2;
+
     String url, fileName, absolutePath;
     Drawable drawable;
-    Palette palette;
+    Palette palette;    // TODO: save palette in Db?
     private ImageTask imageTask;
     int width, height;
+    int type;
+
+    Image(){}
+    Image(int type){
+        this.type = type;
+    }
 
     Drawable getDrawable(Context context, ImageListener imageListener, String fileNameSeed, int index){
         if(drawable != null){
@@ -34,11 +44,12 @@ class Image extends DbRow{
 
     private void loadFromInternalStorage(Context context){
         BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inSampleSize = 8;
+        if(type != TYPE_ICON) options.inSampleSize = getSampleSize();
+
         Bitmap bitmap = BitmapFactory.decodeFile(
                 (new File(context.getFilesDir(), fileName)).getAbsolutePath(), options);
         drawable = new BitmapDrawable(context.getResources(), bitmap);
-        palette = (new Palette.Builder(bitmap)).generate();
+        if(type!=TYPE_INLINE) palette = (new Palette.Builder(bitmap)).generate();
     }
 
     private String generateFileName(String name){
@@ -46,5 +57,13 @@ class Image extends DbRow{
         if(fileName.length()>10) fileName = fileName.substring(0, 10);
         fileName += "_" + System.currentTimeMillis() + ".jpg";
         return fileName;
+    }
+
+    private int getSampleSize(){
+        int dstWidth = MainActivity.viewWidth;
+        int sampleSize = 1;
+        while (width / (sampleSize*2) > dstWidth) sampleSize*=2;
+        if(width/sampleSize-dstWidth < dstWidth-width/(sampleSize*2)) return sampleSize;
+        else return sampleSize*2;
     }
 }

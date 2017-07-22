@@ -165,10 +165,12 @@ class DbManager extends SQLiteOpenHelper {
 
                 int imageIndex = getInt(cursor, ImagesTable.COLUMN_NAME_INDEX);
 
-                if(imageIndex == Article.HEADER){
+                if(imageIndex == Image.TYPE_HEADER){
+                    image.type = Image.TYPE_HEADER;
                     article.header = image;
-                    article.getImage(null, Article.HEADER);
+                    article.getImage(null, Image.TYPE_HEADER);
                 }else{
+                    image.type = Image.TYPE_INLINE;
                     if(article.inlineImages == null) article.inlineImages = new ArrayList<>();
                     for(int i = article.inlineImages.size() + 1; i <= imageIndex+1; i++)
                         article.inlineImages.add(null);
@@ -286,7 +288,6 @@ class DbManager extends SQLiteOpenHelper {
         static final String COLUMN_NAME_CONTENT = "content";
     }
 
-    // TODO: Add palette to Db?
     class ImagesTable implements BaseColumns {
         static final String TABLE_NAME = "images";
         static final String COLUMN_NAME_ARTICLE_ID = "article_id";

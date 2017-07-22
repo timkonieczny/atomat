@@ -26,7 +26,6 @@ import android.text.style.URLSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -75,7 +74,7 @@ public class ArticleFragment extends Fragment implements ArticleChangedListener,
         ((TextView) view.findViewById(R.id.article_title)).setText(article.title);
         ((TextView) view.findViewById(R.id.article_author)).setText(article.author);
         sourceTitleTextView.setText(article.source.title);
-        headerImageView.setImageDrawable(article.getImage(this, Article.HEADER));
+        headerImageView.setImageDrawable(article.getImage(this, Image.TYPE_HEADER));
         sourceTitleTextView.setCompoundDrawablesWithIntrinsicBounds(article.source.getIconDrawable(this), null, null, null);
         contentTextView = (TextView)view.findViewById(R.id.article_content);
 
@@ -142,7 +141,7 @@ public class ArticleFragment extends Fragment implements ArticleChangedListener,
         if(article.inlineImages == null){
             article.inlineImages = new ArrayList<>();
             for(int i = 0; i < imageSpans.length; i++){
-                article.inlineImages.add(new Image());
+                article.inlineImages.add(new Image(Image.TYPE_INLINE));
                 article.inlineImages.get(i).url = imageSpans[i].getSource();
             }
         }
@@ -213,7 +212,7 @@ public class ArticleFragment extends Fragment implements ArticleChangedListener,
 
     @Override
     public void onArticleChanged(Article article, int flag) {
-        if(flag == Article.HEADER) headerImageView.setImageDrawable(article.header.drawable);
+        if(flag == Image.TYPE_HEADER) headerImageView.setImageDrawable(article.header.drawable);
         else {
             setInlineImage(flag);
             contentTextView.setText(spannableStringBuilder);

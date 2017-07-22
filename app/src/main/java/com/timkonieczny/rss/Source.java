@@ -12,14 +12,12 @@ class Source extends DbRow implements ImageListener{
 
     private SourceChangedListener sourceChangedListener;
 
-    private final int ICON = -1;
-
     Source(Context context, String rssUrl){
         title = null;
         link = null;
         this.rssUrl = rssUrl;
         this.context = context;
-        icon = new Image();
+        icon = new Image(Image.TYPE_ICON);
     }
 
     Source(Context context, String rssUrl, String title, String link, String iconUrl, String iconFileName, long dbId){
@@ -33,7 +31,7 @@ class Source extends DbRow implements ImageListener{
 
     Drawable getIconDrawable(SourceChangedListener sourceChangedListener){
         this.sourceChangedListener = sourceChangedListener;
-        return icon.getDrawable(context, this, title, ICON);
+        return icon.getDrawable(context, this, title, Image.TYPE_ICON);
     }
 
     @Override

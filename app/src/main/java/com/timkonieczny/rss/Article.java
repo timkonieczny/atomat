@@ -22,10 +22,8 @@ class Article extends DbRow implements ImageListener{
 
     private Context context;
 
-    static final int HEADER = -1;
-
     Article(Context context, FragmentManager fragmentManager){
-        header = new Image();
+        header = new Image(Image.TYPE_HEADER);
         this.context = context;
         this.onClickListener = new ArticleOnClickListener(this, fragmentManager);
     }
@@ -46,7 +44,7 @@ class Article extends DbRow implements ImageListener{
 
     Drawable getImage(ArticleChangedListener articleChangedListener, int index){
         this.articleChangedListener = articleChangedListener;
-        if(index == HEADER) return header.getDrawable(context, this, title, index);
+        if(index == Image.TYPE_HEADER) return header.getDrawable(context, this, title, index);
         else return inlineImages.get(index).getDrawable(context, this, title, index);
     }
 
@@ -62,7 +60,7 @@ class Article extends DbRow implements ImageListener{
     @Override
     public void onImageLoaded(int index) {
         Image image;
-        if(index == HEADER) image = header;
+        if(index == Image.TYPE_HEADER) image = header;
         else image = inlineImages.get(index);
         ContentValues values = new ContentValues();
         values.put(DbManager.ImagesTable.COLUMN_NAME_PATH, image.fileName);
