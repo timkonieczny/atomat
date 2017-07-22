@@ -61,21 +61,17 @@ class Article extends DbRow implements ImageListener{
 
     @Override
     public void onImageLoaded(int index) {
+        Image image;
+        if(index == HEADER) image = header;
+        else image = inlineImages.get(index);
         ContentValues values = new ContentValues();
-        if(index == HEADER) {
-            values.put(DbManager.ImagesTable.COLUMN_NAME_PATH, header.fileName);
-            values.put(DbManager.ImagesTable.COLUMN_NAME_WIDTH, header.width);
-            values.put(DbManager.ImagesTable.COLUMN_NAME_HEIGHT, header.height);
-            MainActivity.dbManager.updateImage(values, dbId, index);
-        }else{
-            values.put(DbManager.ImagesTable.COLUMN_NAME_PATH, inlineImages.get(index).fileName);
-            values.put(DbManager.ImagesTable.COLUMN_NAME_INDEX, index);
-            values.put(DbManager.ImagesTable.COLUMN_NAME_ARTICLE_ID, dbId);
-            values.put(DbManager.ImagesTable.COLUMN_NAME_URL, inlineImages.get(index).url);
-            values.put(DbManager.ImagesTable.COLUMN_NAME_WIDTH, inlineImages.get(index).width);
-            values.put(DbManager.ImagesTable.COLUMN_NAME_HEIGHT, inlineImages.get(index).height);
-            MainActivity.dbManager.insertImage(values);
-        }
+        values.put(DbManager.ImagesTable.COLUMN_NAME_PATH, image.fileName);
+        values.put(DbManager.ImagesTable.COLUMN_NAME_INDEX, index);
+        values.put(DbManager.ImagesTable.COLUMN_NAME_ARTICLE_ID, dbId);
+        values.put(DbManager.ImagesTable.COLUMN_NAME_URL, image.url);
+        values.put(DbManager.ImagesTable.COLUMN_NAME_WIDTH, image.width);
+        values.put(DbManager.ImagesTable.COLUMN_NAME_HEIGHT, image.height);
+        image.dbId = MainActivity.dbManager.insertImage(values);
 
         if (articleChangedListener != null) articleChangedListener.onArticleChanged(this, index);
     }

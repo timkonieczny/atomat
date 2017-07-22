@@ -59,11 +59,7 @@ class DbManager extends SQLiteOpenHelper {
                 ArticlesTable.COLUMN_NAME_TITLE +               " TEXT," +
                 ArticlesTable.COLUMN_NAME_AUTHOR +              " TEXT," +
                 ArticlesTable.COLUMN_NAME_PUBLISHED +           " INTEGER," +
-                ArticlesTable.COLUMN_NAME_CONTENT +             " TEXT," +
-                ArticlesTable.COLUMN_NAME_HEADER_IMAGE +        " TEXT," +
-                ArticlesTable.COLUMN_NAME_HEADER_IMAGE_FILE +   " TEXT," +
-                ArticlesTable.COLUMN_NAME_INLINE_IMAGES +       " TEXT," +
-                ArticlesTable.COLUMN_NAME_INLINE_IMAGES_FILES + " TEXT)");
+                ArticlesTable.COLUMN_NAME_CONTENT +             " TEXT)");
 
         db.execSQL("CREATE TABLE " + ImagesTable.TABLE_NAME + " (" +
                 ImagesTable._ID +                               " INTEGER PRIMARY KEY," +
@@ -252,23 +248,11 @@ class DbManager extends SQLiteOpenHelper {
             values.put(ArticlesTable.COLUMN_NAME_PUBLISHED, article.published.getTime());
             values.put(ArticlesTable.COLUMN_NAME_CONTENT, article.content);
             article.dbId = db.insert(ArticlesTable.TABLE_NAME, null, values);
-            values.clear();
-            values.put(ImagesTable.COLUMN_NAME_URL, article.header.url);
-            values.put(ImagesTable.COLUMN_NAME_ARTICLE_ID, article.dbId);
-            values.put(ImagesTable.COLUMN_NAME_INDEX, Article.HEADER);
-            db.insert(ImagesTable.TABLE_NAME, null, values);
         }
     }
 
-    void updateImage(ContentValues values, long dbId, int index){
-        db.update(DbManager.ImagesTable.TABLE_NAME, values,
-                DbManager.ImagesTable.COLUMN_NAME_ARTICLE_ID + " = ? AND " + DbManager.ImagesTable.COLUMN_NAME_INDEX + " = ?",
-                new String[]{String.valueOf(dbId), String.valueOf(index)}
-        );
-    }
-
-    void insertImage(ContentValues values){
-        db.insert(ImagesTable.TABLE_NAME, null, values);
+    long insertImage(ContentValues values){
+        return db.insert(ImagesTable.TABLE_NAME, null, values);
     }
 
     private String getString(Cursor cursor, String column){
@@ -294,17 +278,12 @@ class DbManager extends SQLiteOpenHelper {
 
     private class ArticlesTable implements BaseColumns {
         static final String TABLE_NAME = "articles";
-
         static final String COLUMN_NAME_LINK = "link";
         static final String COLUMN_NAME_SOURCE_ID = "source_id";
         static final String COLUMN_NAME_TITLE = "title";
         static final String COLUMN_NAME_AUTHOR = "author";
         static final String COLUMN_NAME_PUBLISHED = "published";
         static final String COLUMN_NAME_CONTENT = "content";
-        static final String COLUMN_NAME_HEADER_IMAGE = "header_image";
-        static final String COLUMN_NAME_HEADER_IMAGE_FILE = "header_image_file";
-        static final String COLUMN_NAME_INLINE_IMAGES = "inline_images";
-        static final String COLUMN_NAME_INLINE_IMAGES_FILES = "inline_images_files";
     }
 
     // TODO: Add palette to Db?

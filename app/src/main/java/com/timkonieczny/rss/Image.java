@@ -9,7 +9,7 @@ import android.support.v7.graphics.Palette;
 
 import java.io.File;
 
-class Image{
+class Image extends DbRow{
     String url, fileName, absolutePath;
     Drawable drawable;
     Palette palette;
