@@ -40,37 +40,46 @@ class DbManager extends SQLiteOpenHelper {
 
     // retrieves db if it exists (onCreate() not called), otherwise creates it (onCreate() called).
     void getDb(){
-        if(db == null) db = getWritableDatabase();
+        if(db == null){
+            db = getWritableDatabase();
+            db.execSQL("PRAGMA foreign_keys = ON");
+        }
     }
 
     private void createTables(SQLiteDatabase db){
+
         db.execSQL("CREATE TABLE " + SourcesTable.TABLE_NAME + " (" +
-                SourcesTable._ID +                              " INTEGER PRIMARY KEY," +
-                SourcesTable.COLUMN_NAME_URL +                  " TEXT," +
-                SourcesTable.COLUMN_NAME_TITLE +                " TEXT," +
-                SourcesTable.COLUMN_NAME_ICON +                 " TEXT," +
-                SourcesTable.COLUMN_NAME_ICON_FILE +            " TEXT," +
+                SourcesTable._ID +                              " INTEGER PRIMARY KEY, " +
+                SourcesTable.COLUMN_NAME_URL +                  " TEXT, " +
+                SourcesTable.COLUMN_NAME_TITLE +                " TEXT, " +
+                SourcesTable.COLUMN_NAME_ICON +                 " TEXT, " +
+                SourcesTable.COLUMN_NAME_ICON_FILE +            " TEXT, " +
                 SourcesTable.COLUMN_NAME_LINK +                 " TEXT)");
 
-        db.execSQL("CREATE TABLE " + ArticlesTable.TABLE_NAME + " (" +
-                ArticlesTable._ID +                             " INTEGER PRIMARY KEY," +
-                ArticlesTable.COLUMN_NAME_LINK +                " TEXT," +
-                ArticlesTable.COLUMN_NAME_SOURCE_ID +           " INTEGER," +
-                ArticlesTable.COLUMN_NAME_TITLE +               " TEXT," +
-                ArticlesTable.COLUMN_NAME_AUTHOR +              " TEXT," +
-                ArticlesTable.COLUMN_NAME_PUBLISHED +           " INTEGER," +
-                ArticlesTable.COLUMN_NAME_CONTENT +             " TEXT)");
+        db.execSQL("CREATE TABLE " + ArticlesTable.TABLE_NAME + " ( " +
+                ArticlesTable._ID +                             " INTEGER PRIMARY KEY, " +
+                ArticlesTable.COLUMN_NAME_LINK +                " TEXT, " +
+                ArticlesTable.COLUMN_NAME_SOURCE_ID +           " INTEGER, " +
+                ArticlesTable.COLUMN_NAME_TITLE +               " TEXT, " +
+                ArticlesTable.COLUMN_NAME_AUTHOR +              " TEXT, " +
+                ArticlesTable.COLUMN_NAME_PUBLISHED +           " INTEGER, " +
+                ArticlesTable.COLUMN_NAME_CONTENT +             " TEXT, " +
+                "FOREIGN KEY (" + ArticlesTable.COLUMN_NAME_SOURCE_ID + ") " +
+                "REFERENCES " + SourcesTable.TABLE_NAME + "(" + SourcesTable._ID + ") " +
+                "ON DELETE CASCADE)");
 
         db.execSQL("CREATE TABLE " + ImagesTable.TABLE_NAME + " (" +
-                ImagesTable._ID +                               " INTEGER PRIMARY KEY," +
-                ImagesTable.COLUMN_NAME_ARTICLE_ID +            " INTEGER," +
-                ImagesTable.COLUMN_NAME_WIDTH +                 " INTEGER," +
-                ImagesTable.COLUMN_NAME_HEIGHT +                " INTEGER," +
-                ImagesTable.COLUMN_NAME_URL +                   " TEXT," +
-                ImagesTable.COLUMN_NAME_PATH +                  " TEXT," +
-                ImagesTable.COLUMN_NAME_ABSOLUTE_PATH +         " TEXT," +
-                ImagesTable.COLUMN_NAME_INDEX +                 " INTEGER)");
-
+                ImagesTable._ID +                               " INTEGER PRIMARY KEY, " +
+                ImagesTable.COLUMN_NAME_ARTICLE_ID +            " INTEGER, " +
+                ImagesTable.COLUMN_NAME_WIDTH +                 " INTEGER, " +
+                ImagesTable.COLUMN_NAME_HEIGHT +                " INTEGER, " +
+                ImagesTable.COLUMN_NAME_URL +                   " TEXT, " +
+                ImagesTable.COLUMN_NAME_PATH +                  " TEXT, " +
+                ImagesTable.COLUMN_NAME_ABSOLUTE_PATH +         " TEXT, " +
+                ImagesTable.COLUMN_NAME_INDEX +                 " INTEGER, " +
+                "FOREIGN KEY (" + ImagesTable.COLUMN_NAME_ARTICLE_ID + ") " +
+                "REFERENCES " + ArticlesTable.TABLE_NAME + "(" + ArticlesTable._ID + ") " +
+                "ON DELETE CASCADE)");
     }
 
     void load(Context context, FragmentManager fragmentManager, long articleLifetime){
@@ -127,7 +136,7 @@ class DbManager extends SQLiteOpenHelper {
                 ImagesTable.TABLE_NAME + "." + ImagesTable.COLUMN_NAME_HEIGHT + ", " +
                 ImagesTable.TABLE_NAME + "." + ImagesTable.COLUMN_NAME_INDEX +
                 " FROM " + ArticlesTable.TABLE_NAME +
-                " LEFT OUTER JOIN " + ImagesTable.TABLE_NAME +
+                " LEFT JOIN " + ImagesTable.TABLE_NAME +
                 " ON " + ArticlesTable.TABLE_NAME + "." + ArticlesTable._ID +
                 " = " + ImagesTable.TABLE_NAME + "." + ImagesTable.COLUMN_NAME_ARTICLE_ID +
                 " AND " + ArticlesTable.TABLE_NAME + "." + ArticlesTable.COLUMN_NAME_PUBLISHED +
@@ -181,10 +190,10 @@ class DbManager extends SQLiteOpenHelper {
         cursor.close();
 
         // delete invalid articles
-        deleteOldArticles(context, validTime);
+        deleteOldArticles(validTime);
     }
 
-    private int deleteOldArticles(Context context, long validTime) {
+    private int deleteOldArticles(long validTime) {
 
         String query = "SELECT " + ImagesTable.TABLE_NAME + "." + ImagesTable.COLUMN_NAME_PATH + ", " +
                 ImagesTable.TABLE_NAME + "." + ImagesTable._ID +
@@ -199,11 +208,8 @@ class DbManager extends SQLiteOpenHelper {
         while(cursor.moveToNext()){
             // delete from MainActivity.articles
             Long dbId = getLong(cursor, ArticlesTable._ID);
+            if(MainActivity.articles.containsDbId(dbId)) MainActivity.articles.getByDbId(dbId).destroy();
             if(MainActivity.articles.containsDbId(dbId)) MainActivity.articles.removeByDbId(dbId);
-            // delete header image file
-            context.deleteFile(getString(cursor, ImagesTable.COLUMN_NAME_PATH));
-            // delete inline image files
-            db.delete(ImagesTable.TABLE_NAME, ImagesTable._ID + " = ?", new String[]{getString(cursor, ImagesTable._ID)});
         }
         cursor.close();
         // delete db entry
@@ -219,6 +225,10 @@ class DbManager extends SQLiteOpenHelper {
         values.put(SourcesTable.COLUMN_NAME_LINK, source.link);
         source.dbId = db.insert(SourcesTable.TABLE_NAME, null, values);
         MainActivity.sources.addDbId(source);
+    }
+
+    void deleteSource(Source source){
+        db.delete(SourcesTable.TABLE_NAME, SourcesTable._ID + " = ?", new String[]{String.valueOf(source.dbId)});
     }
 
     void updateValue(String table, String column, String value, String whereColumn, String whereValue){
@@ -267,6 +277,36 @@ class DbManager extends SQLiteOpenHelper {
 
     private Integer getInt(Cursor cursor, String column){
         return cursor.getInt(cursor.getColumnIndexOrThrow(column));
+    }
+
+    @Override
+    public String toString(){
+        String debug = super.toString() + "\n";
+        String query =
+                "SELECT " + SourcesTable.TABLE_NAME + "." + SourcesTable._ID + " AS "+ SourcesTable.TABLE_NAME + SourcesTable._ID + ", " +
+                        ArticlesTable.TABLE_NAME +"." + ArticlesTable._ID + " AS "+ ArticlesTable.TABLE_NAME + ArticlesTable._ID + ", " +
+                        ImagesTable.TABLE_NAME + "." + ImagesTable._ID + " AS "+ ImagesTable.TABLE_NAME + ImagesTable._ID + ", " +
+                        " \nFROM " + SourcesTable.TABLE_NAME +
+                        " \nLEFT JOIN " + ArticlesTable.TABLE_NAME +
+                        " ON " + ArticlesTable.COLUMN_NAME_SOURCE_ID +
+                        " = " + SourcesTable.TABLE_NAME + "." + SourcesTable._ID +
+                        " \nLEFT JOIN " + ImagesTable.TABLE_NAME +
+                        " ON " + ImagesTable.COLUMN_NAME_ARTICLE_ID +
+                        " = " + ArticlesTable.TABLE_NAME + "." + ArticlesTable._ID;
+        Cursor cursor = db.rawQuery(query, null);
+
+        debug += "Query:\n" + query + "\n\nSources\tArticles\tImages\n";
+
+        while (cursor.moveToNext()){
+            long sourceDbId = getLong(cursor, SourcesTable.TABLE_NAME + SourcesTable._ID);
+            long articleDbId = getLong(cursor, ArticlesTable.TABLE_NAME + ArticlesTable._ID);
+            long imageDbId = getLong(cursor, ImagesTable.TABLE_NAME + ImagesTable._ID);
+            debug += sourceDbId + "\t\t\t" +
+                    articleDbId + "\t\t\t" +
+                    imageDbId + "\n";
+        }
+        cursor.close();
+        return debug;
     }
 
     class SourcesTable implements BaseColumns {

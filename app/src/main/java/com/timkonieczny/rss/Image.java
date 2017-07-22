@@ -66,4 +66,8 @@ class Image extends DbRow{
         if(width/sampleSize-dstWidth < dstWidth-width/(sampleSize*2)) return sampleSize;
         else return sampleSize*2;
     }
+
+    void destroy(Context context){
+        if(fileName != null) context.deleteFile(fileName);
+    }
 }

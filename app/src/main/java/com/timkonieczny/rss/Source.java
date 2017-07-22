@@ -2,7 +2,6 @@ package com.timkonieczny.rss;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
-import android.util.Log;
 import android.view.MenuItem;
 import android.widget.PopupMenu;
 
@@ -13,7 +12,7 @@ class Source extends DbRow implements ImageListener, PopupMenu.OnMenuItemClickLi
 
     Context context;
 
-    private SourceChangedListener sourceChangedListener;
+    SourceChangedListener sourceChangedListener;
 
     Source(Context context, String rssUrl){
         title = null;
@@ -38,7 +37,16 @@ class Source extends DbRow implements ImageListener, PopupMenu.OnMenuItemClickLi
     }
 
     private void destroy(){
-        Log.d("Source", "destroy "+title);
+        for(int i = 0; i < MainActivity.articles.size(); i++)
+            if(MainActivity.articles.get(i).source == this){
+                MainActivity.articles.get(i).destroy();
+                MainActivity.articles.remove(i);
+                i--;
+            }
+
+        icon.destroy(context);
+        MainActivity.dbManager.deleteSource(this);
+        if(sourceChangedListener!=null) sourceChangedListener.onSourceChanged(this);
     }
 
     @Override
@@ -63,6 +71,7 @@ class Source extends DbRow implements ImageListener, PopupMenu.OnMenuItemClickLi
     @Override
     public boolean onMenuItemClick(MenuItem item) {
         destroy();
+        MainActivity.sources.removeByDbId(dbId);
         return true;
     }
 }

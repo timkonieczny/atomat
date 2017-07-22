@@ -48,6 +48,16 @@ class Article extends DbRow implements ImageListener{
         else return inlineImages.get(index).getDrawable(context, this, title, index);
     }
 
+    void destroy(){
+        if(header != null) header.destroy(context);
+        if(inlineImages!=null)
+            for(int i = 0; i < inlineImages.size(); i++){
+                inlineImages.get(i).destroy(context);
+                inlineImages.remove(i);
+                i--;
+            }
+    }
+
     @Override
     public String toString(){
         return "Title: " + title +

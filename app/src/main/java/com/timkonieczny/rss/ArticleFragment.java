@@ -78,7 +78,6 @@ public class ArticleFragment extends Fragment implements ArticleChangedListener,
         sourceTitleTextView.setCompoundDrawablesWithIntrinsicBounds(article.source.getIconDrawable(this), null, null, null);
         contentTextView = (TextView)view.findViewById(R.id.article_content);
 
-
         spannableStringBuilder = new SpannableStringBuilder(Html.fromHtml(
                 article.content,Html.FROM_HTML_MODE_COMPACT, null, getCustomTagHandler()));
 
@@ -152,17 +151,19 @@ public class ArticleFragment extends Fragment implements ArticleChangedListener,
     }
 
     private void setInlineImage(int index){
-        Image image = article.inlineImages.get(index);
-        int imageWidth = MainActivity.viewWidth-contentTextView.getPaddingLeft()-contentTextView.getPaddingRight();
-        int imageHeight = (image.drawable.getMinimumHeight() *
-                (MainActivity.viewWidth-contentTextView.getPaddingLeft()-contentTextView.getPaddingRight())) /
-                image.drawable.getMinimumWidth();
-        image.drawable.setBounds(0, 0, imageWidth, imageHeight);
-        spannableStringBuilder.setSpan(new ImageSpan(image.drawable),
-                spannableStringBuilder.getSpanStart(imageSpans[index]),
-                spannableStringBuilder.getSpanEnd(imageSpans[index]),
-                spannableStringBuilder.getSpanFlags(imageSpans[index]));
-        spannableStringBuilder.removeSpan(imageSpans[index]);
+        if(article.getImage(this, index) != null) {
+            int imageWidth = MainActivity.viewWidth - contentTextView.getPaddingLeft() - contentTextView.getPaddingRight();
+            Image image = article.inlineImages.get(index);
+            int imageHeight = (image.drawable.getMinimumHeight() *
+                    (MainActivity.viewWidth - contentTextView.getPaddingLeft() - contentTextView.getPaddingRight())) /
+                    image.drawable.getMinimumWidth();
+            image.drawable.setBounds(0, 0, imageWidth, imageHeight);
+            spannableStringBuilder.setSpan(new ImageSpan(image.drawable),
+                    spannableStringBuilder.getSpanStart(imageSpans[index]),
+                    spannableStringBuilder.getSpanEnd(imageSpans[index]),
+                    spannableStringBuilder.getSpanFlags(imageSpans[index]));
+            spannableStringBuilder.removeSpan(imageSpans[index]);
+        }
     }
 
     private Html.TagHandler getCustomTagHandler(){

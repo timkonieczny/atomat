@@ -16,10 +16,12 @@ class SourcesAdapter extends BaseAdapter implements SourceChangedListener {
     private LayoutInflater layoutInflater;
     private GridView gridView;
     private Context context;
+    private SourceChangedListener sourceChangedListener;
 
     SourcesAdapter(Context context){
         layoutInflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         this.context = context;
+        sourceChangedListener = this;
     }
 
     @Override
@@ -50,7 +52,7 @@ class SourcesAdapter extends BaseAdapter implements SourceChangedListener {
         int backgroundColor = context.getResources().getColor(R.color.cardview_dark_background, context.getTheme());
 
         final Source source = MainActivity.sources.get(position);
-        iconImageView.setImageDrawable(source.getIconDrawable(this));
+        iconImageView.setImageDrawable(source.getIconDrawable(sourceChangedListener));
         if(source.icon.palette != null) backgroundView.setBackgroundColor(source.icon.palette.getVibrantColor(backgroundColor));
         else backgroundView.setBackgroundColor(backgroundColor);
 
@@ -61,6 +63,7 @@ class SourcesAdapter extends BaseAdapter implements SourceChangedListener {
             public void onClick(View v) {
                 PopupMenu popupMenu = new PopupMenu(context, v, Gravity.NO_GRAVITY, R.attr.actionOverflowMenuStyle, 0);
                 popupMenu.setOnMenuItemClickListener(source);
+                source.sourceChangedListener = sourceChangedListener;
                 popupMenu.inflate(R.menu.source_options_popup);
                 popupMenu.show();
             }
