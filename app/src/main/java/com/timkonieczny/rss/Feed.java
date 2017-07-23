@@ -94,15 +94,28 @@ class Feed extends AsyncTask<Void, Boolean, Boolean> implements DbOpenListener{
             HttpURLConnection connection = (HttpURLConnection) (new URL(source.rssUrl)).openConnection();
             connection.setReadTimeout(10000);
             connection.setConnectTimeout(15000);
+            if(source.headerLastModified != null)
+                connection.setRequestProperty("If-Modified-Since", source.headerLastModified);
+            if(source.headerETag != null)
+                connection.setRequestProperty("If-None-Match", source.headerETag);
+
             connection.connect();
-            InputStream stream = connection.getInputStream();
+            switch (connection.getResponseCode()){      // if file has changed since last request
+                case HttpURLConnection.HTTP_OK:         // otherwise HttpURLConnection.HTTP_NOT_MODIFIED:
+                    source.headerLastModified = connection.getHeaderField("Last-Modified");
+                    source.headerETag = connection.getHeaderField("ETag");
 
-            articles.addAll(sourceUpdater.parse(stream, source, isNew));
+                    InputStream stream = connection.getInputStream();
+                    articles.addAll(sourceUpdater.parse(stream, source, isNew));
 
-            if(isNew){
-                MainActivity.sources.add(sourceUpdater.source);
-                MainActivity.dbManager.createSource(sourceUpdater.source);
+                    if(isNew){
+                        MainActivity.sources.add(sourceUpdater.source);
+                        MainActivity.dbManager.createSource(sourceUpdater.source);
+                    }
+                    break;
             }
+
+            connection.disconnect();
 
         } catch (IOException | XmlPullParserException e) {
             e.printStackTrace();

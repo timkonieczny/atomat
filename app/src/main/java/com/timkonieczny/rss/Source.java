@@ -14,6 +14,9 @@ class Source extends DbRow implements ImageListener, PopupMenu.OnMenuItemClickLi
 
     SourceChangedListener sourceChangedListener;
 
+    String headerLastModified;
+    String headerETag;
+
     Source(Context context, String rssUrl){
         title = null;
         link = null;
