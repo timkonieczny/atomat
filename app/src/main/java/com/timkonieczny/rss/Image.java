@@ -14,15 +14,24 @@ class Image extends DbRow{
     static int TYPE_HEADER = -1;
     static int TYPE_ICON = -2;
 
-    String url, fileName, absolutePath;
+    String url;
+    String fileName;
     Drawable drawable;
     Palette palette;    // TODO: save palette in Db?
     private ImageTask imageTask;
-    int width, height;
-    int type;
+    int width;
+    int height;
+    private int type;
 
-    Image(){}
     Image(int type){
+        this.type = type;
+    }
+    Image(int type, long dbId, String url, String fileName, int width, int height){
+        this.dbId = dbId;
+        this.url = url;
+        this.fileName = fileName;
+        this.width = width;
+        this.height = height;
         this.type = type;
     }
 

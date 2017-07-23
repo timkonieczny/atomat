@@ -29,14 +29,14 @@ class Article extends DbRow implements ImageListener{
     }
 
     Article(Context context, FragmentManager fragmentManager,
-            String title, String author, String link, Date published, String content,
+            String title, String author, String link, long published, String content,
             Source source, long dbId){
 
         this(context, fragmentManager);
         this.title = title;
         this.author = author;
         this.link = link;
-        this.published = published;
+        this.published = new Date(published);
         this.content = content;
         this.source = source;
         this.dbId = dbId;
@@ -74,7 +74,7 @@ class Article extends DbRow implements ImageListener{
         else image = inlineImages.get(index);
         ContentValues values = new ContentValues();
         values.put(DbManager.ImagesTable.COLUMN_NAME_PATH, image.fileName);
-        values.put(DbManager.ImagesTable.COLUMN_NAME_INDEX, index);
+        values.put(DbManager.ImagesTable.COLUMN_NAME_TYPE, index);
         values.put(DbManager.ImagesTable.COLUMN_NAME_ARTICLE_ID, dbId);
         values.put(DbManager.ImagesTable.COLUMN_NAME_URL, image.url);
         values.put(DbManager.ImagesTable.COLUMN_NAME_WIDTH, image.width);

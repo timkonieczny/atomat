@@ -63,7 +63,7 @@ class Source extends DbRow implements ImageListener, PopupMenu.OnMenuItemClickLi
     public void onImageLoaded(int index) {
         // save icon file name in db
         MainActivity.dbManager.updateValue(DbManager.SourcesTable.TABLE_NAME,
-                DbManager.SourcesTable.COLUMN_NAME_ICON_FILE, icon.fileName,
+                DbManager.SourcesTable.COLUMN_NAME_ICON_PATH, icon.fileName,
                 DbManager.SourcesTable.COLUMN_NAME_URL, rssUrl);
         sourceChangedListener.onSourceChanged(this);
     }
