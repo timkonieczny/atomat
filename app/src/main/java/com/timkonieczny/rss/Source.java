@@ -7,15 +7,13 @@ import android.widget.PopupMenu;
 
 class Source extends DbRow implements ImageListener, PopupMenu.OnMenuItemClickListener{
 
-    String title, rssUrl, link;
+    String title, rssUrl;
+    private String link;
     Image icon;
 
     Context context;
 
     SourceChangedListener sourceChangedListener;
-
-    String headerLastModified;
-    String headerETag;
 
     Source(Context context, String rssUrl){
         title = null;

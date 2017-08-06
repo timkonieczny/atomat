@@ -1,7 +1,6 @@
 package com.timkonieczny.rss;
 
-import android.app.FragmentManager;
-import android.content.Context;
+import android.content.ContentValues;
 import android.util.Xml;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -9,12 +8,14 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -23,11 +24,15 @@ class SourceUpdater {
 
     private SimpleDateFormat[] dateFormats;
     private Pattern imgWithWhitespacePattern, imgPattern, stylePattern;
-    protected Source source;
-    private boolean updateSource;
-    private Context context;
-    private FragmentManager fragmentManager;
+    protected String url;
+    private boolean isNewSource;
     private XmlPullParser parser;
+    private ContentValues sourceContentValues;
+    private ArrayList<ContentValues> newArticles;
+    private ArrayList<ContentValues> newImages;
+    private HashSet<String> existingLinks;
+    private String lastModified, eTag;
+
 
     private HashSet<String> feedTags;
     private HashSet<String> feedTitleTags;
@@ -41,9 +46,7 @@ class SourceUpdater {
     private HashSet<String> entryLinkTags;
     private HashSet<String> entryAuthorTags;
 
-    SourceUpdater(Context context, FragmentManager fragmentManager) {
-        this.context = context;
-        this.fragmentManager = fragmentManager;
+    SourceUpdater() {
 
         initializeTagDictionaries();
         imgWithWhitespacePattern = Pattern.compile("\\A\\s*<img(.*?)/>\\s*");  // <imgPattern ... /> at beginning of input, including trailing whitespaces
@@ -54,6 +57,9 @@ class SourceUpdater {
                 new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX", Locale.US)
         };
 
+        newArticles = new ArrayList<>();
+        newImages = new ArrayList<>();
+
         parser = Xml.newPullParser();
         try {
             parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
@@ -62,28 +68,70 @@ class SourceUpdater {
         }
     }
 
-    List<Article> parse(InputStream inputStream, Source source, boolean updateSource)
+    void parse(long dbId, String newUrl)
             throws XmlPullParserException, IOException {
 
-        this.updateSource = updateSource;
-        this.source = source;
-        parser.setInput(inputStream, null);
+        isNewSource = newUrl!=null;
 
-        while (parser.next() != XmlPullParser.END_TAG) {
-            if (parser.getEventType() != XmlPullParser.START_TAG) {
-                continue;
-            }
-            if(feedTags.contains(parser.getName())){
-                return readFeed(parser);
-            }
+        if(!isNewSource) {
+            String[] sourceInfo = MainActivity.dbManager.getSourceInfo(dbId);
+            url = sourceInfo[0];
+            lastModified = sourceInfo[1];
+            eTag = sourceInfo[2];
         }
 
-        inputStream.close();
-        return null;
+
+        HttpURLConnection connection = (HttpURLConnection) (new URL(newUrl)).openConnection();
+        connection.setReadTimeout(10000);
+        connection.setConnectTimeout(15000);
+        if(lastModified != null)
+            connection.setRequestProperty("If-Modified-Since", lastModified);
+        if(eTag != null)
+            connection.setRequestProperty("If-None-Match", eTag);
+
+        connection.connect();
+        switch (connection.getResponseCode()){      // if file has changed since last request
+            case HttpURLConnection.HTTP_OK:         // otherwise HttpURLConnection.HTTP_NOT_MODIFIED
+                lastModified = connection.getHeaderField("Last-Modified");
+                eTag = connection.getHeaderField("ETag");
+
+                InputStream inputStream = connection.getInputStream();
+
+                sourceContentValues = new ContentValues();
+
+                if(isNewSource) sourceContentValues.put(DbManager.SourcesTable.COLUMN_NAME_URL, newUrl);
+
+                sourceContentValues.put(DbManager.SourcesTable.COLUMN_NAME_LAST_MODIFIED, lastModified);
+                sourceContentValues.put(DbManager.SourcesTable.COLUMN_NAME_ETAG, eTag);
+
+                parser.setInput(inputStream, null);
+
+                while (parser.next() != XmlPullParser.END_TAG) {
+                    if (parser.getEventType() != XmlPullParser.START_TAG) {
+                        continue;
+                    }
+                    if(feedTags.contains(parser.getName())){
+                        readFeed(parser);
+
+                        if(isNewSource)
+                            dbId = MainActivity.dbManager.insertRow(DbManager.SourcesTable.TABLE_NAME, sourceContentValues);
+
+                        MainActivity.dbManager.bulkInsertArticles(newArticles, newImages, dbId);
+                        break;
+                    }
+                }
+                inputStream.close();
+                break;
+        }
+
+        connection.disconnect();
     }
 
-    private List<Article> readFeed(XmlPullParser parser) throws XmlPullParserException, IOException {
-        ArrayList<Article> articles = new ArrayList<>();
+    private void readFeed(XmlPullParser parser) throws XmlPullParserException, IOException {
+
+        String title;
+        String iconUrl;
+        existingLinks = MainActivity.dbManager.getExistingArticleLinks();
 
         if(feedTags.contains(parser.getName())) {
             parser.require(XmlPullParser.START_TAG, null, parser.getName());
@@ -96,19 +144,19 @@ class SourceUpdater {
 
                 // Starts by looking for the entry tag
                 if (entryTags.contains(name)) {
-                    articles.add(readEntry(parser));
-                } else if (updateSource) {
+                    readEntry(parser);
+                } else if (isNewSource) {
                     if (feedTitleTags.contains(name)) {
-                        source.title = readTag(parser, name);
+                        title = readTag(parser, name);
+                        sourceContentValues.put(DbManager.SourcesTable.COLUMN_NAME_TITLE, title);
                     } else if (feedIconTags.contains(name)) {
-                        source.icon.url = readTag(parser, name);
+                        iconUrl = readTag(parser, name);
+                        sourceContentValues.put(DbManager.SourcesTable.COLUMN_NAME_ICON_URL, iconUrl);
                     } else if (feedLinkTags.contains(name)) {
                         String linkUrl = parser.getAttributeValue(null, "href");
-                        if(linkUrl!=null) {
-                            source.link = linkUrl;
-                            parser.next();
-                        }else
-                            source.link = readTag(parser, name);
+                        if(linkUrl!=null) parser.next();
+                        else linkUrl = readTag(parser, name);
+                        sourceContentValues.put(DbManager.SourcesTable.COLUMN_NAME_WEBSITE, linkUrl);
                     }else{
                         skip(parser);
                     }
@@ -117,18 +165,17 @@ class SourceUpdater {
                 }
             }
         }
-        for(int i = 0; i < articles.size(); i++){
-            Article article = articles.get(i);
-            article.source = source;
-        }
-        return articles;
     }
 
     // Parses the contents of an entry. If it encounters a title, summary, or link tag, hands them
     // off  to their respective methods for processing. Otherwise, skips the tag.
-    private Article readEntry(XmlPullParser parser) throws XmlPullParserException, IOException {
-
-        Article article = new Article(context, fragmentManager);
+    private void readEntry(XmlPullParser parser) throws XmlPullParserException, IOException {
+        String title = "null";
+        String content = "null";
+        String headerUri = null;
+        String link = "null";
+        String author = "null";
+        String published = "";
 
         parser.require(XmlPullParser.START_TAG, null, parser.getName());
         while (parser.next() != XmlPullParser.END_TAG) {
@@ -138,33 +185,48 @@ class SourceUpdater {
             String name = parser.getName();
 
             if(entryTitleTags.contains(name)){
-                article.title = readTag(parser, name);
+                title = readTag(parser, name);
             }else if(entryContentTags.contains(name)){
-                article.content = readTag(parser, name);
-                Matcher matcher = imgPattern.matcher(article.content);
-                if (matcher.find()) article.header.url = matcher.group(1);
-                String content = imgWithWhitespacePattern.matcher(article.content).replaceFirst("");
+                content = readTag(parser, name);
+                Matcher matcher = imgPattern.matcher(content);
+                if (matcher.find()) headerUri = matcher.group(1);
+                content = imgWithWhitespacePattern.matcher(content).replaceFirst("");
                 content = stylePattern.matcher(content).replaceAll("");
-                article.content = content;
             }else if(entryLinkTags.contains(name)){
-                article.link = parser.getAttributeValue(null, "href");
-                if(article.link!=null) parser.next();
-                else article.link = readTag(parser, name);
+                link = parser.getAttributeValue(null, "href");
+                if(link!=null) parser.next();
+                else link = readTag(parser, name);
             }else if(entryAuthorTags.contains(name)){
-                article.author = readAuthors(parser);
+                author = readAuthors(parser);
             }else if(entryPublishedTags.contains(name)){
                 ParsePosition parsePosition = new ParsePosition(0);
                 int i = 0;
                 String dateString = readTag(parser, name);
-                while(article.published == null && i < dateFormats.length){
-                    article.published = dateFormats[i].parse(dateString, parsePosition);
+                Date date = null;
+                while(date == null && i < dateFormats.length){
+                    date = dateFormats[i].parse(dateString, parsePosition);
                     i++;
                 }
+                if(date != null) published = String.valueOf(date.getTime());
             }else{
                 skip(parser);
             }
         }
-        return article;
+        if(!existingLinks.contains(link)) {
+            ContentValues articlesValues = new ContentValues();
+            articlesValues.put(DbManager.ArticlesTable.COLUMN_NAME_TITLE, title);
+            articlesValues.put(DbManager.ArticlesTable.COLUMN_NAME_AUTHOR, author);
+            articlesValues.put(DbManager.ArticlesTable.COLUMN_NAME_CONTENT, content);
+            articlesValues.put(DbManager.ArticlesTable.COLUMN_NAME_PUBLISHED, published);
+            articlesValues.put(DbManager.ArticlesTable.COLUMN_NAME_URL, link);
+            newArticles.add(articlesValues);
+            if (headerUri != null) {
+                ContentValues headerValues = new ContentValues();
+                headerValues.put(DbManager.ImagesTable.COLUMN_NAME_URL, headerUri);
+                headerValues.put(DbManager.ImagesTable.COLUMN_NAME_TYPE, Image.TYPE_HEADER);
+                newImages.add(headerValues);
+            } else newImages.add(null);
+        }
     }
 
     // Processes tags in the feed.

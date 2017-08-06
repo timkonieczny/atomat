@@ -7,15 +7,25 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
+import android.util.Log;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
 
 class DbManager extends SQLiteOpenHelper {
 
     private static final String DB_NAME = "atomat.db";
     private static final int DB_VERSION = 1;
     SQLiteDatabase db = null;
+
+    private Comparator<Article> descending = new Comparator<Article>() {
+        @Override
+        public int compare(Article a1, Article a2) {
+            return a2.published.compareTo(a1.published);
+        }
+    };
 
     DbManager(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
@@ -51,13 +61,15 @@ class DbManager extends SQLiteOpenHelper {
                 SourcesTable._ID +                              " INTEGER PRIMARY KEY, " +
                 SourcesTable.COLUMN_NAME_URL +                  " TEXT, " +
                 SourcesTable.COLUMN_NAME_TITLE +                " TEXT, " +
-                SourcesTable.COLUMN_NAME_ICON_URL +                 " TEXT, " +
+                SourcesTable.COLUMN_NAME_ICON_URL +             " TEXT, " +
                 SourcesTable.COLUMN_NAME_ICON_PATH +            " TEXT, " +
-                SourcesTable.COLUMN_NAME_WEBSITE +                 " TEXT)");
+                SourcesTable.COLUMN_NAME_WEBSITE +              " TEXT, " +
+                SourcesTable.COLUMN_NAME_LAST_MODIFIED +        " TEXT, " +
+                SourcesTable.COLUMN_NAME_ETAG +                 " TEXT)");
 
         db.execSQL("CREATE TABLE " + ArticlesTable.TABLE_NAME + " ( " +
                 ArticlesTable._ID +                             " INTEGER PRIMARY KEY, " +
-                ArticlesTable.COLUMN_NAME_URL +                " TEXT, " +
+                ArticlesTable.COLUMN_NAME_URL +                 " TEXT, " +
                 ArticlesTable.COLUMN_NAME_SOURCE_ID +           " INTEGER, " +
                 ArticlesTable.COLUMN_NAME_TITLE +               " TEXT, " +
                 ArticlesTable.COLUMN_NAME_AUTHOR +              " TEXT, " +
@@ -74,7 +86,7 @@ class DbManager extends SQLiteOpenHelper {
                 ImagesTable.COLUMN_NAME_HEIGHT +                " INTEGER, " +
                 ImagesTable.COLUMN_NAME_URL +                   " TEXT, " +
                 ImagesTable.COLUMN_NAME_PATH +                  " TEXT, " +
-                ImagesTable.COLUMN_NAME_TYPE +                 " INTEGER, " +
+                ImagesTable.COLUMN_NAME_TYPE +                  " INTEGER, " +
                 "FOREIGN KEY (" + ImagesTable.COLUMN_NAME_ARTICLE_ID + ") " +
                 "REFERENCES " + ArticlesTable.TABLE_NAME + "(" + ArticlesTable._ID + ") " +
                 "ON DELETE CASCADE)");
@@ -91,12 +103,12 @@ class DbManager extends SQLiteOpenHelper {
                 SourcesTable.TABLE_NAME + "." + SourcesTable._ID +                      " AS "+ SourcesTable.TABLE_NAME + SourcesTable._ID + ", \n" +
                 SourcesTable.TABLE_NAME + "." + SourcesTable.COLUMN_NAME_URL +          " AS "+ SourcesTable.TABLE_NAME + "_" + SourcesTable.COLUMN_NAME_URL + ", \n" +
                 SourcesTable.TABLE_NAME + "." + SourcesTable.COLUMN_NAME_TITLE +        " AS "+ SourcesTable.TABLE_NAME + "_" + SourcesTable.COLUMN_NAME_TITLE + ", \n" +
-                SourcesTable.TABLE_NAME + "." + SourcesTable.COLUMN_NAME_ICON_URL +         " AS "+ SourcesTable.TABLE_NAME + "_" + SourcesTable.COLUMN_NAME_ICON_URL + ", \n" +
+                SourcesTable.TABLE_NAME + "." + SourcesTable.COLUMN_NAME_ICON_URL +     " AS "+ SourcesTable.TABLE_NAME + "_" + SourcesTable.COLUMN_NAME_ICON_URL + ", \n" +
                 SourcesTable.TABLE_NAME + "." + SourcesTable.COLUMN_NAME_ICON_PATH +    " AS "+ SourcesTable.TABLE_NAME + "_" + SourcesTable.COLUMN_NAME_ICON_PATH + ", \n" +
-                SourcesTable.TABLE_NAME + "." + SourcesTable.COLUMN_NAME_WEBSITE +         " AS "+ SourcesTable.TABLE_NAME + "_" + SourcesTable.COLUMN_NAME_WEBSITE + ", \n" +
+                SourcesTable.TABLE_NAME + "." + SourcesTable.COLUMN_NAME_WEBSITE +      " AS "+ SourcesTable.TABLE_NAME + "_" + SourcesTable.COLUMN_NAME_WEBSITE + ", \n" +
 
                 ArticlesTable.TABLE_NAME +"." + ArticlesTable._ID +                     " AS "+ ArticlesTable.TABLE_NAME + ArticlesTable._ID + ", \n" +
-                ArticlesTable.TABLE_NAME +"." + ArticlesTable.COLUMN_NAME_URL +        " AS "+ ArticlesTable.TABLE_NAME + "_" + ArticlesTable.COLUMN_NAME_URL + ", \n" +
+                ArticlesTable.TABLE_NAME +"." + ArticlesTable.COLUMN_NAME_URL +         " AS "+ ArticlesTable.TABLE_NAME + "_" + ArticlesTable.COLUMN_NAME_URL + ", \n" +
                 ArticlesTable.TABLE_NAME +"." + ArticlesTable.COLUMN_NAME_SOURCE_ID +   " AS "+ ArticlesTable.TABLE_NAME + "_" + ArticlesTable.COLUMN_NAME_SOURCE_ID + ", \n" +
                 ArticlesTable.TABLE_NAME +"." + ArticlesTable.COLUMN_NAME_TITLE +       " AS "+ ArticlesTable.TABLE_NAME + "_" + ArticlesTable.COLUMN_NAME_TITLE + ", \n" +
                 ArticlesTable.TABLE_NAME +"." + ArticlesTable.COLUMN_NAME_AUTHOR +      " AS "+ ArticlesTable.TABLE_NAME + "_" + ArticlesTable.COLUMN_NAME_AUTHOR + ", \n" +
@@ -109,7 +121,7 @@ class DbManager extends SQLiteOpenHelper {
                 ImagesTable.TABLE_NAME + "." + ImagesTable.COLUMN_NAME_PATH +           " AS "+ ImagesTable.TABLE_NAME + "_" + ImagesTable.COLUMN_NAME_PATH + ", \n" +
                 ImagesTable.TABLE_NAME + "." + ImagesTable.COLUMN_NAME_WIDTH +          " AS "+ ImagesTable.TABLE_NAME + "_" + ImagesTable.COLUMN_NAME_WIDTH + ", \n" +
                 ImagesTable.TABLE_NAME + "." + ImagesTable.COLUMN_NAME_HEIGHT +         " AS "+ ImagesTable.TABLE_NAME + "_" + ImagesTable.COLUMN_NAME_HEIGHT + ", \n" +
-                ImagesTable.TABLE_NAME + "." + ImagesTable.COLUMN_NAME_TYPE +          " AS "+ ImagesTable.TABLE_NAME + "_" + ImagesTable.COLUMN_NAME_TYPE +
+                ImagesTable.TABLE_NAME + "." + ImagesTable.COLUMN_NAME_TYPE +           " AS "+ ImagesTable.TABLE_NAME + "_" + ImagesTable.COLUMN_NAME_TYPE +
 
                 " \nFROM " +        SourcesTable.TABLE_NAME +
                 " \nLEFT JOIN " +   ArticlesTable.TABLE_NAME +
@@ -122,6 +134,7 @@ class DbManager extends SQLiteOpenHelper {
 
         while (cursor.moveToNext()) {
             long sourceDbId = getLong(cursor, SourcesTable.TABLE_NAME + SourcesTable._ID);
+            Log.d("DbManager", "sourceId=" + sourceDbId);
             if (!MainActivity.sources.containsDbId(sourceDbId)) {
                 String sourceUrl = getString(cursor, SourcesTable.TABLE_NAME + "_" + SourcesTable.COLUMN_NAME_URL);
                 String sourceTitle = getString(cursor, SourcesTable.TABLE_NAME + "_" + SourcesTable.COLUMN_NAME_TITLE);
@@ -168,36 +181,11 @@ class DbManager extends SQLiteOpenHelper {
 
         cursor.close();
         deleteOldArticles(validTime);
-    }
-
-    void createSource(Source source){
-        getDb();
-        ContentValues values = new ContentValues();
-        values.put(SourcesTable.COLUMN_NAME_URL, source.rssUrl);
-        values.put(SourcesTable.COLUMN_NAME_TITLE, source.title);
-        if(source.icon.url!=null) values.put(SourcesTable.COLUMN_NAME_ICON_URL, source.icon.url);
-        values.put(SourcesTable.COLUMN_NAME_WEBSITE, source.link);
-        source.dbId = db.insert(SourcesTable.TABLE_NAME, null, values);
-        MainActivity.sources.addDbId(source);
+        Collections.sort(MainActivity.articles, descending);
     }
 
     void deleteSource(Source source){
         db.delete(SourcesTable.TABLE_NAME, SourcesTable._ID + " = ?", new String[]{String.valueOf(source.dbId)});
-    }
-
-    void createArticles(List<Article> articles){
-        getDb();
-        for(int i = 0; i < articles.size(); i++) {
-            Article article = articles.get(i);
-            ContentValues values = new ContentValues();
-            values.put(ArticlesTable.COLUMN_NAME_URL, article.link);
-            values.put(ArticlesTable.COLUMN_NAME_SOURCE_ID, article.source.dbId);
-            values.put(ArticlesTable.COLUMN_NAME_TITLE, article.title);
-            values.put(ArticlesTable.COLUMN_NAME_AUTHOR, article.author);
-            values.put(ArticlesTable.COLUMN_NAME_PUBLISHED, article.published.getTime());
-            values.put(ArticlesTable.COLUMN_NAME_CONTENT, article.content);
-            article.dbId = db.insert(ArticlesTable.TABLE_NAME, null, values);
-        }
     }
 
     private int deleteOldArticles(long validTime) {
@@ -223,8 +211,25 @@ class DbManager extends SQLiteOpenHelper {
         return db.delete(ArticlesTable.TABLE_NAME, ArticlesTable.COLUMN_NAME_PUBLISHED+"<?", new String[]{String.valueOf(validTime)});
     }
 
+    void bulkInsertArticles(ArrayList<ContentValues> articleValues, ArrayList<ContentValues> imageValues, long sourceId){
+        db.beginTransaction();
+        try {
+            for(int i = 0; i < articleValues.size(); i++){
+                articleValues.get(i).put(ArticlesTable.COLUMN_NAME_SOURCE_ID, sourceId);
+                long articleId = insertRow(ArticlesTable.TABLE_NAME, articleValues.get(i));
+                if(imageValues.get(i) != null){
+                    imageValues.get(i).put(ImagesTable.COLUMN_NAME_ARTICLE_ID, articleId);
+                    insertRow(ImagesTable.TABLE_NAME, imageValues.get(i));
+                }
+            }
+            db.setTransactionSuccessful();
+        } finally {
+            db.endTransaction();
+        }
+    }
+
     long insertImage(ContentValues values){
-        return db.insert(ImagesTable.TABLE_NAME, null, values);
+        return insertRow(ImagesTable.TABLE_NAME, values);
     }
 
     void updateValue(String table, String column, String value, String whereColumn, String whereValue){
@@ -232,6 +237,37 @@ class DbManager extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
         values.put(column, value);
         db.update(table, values, whereColumn + "= ?", new String[]{whereValue});
+    }
+
+    long insertRow(String table, ContentValues contentValues){
+        return db.insert(table, null, contentValues);
+    }
+
+    HashSet<String> getExistingArticleLinks(){
+        HashSet<String> links = new HashSet<>();
+        Cursor cursor = db.query(ArticlesTable.TABLE_NAME, new String[]{ArticlesTable.COLUMN_NAME_URL}, null, null, null, null, null, null);
+        while(cursor.moveToNext()){
+            links.add(getString(cursor, ArticlesTable.COLUMN_NAME_URL));
+        }
+        return links;
+    }
+
+    String[] getSourceInfo(long dbId) {
+        Cursor cursor = db.query(SourcesTable.TABLE_NAME,
+                new String[]{SourcesTable.COLUMN_NAME_LAST_MODIFIED,
+                        SourcesTable.COLUMN_NAME_ETAG,
+                        SourcesTable.COLUMN_NAME_URL},
+                SourcesTable._ID + "=?", new String[]{String.valueOf(dbId)},
+                null, null, null);
+        String[] values = null;
+        if (cursor.moveToFirst()) {
+            values = new String[]{getString(cursor, SourcesTable.COLUMN_NAME_URL),
+                    getString(cursor, SourcesTable.COLUMN_NAME_LAST_MODIFIED),
+                    getString(cursor, SourcesTable.COLUMN_NAME_ETAG),
+            };
+        }
+        cursor.close();
+        return values;
     }
 
     private String getString(Cursor cursor, String column){
@@ -283,9 +319,11 @@ class DbManager extends SQLiteOpenHelper {
         static final String COLUMN_NAME_ICON_URL = "icon_url";
         static final String COLUMN_NAME_ICON_PATH = "icon_path";
         static final String COLUMN_NAME_WEBSITE = "website";
+        static final String COLUMN_NAME_LAST_MODIFIED = "last_modified";
+        static final String COLUMN_NAME_ETAG = "etag";
     }
 
-    private class ArticlesTable implements BaseColumns {
+    class ArticlesTable implements BaseColumns {
         static final String TABLE_NAME = "articles";
         static final String COLUMN_NAME_SOURCE_ID = "source_id";
         static final String COLUMN_NAME_URL = "url";
