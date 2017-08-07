@@ -7,7 +7,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
-import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -134,7 +133,6 @@ class DbManager extends SQLiteOpenHelper {
 
         while (cursor.moveToNext()) {
             long sourceDbId = getLong(cursor, SourcesTable.TABLE_NAME + SourcesTable._ID);
-            Log.d("DbManager", "sourceId=" + sourceDbId);
             if (!MainActivity.sources.containsDbId(sourceDbId)) {
                 String sourceUrl = getString(cursor, SourcesTable.TABLE_NAME + "_" + SourcesTable.COLUMN_NAME_URL);
                 String sourceTitle = getString(cursor, SourcesTable.TABLE_NAME + "_" + SourcesTable.COLUMN_NAME_TITLE);

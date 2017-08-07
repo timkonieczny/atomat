@@ -43,10 +43,6 @@ class DbList<T extends DbRow> extends ArrayList<T> {
         }
     }
 
-    void addDbId(T t){
-        dbIds.add(t.dbId);
-    }
-
     boolean containsDbId(long dbId){
         return dbIds.contains(dbId);
     }

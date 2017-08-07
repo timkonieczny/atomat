@@ -24,7 +24,6 @@ class SourceUpdater {
 
     private SimpleDateFormat[] dateFormats;
     private Pattern imgWithWhitespacePattern, imgPattern, stylePattern;
-    protected String url;
     private boolean isNewSource;
     private XmlPullParser parser;
     private ContentValues sourceContentValues;
@@ -68,10 +67,10 @@ class SourceUpdater {
         }
     }
 
-    void parse(long dbId, String newUrl)
+    void parse(long dbId, String url)
             throws XmlPullParserException, IOException {
 
-        isNewSource = newUrl!=null;
+        isNewSource = url!=null;
 
         if(!isNewSource) {
             String[] sourceInfo = MainActivity.dbManager.getSourceInfo(dbId);
@@ -81,7 +80,7 @@ class SourceUpdater {
         }
 
 
-        HttpURLConnection connection = (HttpURLConnection) (new URL(newUrl)).openConnection();
+        HttpURLConnection connection = (HttpURLConnection) (new URL(url)).openConnection();
         connection.setReadTimeout(10000);
         connection.setConnectTimeout(15000);
         if(lastModified != null)
@@ -99,7 +98,7 @@ class SourceUpdater {
 
                 sourceContentValues = new ContentValues();
 
-                if(isNewSource) sourceContentValues.put(DbManager.SourcesTable.COLUMN_NAME_URL, newUrl);
+                if(isNewSource) sourceContentValues.put(DbManager.SourcesTable.COLUMN_NAME_URL, url);
 
                 sourceContentValues.put(DbManager.SourcesTable.COLUMN_NAME_LAST_MODIFIED, lastModified);
                 sourceContentValues.put(DbManager.SourcesTable.COLUMN_NAME_ETAG, eTag);
@@ -283,7 +282,7 @@ class SourceUpdater {
         }
     }
 
-    private void initializeTagDictionaries() {  // FIXME: call toLowerCase() on all parsed tags
+    private void initializeTagDictionaries() {
         feedTags = createHashSet("feed", "channel");
         feedTitleTags = createHashSet("title");
         feedIconTags = createHashSet("icon");

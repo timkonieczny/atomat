@@ -13,8 +13,6 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
-import android.view.Display;
 import android.view.MenuItem;
 
 public class MainActivity extends AppCompatActivity
@@ -139,84 +137,5 @@ public class MainActivity extends AppCompatActivity
                 configBefore == configAfter &&
                         (delegateBefore == AppCompatDelegate.MODE_NIGHT_AUTO ||
                                 delegateAfter == AppCompatDelegate.MODE_NIGHT_AUTO);
-
-//         un-optimized if statement
-//        if(delegateBefore == AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM){
-//            return true;    // returns on first Activity initialization, before theme is applied
-//        }else if(delegateBefore == delegateAfter){
-//            return true;
-//        }else if(configBefore == configAfter &&
-//                (delegateBefore == AppCompatDelegate.MODE_NIGHT_AUTO ||
-//                        delegateAfter == AppCompatDelegate.MODE_NIGHT_AUTO)){
-//            return true;
-//        }else{
-//            return false;
-//        }
-//
-//        * VALUES BEFORE AND AFTER CHANGING APP THEME
-//        *
-//        * ISDARK
-//        * switch to daynight (day)
-//        * before    Configuration.UI_MODE_NIGHT_YES   AppCompatDelegate.MODE_NIGHT_YES
-//        * after     Configuration.UI_MODE_NIGHT_YES   AppCompatDelegate.MODE_NIGHT_AUTO
-//        * before    Configuration.UI_MODE_NIGHT_NO    AppCompatDelegate.MODE_NIGHT_AUTO
-//        * after     Configuration.UI_MODE_NIGHT_NO    AppCompatDelegate.MODE_NIGHT_AUTO
-//        *
-//        * switch from daynight (day)
-//        * before    Configuration.UI_MODE_NIGHT_NO    AppCompatDelegate.MODE_NIGHT_AUTO
-//        * after     Configuration.UI_MODE_NIGHT_NO    AppCompatDelegate.MODE_NIGHT_YES
-//        * before    Configuration.UI_MODE_NIGHT_YES   AppCompatDelegate.MODE_NIGHT_YES
-//        * after     Configuration.UI_MODE_NIGHT_YES   AppCompatDelegate.MODE_NIGHT_YES
-//        *
-//        * switch to light
-//        * before    Configuration.UI_MODE_NIGHT_YES   AppCompatDelegate.MODE_NIGHT_YES
-//        * after     Configuration.UI_MODE_NIGHT_YES   AppCompatDelegate.MODE_NIGHT_NO
-//        * before    Configuration.UI_MODE_NIGHT_NO    AppCompatDelegate.MODE_NIGHT_NO
-//        * after     Configuration.UI_MODE_NIGHT_NO    AppCompatDelegate.MODE_NIGHT_NO
-//        *
-//        * ISLIGHT
-//        * switch to daynight (day)
-//        * before:   Configuration.UI_MODE_NIGHT_NO    AppCompatDelegate.MODE_NIGHT_NO
-//        * after:    Configuration.UI_MODE_NIGHT_NO    AppCompatDelegate.MODE_NIGHT_AUTO
-//        *
-//        * switch from daynight (day)
-//        * before:   Configuration.UI_MODE_NIGHT_NO    AppCompatDelegate.MODE_NIGHT_AUTO
-//        * after:    Configuration.UI_MODE_NIGHT_NO    AppCompatDelegate.MODE_NIGHT_NO
-//        *
-//        * switch to dark
-//        * before:   Configuration.UI_MODE_NIGHT_NO    AppCompatDelegate.MODE_NIGHT_NO
-//        * after:    Configuration.UI_MODE_NIGHT_NO    AppCompatDelegate.MODE_NIGHT_YES
-//        * before:   Configuration.UI_MODE_NIGHT_YES   AppCompatDelegate.MODE_NIGHT_YES
-//        * after:    Configuration.UI_MODE_NIGHT_YES   AppCompatDelegate.MODE_NIGHT_YES
-//        *
-//        *
-    }
-
-    private void printCurrentStatus(){
-        switch (getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK) {
-            case Configuration.UI_MODE_NIGHT_NO:
-                Log.d("MainActivity", "Configuration.UI_MODE_NIGHT_NO");
-                break;
-            case Configuration.UI_MODE_NIGHT_YES:
-                Log.d("MainActivity", "Configuration.UI_MODE_NIGHT_YES");
-                break;
-            case Configuration.UI_MODE_NIGHT_UNDEFINED:
-                Log.d("MainActivity", "Configuration.UI_MODE_NIGHT_UNDEFINED");
-                break;
-        }
-        switch (AppCompatDelegate.getDefaultNightMode()){
-            case AppCompatDelegate.MODE_NIGHT_AUTO:
-                Log.d("MainActivity", "AppCompatDelegate.MODE_NIGHT_AUTO");
-                break;
-            case AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM:
-                Log.d("MainActivity", "AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM");
-                break;
-            case AppCompatDelegate.MODE_NIGHT_NO:
-                Log.d("MainActivity", "AppCompatDelegate.MODE_NIGHT_NO");
-                break;
-            case AppCompatDelegate.MODE_NIGHT_YES:
-                Log.d("MainActivity", "AppCompatDelegate.MODE_NIGHT_YES");
-                break;
-        }
     }
 }

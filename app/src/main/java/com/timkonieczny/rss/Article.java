@@ -12,7 +12,8 @@ import java.util.Date;
 class Article extends DbRow implements ImageListener{
 
     Date published;
-    String title, author, link, content;
+    String title, author, content;
+    private String link;
     Source source;
     View.OnClickListener onClickListener;
     private ArticleChangedListener articleChangedListener;
@@ -22,17 +23,13 @@ class Article extends DbRow implements ImageListener{
 
     private Context context;
 
-    Article(Context context, FragmentManager fragmentManager){
-        header = new Image(Image.TYPE_HEADER);
-        this.context = context;
-        this.onClickListener = new ArticleOnClickListener(this, fragmentManager);
-    }
-
     Article(Context context, FragmentManager fragmentManager,
             String title, String author, String link, long published, String content,
             Source source, long dbId){
 
-        this(context, fragmentManager);
+        header = new Image(Image.TYPE_HEADER);
+        this.context = context;
+        this.onClickListener = new ArticleOnClickListener(this, fragmentManager);
         this.title = title;
         this.author = author;
         this.link = link;
