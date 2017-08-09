@@ -54,6 +54,9 @@ class DbManager extends SQLiteOpenHelper {
         }
     }
 
+
+    // SAVING METHODS
+
     private void createTables(SQLiteDatabase db){
 
         db.execSQL("CREATE TABLE " + SourcesTable.TABLE_NAME + " (" +
@@ -91,12 +94,53 @@ class DbManager extends SQLiteOpenHelper {
                 "ON DELETE CASCADE)");
     }
 
-    void load(Context context, FragmentManager fragmentManager, long articleLifetime){
+    void bulkInsertArticles(ArrayList<ContentValues> articleValues, ArrayList<ContentValues> imageValues, long sourceId){
+        db.beginTransaction();
+        try {
+            for(int i = 0; i < articleValues.size(); i++){
+                articleValues.get(i).put(ArticlesTable.COLUMN_NAME_SOURCE_ID, sourceId);
+                long articleId = insertRow(ArticlesTable.TABLE_NAME, articleValues.get(i));
+                if(imageValues.get(i) != null){
+                    imageValues.get(i).put(ImagesTable.COLUMN_NAME_ARTICLE_ID, articleId);
+                    insertImage(imageValues.get(i));
+                }
+            }
+            db.setTransactionSuccessful();
+        } finally {
+            db.endTransaction();
+        }
+    }
 
+    long insertImage(ContentValues values){
+        return insertRow(ImagesTable.TABLE_NAME, values);
+    }
+
+    void updateImage(long articleId, int type, ContentValues contentValues){
+        getDb();
+        db.update(ImagesTable.TABLE_NAME, contentValues,
+                ImagesTable.COLUMN_NAME_ARTICLE_ID + "=? AND " + ImagesTable.COLUMN_NAME_TYPE + "=?",
+                new String[]{String.valueOf(articleId), String.valueOf(type)});
+    }
+
+    void updateValue(String table, String column, String value, String whereColumn, String whereValue){
+        getDb();
+        ContentValues values = new ContentValues();
+        values.put(column, value);
+        db.update(table, values, whereColumn + "= ?", new String[]{whereValue});
+    }
+
+    long insertRow(String table, ContentValues contentValues){
+        return db.insert(table, null, contentValues);
+    }
+
+    void load(Context context, FragmentManager fragmentManager, long articleLifetime){
         getDb();
 
         // get valid articles
         long validTime = System.currentTimeMillis()-articleLifetime;
+
+        deleteOldArticles(validTime);
+
 
         String query = "SELECT " +
                 SourcesTable.TABLE_NAME + "." + SourcesTable._ID +                      " AS "+ SourcesTable.TABLE_NAME + SourcesTable._ID + ", \n" +
@@ -125,7 +169,6 @@ class DbManager extends SQLiteOpenHelper {
                 " \nFROM " +        SourcesTable.TABLE_NAME +
                 " \nLEFT JOIN " +   ArticlesTable.TABLE_NAME +
                 " ON " +            ArticlesTable.TABLE_NAME + "." + ArticlesTable.COLUMN_NAME_SOURCE_ID + " = " + SourcesTable.TABLE_NAME + "." + SourcesTable._ID +
-                " AND " +           ArticlesTable.TABLE_NAME + "." + ArticlesTable.COLUMN_NAME_PUBLISHED + " > " + validTime +
                 " \nLEFT JOIN " +   ImagesTable.TABLE_NAME +
                 " ON " +            ImagesTable.COLUMN_NAME_ARTICLE_ID + " = " + ArticlesTable.TABLE_NAME + "." + ArticlesTable._ID;
 
@@ -178,67 +221,33 @@ class DbManager extends SQLiteOpenHelper {
         }
 
         cursor.close();
-        deleteOldArticles(validTime);
+
         Collections.sort(MainActivity.articles, descending);
     }
+
+
+    // UPDATING METHODS
 
     void deleteSource(Source source){
         db.delete(SourcesTable.TABLE_NAME, SourcesTable._ID + " = ?", new String[]{String.valueOf(source.dbId)});
     }
 
     private int deleteOldArticles(long validTime) {
-
-        String query = "SELECT " + ImagesTable.TABLE_NAME + "." + ImagesTable.COLUMN_NAME_PATH + ", " +
-                ImagesTable.TABLE_NAME + "." + ImagesTable._ID +
-                " FROM " + ImagesTable.TABLE_NAME +
-                " INNER JOIN " + ArticlesTable.TABLE_NAME +
-                " ON " + ImagesTable.TABLE_NAME + "." + ImagesTable.COLUMN_NAME_ARTICLE_ID +
-                " = " + ArticlesTable.TABLE_NAME + "." + ArticlesTable._ID +
-                " WHERE " + ArticlesTable.TABLE_NAME + "." + ArticlesTable.COLUMN_NAME_PUBLISHED + " < ?";
-
-        Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(validTime)});
-
-        while(cursor.moveToNext()){
-            // delete from MainActivity.articles
-            Long dbId = getLong(cursor, ArticlesTable._ID);
-            if(MainActivity.articles.containsDbId(dbId)) MainActivity.articles.getByDbId(dbId).destroy();
-            if(MainActivity.articles.containsDbId(dbId)) MainActivity.articles.removeByDbId(dbId);
-        }
-        cursor.close();
-        // delete db entry
         return db.delete(ArticlesTable.TABLE_NAME, ArticlesTable.COLUMN_NAME_PUBLISHED+"<?", new String[]{String.valueOf(validTime)});
     }
 
-    void bulkInsertArticles(ArrayList<ContentValues> articleValues, ArrayList<ContentValues> imageValues, long sourceId){
-        db.beginTransaction();
-        try {
-            for(int i = 0; i < articleValues.size(); i++){
-                articleValues.get(i).put(ArticlesTable.COLUMN_NAME_SOURCE_ID, sourceId);
-                long articleId = insertRow(ArticlesTable.TABLE_NAME, articleValues.get(i));
-                if(imageValues.get(i) != null){
-                    imageValues.get(i).put(ImagesTable.COLUMN_NAME_ARTICLE_ID, articleId);
-                    insertRow(ImagesTable.TABLE_NAME, imageValues.get(i));
-                }
-            }
-            db.setTransactionSuccessful();
-        } finally {
-            db.endTransaction();
+
+    // LOADING METHODS
+
+    long[] getSourceIds(){
+        Cursor cursor = db.query(SourcesTable.TABLE_NAME, new String[]{SourcesTable._ID}, null, null, null, null, null);
+        long[] sourceIds = new long[cursor.getCount()];
+        int i = 0;
+        while (cursor.moveToNext()){
+            sourceIds[i++] = getLong(cursor, SourcesTable._ID);
         }
-    }
-
-    long insertImage(ContentValues values){
-        return insertRow(ImagesTable.TABLE_NAME, values);
-    }
-
-    void updateValue(String table, String column, String value, String whereColumn, String whereValue){
-        getDb();
-        ContentValues values = new ContentValues();
-        values.put(column, value);
-        db.update(table, values, whereColumn + "= ?", new String[]{whereValue});
-    }
-
-    long insertRow(String table, ContentValues contentValues){
-        return db.insert(table, null, contentValues);
+        cursor.close();
+        return sourceIds;
     }
 
     HashSet<String> getExistingArticleLinks(){
@@ -247,6 +256,7 @@ class DbManager extends SQLiteOpenHelper {
         while(cursor.moveToNext()){
             links.add(getString(cursor, ArticlesTable.COLUMN_NAME_URL));
         }
+        cursor.close();
         return links;
     }
 

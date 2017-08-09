@@ -69,15 +69,18 @@ class Article extends DbRow implements ImageListener{
         Image image;
         if(index == Image.TYPE_HEADER) image = header;
         else image = inlineImages.get(index);
+
         ContentValues values = new ContentValues();
         values.put(DbManager.ImagesTable.COLUMN_NAME_PATH, image.fileName);
-        values.put(DbManager.ImagesTable.COLUMN_NAME_TYPE, index);
-        values.put(DbManager.ImagesTable.COLUMN_NAME_ARTICLE_ID, dbId);
-        values.put(DbManager.ImagesTable.COLUMN_NAME_URL, image.url);
         values.put(DbManager.ImagesTable.COLUMN_NAME_WIDTH, image.width);
         values.put(DbManager.ImagesTable.COLUMN_NAME_HEIGHT, image.height);
-        image.dbId = MainActivity.dbManager.insertImage(values);
-
+        if(index == Image.TYPE_HEADER) MainActivity.dbManager.updateImage(dbId, index, values); // header image exists in db already
+        else{
+            values.put(DbManager.ImagesTable.COLUMN_NAME_TYPE, index);
+            values.put(DbManager.ImagesTable.COLUMN_NAME_ARTICLE_ID, dbId);
+            values.put(DbManager.ImagesTable.COLUMN_NAME_URL, image.url);
+            image.dbId = MainActivity.dbManager.insertImage(values);                            // inline image does not exist yet
+        }
         if (articleChangedListener != null) articleChangedListener.onArticleChanged(this, index);
     }
 }
