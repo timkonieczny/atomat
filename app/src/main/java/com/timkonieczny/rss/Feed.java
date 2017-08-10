@@ -50,7 +50,7 @@ class Feed extends AsyncTask<Void, Boolean, Boolean> implements DbOpenListener{
         before = MainActivity.articles.size();
         try {
             for (int i = 0; i < MainActivity.sources.size(); i++) {
-                sourceUpdater.parse(MainActivity.sources.get(i).dbId, null);
+                sourceUpdater.parse(MainActivity.sources.get(i).dbId, null);    // TODO: cancel & reschedule JobService
             }
             if (newSource != null) sourceUpdater.parse(Source.DEFAULT_DB_ID, newSource);
         } catch (XmlPullParserException | IOException e) {

@@ -1,7 +1,11 @@
 package com.timkonieczny.rss;
 
+import android.app.job.JobInfo;
+import android.app.job.JobScheduler;
+import android.content.ComponentName;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.os.PersistableBundle;
 import android.view.MenuItem;
 import android.widget.PopupMenu;
 
@@ -15,21 +19,24 @@ class Source extends DbRow implements ImageListener, PopupMenu.OnMenuItemClickLi
 
     SourceChangedListener sourceChangedListener;
 
-    Source(Context context, String rssUrl){
-        title = null;
-        link = null;
-        this.rssUrl = rssUrl;
-        this.context = context;
-        icon = new Image(Image.TYPE_ICON);
-    }
-
     Source(Context context, String rssUrl, String title, String link, String iconUrl, String iconFileName, long dbId){
-        this(context, rssUrl);
+        this.context = context;
+        this.rssUrl = rssUrl;
         this.title = title;
         this.link = link;
+        this.icon = new Image(Image.TYPE_ICON);
         this.icon.url = iconUrl;
         this.icon.fileName = iconFileName;
         this.dbId = dbId;
+
+        JobInfo.Builder builder = new JobInfo.Builder((int)dbId, new ComponentName(context, UpdateService.class));
+        builder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY);
+        builder.setPeriodic(5000);      // TODO: set update frequency to reasonable time / set in preferences
+        builder.setPersisted(true);
+        PersistableBundle bundle = new PersistableBundle(1);
+        bundle.putLong("dbId", this.dbId);
+        builder.setExtras(bundle);
+        ((JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE)).schedule(builder.build());
     }
 
     Drawable getIconDrawable(SourceChangedListener sourceChangedListener){

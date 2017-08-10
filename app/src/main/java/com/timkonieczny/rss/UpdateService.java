@@ -8,10 +8,10 @@ public class UpdateService extends JobService {
     public boolean onStartJob(final JobParameters jobParameters) {
         new BackgroundFeedTask(){
             @Override
-            protected void onPostExecute(Void aVoid){   // TODO: rather create single JobService for each source
+            protected void onPostExecute(Void aVoid){
                 jobFinished(jobParameters, false);      // TODO: check JobService success. Don't just pass false
             }
-        };
+        }.execute(jobParameters.getExtras().getLong("dbId"));
         return false;
     }
 

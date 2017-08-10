@@ -1,9 +1,5 @@
 package com.timkonieczny.rss;
 
-import android.app.job.JobInfo;
-import android.app.job.JobScheduler;
-import android.content.ComponentName;
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Point;
@@ -75,12 +71,6 @@ public class MainActivity extends AppCompatActivity
                 }
                 isFragmentSelected = true;
             }
-
-            JobInfo.Builder builder = new JobInfo.Builder(5000, new ComponentName(this, UpdateService.class));  // TODO: pass source id to service
-            builder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY);
-            builder.setPeriodic(5000);
-            JobScheduler jobScheduler = (JobScheduler) getSystemService(Context.JOB_SCHEDULER_SERVICE);         // TODO: run service on boot
-            jobScheduler.schedule(builder.build());
         }
     }
 

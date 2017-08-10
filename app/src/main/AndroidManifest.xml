@@ -3,6 +3,8 @@
     package="com.timkonieczny.rss">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- for background task persistence -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <!-- for DayNight theme -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 

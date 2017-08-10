@@ -69,7 +69,6 @@ class SourceUpdater {
 
     void parse(long dbId, String url)
             throws XmlPullParserException, IOException {
-
         isNewSource = url!=null;
 
         if(!isNewSource) {
