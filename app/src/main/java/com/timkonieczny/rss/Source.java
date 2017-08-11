@@ -29,14 +29,7 @@ class Source extends DbRow implements ImageListener, PopupMenu.OnMenuItemClickLi
         this.icon.fileName = iconFileName;
         this.dbId = dbId;
 
-        JobInfo.Builder builder = new JobInfo.Builder((int)dbId, new ComponentName(context, UpdateService.class));
-        builder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY);
-        builder.setPeriodic(5000);      // TODO: set update frequency to reasonable time / set in preferences
-        builder.setPersisted(true);
-        PersistableBundle bundle = new PersistableBundle(1);
-        bundle.putLong("dbId", this.dbId);
-        builder.setExtras(bundle);
-        ((JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE)).schedule(builder.build());
+        rescheduleBackgroundUpdate();
     }
 
     Drawable getIconDrawable(SourceChangedListener sourceChangedListener){
@@ -55,6 +48,21 @@ class Source extends DbRow implements ImageListener, PopupMenu.OnMenuItemClickLi
         icon.destroy(context);
         MainActivity.dbManager.deleteSource(this);
         if(sourceChangedListener!=null) sourceChangedListener.onSourceChanged(this);
+    }
+
+    void rescheduleBackgroundUpdate(){      // TODO: test if job is run after reboot
+        JobScheduler jobScheduler = (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
+        if(jobScheduler.getPendingJob((int)dbId) != null)
+            jobScheduler.cancel((int)dbId);
+
+        JobInfo.Builder builder = new JobInfo.Builder((int)dbId, new ComponentName(context, UpdateService.class));
+        builder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY);
+        builder.setPeriodic(5000);      // TODO: set update frequency to reasonable time / set in preferences
+        builder.setPersisted(true);
+        PersistableBundle bundle = new PersistableBundle(1);
+        bundle.putLong("dbId", dbId);
+        builder.setExtras(bundle);
+        jobScheduler.schedule(builder.build());
     }
 
     @Override
