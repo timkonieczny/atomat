@@ -15,7 +15,7 @@ public class ChooseUpdateFrequencyDialog extends DialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setTitle("Update source")
+        builder.setTitle("Update " + source.title)
                 .setItems(R.array.update_freq_values, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         // The 'which' argument contains the index position
@@ -51,7 +51,9 @@ public class ChooseUpdateFrequencyDialog extends DialogFragment {
                                 break;
                         }
                     }
-                });
+                })
+        .setCancelable(true)
+        .setNegativeButton(R.string.cancel, null);
         return builder.create();
     }
 
