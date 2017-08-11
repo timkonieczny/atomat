@@ -55,6 +55,7 @@
     <string name="update_freq_24h">Every 24 hours</string>
     <string name="update_freq_15m">Every 15 minutes</string>    <!-- TODO: Remove 15 minutes -->
     <string name="cancel">Cancel</string>
+    <string name="ok">OK</string>
 
     <!-- placeholder strings -->
     <!-- TODO: Remove placeholder strings -->
