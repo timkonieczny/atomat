@@ -72,7 +72,7 @@ class Source extends DbRow implements ImageListener, PopupMenu.OnMenuItemClickLi
         rescheduleBackgroundUpdate();
     }
 
-    void rescheduleBackgroundUpdate(){      // TODO: test if job is run after reboot
+    void rescheduleBackgroundUpdate(){
         JobScheduler jobScheduler = (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
         if(jobScheduler.getPendingJob((int)dbId) != null)
             jobScheduler.cancel((int)dbId);
