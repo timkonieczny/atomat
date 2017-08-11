@@ -9,10 +9,10 @@ public class UpdateService extends JobService {
         new BackgroundFeedTask(){
             @Override
             protected void onPostExecute(Void aVoid){
-                jobFinished(jobParameters, false);      // TODO: check JobService success. Don't just pass false
+                jobFinished(jobParameters, false);
             }
         }.execute(jobParameters.getExtras().getLong("dbId"));
-        return false;
+        return true;
     }
 
     @Override
