@@ -1,5 +1,6 @@
 package com.timkonieczny.rss;
 
+import android.app.FragmentManager;
 import android.content.Context;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -17,10 +18,12 @@ class SourcesAdapter extends BaseAdapter implements SourceChangedListener {
     private GridView gridView;
     private Context context;
     private SourceChangedListener sourceChangedListener;
+    private FragmentManager fragmentManager;
 
-    SourcesAdapter(Context context){
+    SourcesAdapter(Context context, FragmentManager fragmentManager){
         layoutInflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         this.context = context;
+        this.fragmentManager = fragmentManager;
         sourceChangedListener = this;
     }
 
@@ -57,6 +60,10 @@ class SourcesAdapter extends BaseAdapter implements SourceChangedListener {
         else backgroundView.setBackgroundColor(backgroundColor);
 
         ((TextView)view.findViewById(R.id.source_title)).setText(source.title);
+
+        source.chooseUpdateFrequencyDialog = new ChooseUpdateFrequencyDialog();
+        source.chooseUpdateFrequencyDialog.fragmentManager = fragmentManager;
+        source.chooseUpdateFrequencyDialog.source = source;
 
         view.findViewById(R.id.source_item_options_button).setOnClickListener(new View.OnClickListener() {
             @Override

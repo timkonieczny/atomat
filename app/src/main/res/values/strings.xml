@@ -29,6 +29,7 @@
 
     <!-- url options entries -->
     <string name="delete_source_menu_option">Delete source</string>
+    <string name="update_frequency_source_menu_option">Edit update frequency</string>
 
     <!-- strings related to settings -->
     <string name="pref_theme_category_title">Theme</string>
@@ -46,6 +47,14 @@
     <string name="pref_sync_option_3w">3 weeks</string>
     <string name="pref_sync_option_1m">1 month</string>
     <string name="pref_sync_option_2m">2 months</string>
+    <string name="update_freq_1h">Every hour</string>
+    <string name="update_freq_2h">Every 2 hours</string>
+    <string name="update_freq_3h">Every 3 hours</string>
+    <string name="update_freq_6h">Every 6 hours</string>
+    <string name="update_freq_12h">Every 12 hours</string>
+    <string name="update_freq_24h">Every 24 hours</string>
+    <string name="update_freq_15m">Every 15 minutes</string>
+    <!-- TODO: Remove 15 minutes -->
 
     <!-- placeholder strings -->
     <!-- TODO: Remove placeholder strings -->

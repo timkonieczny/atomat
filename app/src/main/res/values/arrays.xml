@@ -23,4 +23,13 @@
         <item>2592000</item>
         <item>5184000</item>
     </string-array>
+    <string-array name="update_freq_values">
+        <item>@string/update_freq_1h</item>
+        <item>@string/update_freq_2h</item>
+        <item>@string/update_freq_3h</item>
+        <item>@string/update_freq_6h</item>
+        <item>@string/update_freq_12h</item>
+        <item>@string/update_freq_24h</item>
+        <item>@string/update_freq_15m</item>
+    </string-array>
 </resources>

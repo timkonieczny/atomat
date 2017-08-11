@@ -3,4 +3,7 @@
     <item
         android:id="@+id/delete_source_menu_item"
         android:title="@string/delete_source_menu_option" />
+    <item
+        android:id="@+id/update_frequency_source_menu_item"
+        android:title="@string/update_frequency_source_menu_option" />
 </menu>

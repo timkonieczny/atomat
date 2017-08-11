@@ -67,7 +67,8 @@ class DbManager extends SQLiteOpenHelper {
                 SourcesTable.COLUMN_NAME_ICON_PATH +            " TEXT, " +
                 SourcesTable.COLUMN_NAME_WEBSITE +              " TEXT, " +
                 SourcesTable.COLUMN_NAME_LAST_MODIFIED +        " TEXT, " +
-                SourcesTable.COLUMN_NAME_ETAG +                 " TEXT)");
+                SourcesTable.COLUMN_NAME_ETAG +                 " TEXT, " +
+                SourcesTable.COLUMN_NAME_UPDATE_FREQUENCY +     " INTEGER DEFAULT 21600000)");  // 6 hours
 
         db.execSQL("CREATE TABLE " + ArticlesTable.TABLE_NAME + " ( " +
                 ArticlesTable._ID +                             " INTEGER PRIMARY KEY, " +
@@ -143,28 +144,29 @@ class DbManager extends SQLiteOpenHelper {
 
 
         String query = "SELECT " +
-                SourcesTable.TABLE_NAME + "." + SourcesTable._ID +                      " AS "+ SourcesTable.TABLE_NAME + SourcesTable._ID + ", \n" +
-                SourcesTable.TABLE_NAME + "." + SourcesTable.COLUMN_NAME_URL +          " AS "+ SourcesTable.TABLE_NAME + "_" + SourcesTable.COLUMN_NAME_URL + ", \n" +
-                SourcesTable.TABLE_NAME + "." + SourcesTable.COLUMN_NAME_TITLE +        " AS "+ SourcesTable.TABLE_NAME + "_" + SourcesTable.COLUMN_NAME_TITLE + ", \n" +
-                SourcesTable.TABLE_NAME + "." + SourcesTable.COLUMN_NAME_ICON_URL +     " AS "+ SourcesTable.TABLE_NAME + "_" + SourcesTable.COLUMN_NAME_ICON_URL + ", \n" +
-                SourcesTable.TABLE_NAME + "." + SourcesTable.COLUMN_NAME_ICON_PATH +    " AS "+ SourcesTable.TABLE_NAME + "_" + SourcesTable.COLUMN_NAME_ICON_PATH + ", \n" +
-                SourcesTable.TABLE_NAME + "." + SourcesTable.COLUMN_NAME_WEBSITE +      " AS "+ SourcesTable.TABLE_NAME + "_" + SourcesTable.COLUMN_NAME_WEBSITE + ", \n" +
+                SourcesTable.TABLE_NAME + "." + SourcesTable._ID +                          " AS "+ SourcesTable.TABLE_NAME + SourcesTable._ID + ", \n" +
+                SourcesTable.TABLE_NAME + "." + SourcesTable.COLUMN_NAME_URL +              " AS "+ SourcesTable.TABLE_NAME + "_" + SourcesTable.COLUMN_NAME_URL + ", \n" +
+                SourcesTable.TABLE_NAME + "." + SourcesTable.COLUMN_NAME_TITLE +            " AS "+ SourcesTable.TABLE_NAME + "_" + SourcesTable.COLUMN_NAME_TITLE + ", \n" +
+                SourcesTable.TABLE_NAME + "." + SourcesTable.COLUMN_NAME_ICON_URL +         " AS "+ SourcesTable.TABLE_NAME + "_" + SourcesTable.COLUMN_NAME_ICON_URL + ", \n" +
+                SourcesTable.TABLE_NAME + "." + SourcesTable.COLUMN_NAME_ICON_PATH +        " AS "+ SourcesTable.TABLE_NAME + "_" + SourcesTable.COLUMN_NAME_ICON_PATH + ", \n" +
+                SourcesTable.TABLE_NAME + "." + SourcesTable.COLUMN_NAME_WEBSITE +          " AS "+ SourcesTable.TABLE_NAME + "_" + SourcesTable.COLUMN_NAME_WEBSITE + ", \n" +
+                SourcesTable.TABLE_NAME + "." + SourcesTable.COLUMN_NAME_UPDATE_FREQUENCY + " AS "+ SourcesTable.TABLE_NAME + "_" + SourcesTable.COLUMN_NAME_UPDATE_FREQUENCY + ", \n" +
 
-                ArticlesTable.TABLE_NAME +"." + ArticlesTable._ID +                     " AS "+ ArticlesTable.TABLE_NAME + ArticlesTable._ID + ", \n" +
-                ArticlesTable.TABLE_NAME +"." + ArticlesTable.COLUMN_NAME_URL +         " AS "+ ArticlesTable.TABLE_NAME + "_" + ArticlesTable.COLUMN_NAME_URL + ", \n" +
-                ArticlesTable.TABLE_NAME +"." + ArticlesTable.COLUMN_NAME_SOURCE_ID +   " AS "+ ArticlesTable.TABLE_NAME + "_" + ArticlesTable.COLUMN_NAME_SOURCE_ID + ", \n" +
-                ArticlesTable.TABLE_NAME +"." + ArticlesTable.COLUMN_NAME_TITLE +       " AS "+ ArticlesTable.TABLE_NAME + "_" + ArticlesTable.COLUMN_NAME_TITLE + ", \n" +
-                ArticlesTable.TABLE_NAME +"." + ArticlesTable.COLUMN_NAME_AUTHOR +      " AS "+ ArticlesTable.TABLE_NAME + "_" + ArticlesTable.COLUMN_NAME_AUTHOR + ", \n" +
-                ArticlesTable.TABLE_NAME +"." + ArticlesTable.COLUMN_NAME_PUBLISHED +   " AS "+ ArticlesTable.TABLE_NAME + "_" + ArticlesTable.COLUMN_NAME_PUBLISHED + ", \n" +
-                ArticlesTable.TABLE_NAME +"." + ArticlesTable.COLUMN_NAME_CONTENT +     " AS "+ ArticlesTable.TABLE_NAME + "_" + ArticlesTable.COLUMN_NAME_CONTENT + ", \n" +
+                ArticlesTable.TABLE_NAME +"." + ArticlesTable._ID +                         " AS "+ ArticlesTable.TABLE_NAME + ArticlesTable._ID + ", \n" +
+                ArticlesTable.TABLE_NAME +"." + ArticlesTable.COLUMN_NAME_URL +             " AS "+ ArticlesTable.TABLE_NAME + "_" + ArticlesTable.COLUMN_NAME_URL + ", \n" +
+                ArticlesTable.TABLE_NAME +"." + ArticlesTable.COLUMN_NAME_SOURCE_ID +       " AS "+ ArticlesTable.TABLE_NAME + "_" + ArticlesTable.COLUMN_NAME_SOURCE_ID + ", \n" +
+                ArticlesTable.TABLE_NAME +"." + ArticlesTable.COLUMN_NAME_TITLE +           " AS "+ ArticlesTable.TABLE_NAME + "_" + ArticlesTable.COLUMN_NAME_TITLE + ", \n" +
+                ArticlesTable.TABLE_NAME +"." + ArticlesTable.COLUMN_NAME_AUTHOR +          " AS "+ ArticlesTable.TABLE_NAME + "_" + ArticlesTable.COLUMN_NAME_AUTHOR + ", \n" +
+                ArticlesTable.TABLE_NAME +"." + ArticlesTable.COLUMN_NAME_PUBLISHED +       " AS "+ ArticlesTable.TABLE_NAME + "_" + ArticlesTable.COLUMN_NAME_PUBLISHED + ", \n" +
+                ArticlesTable.TABLE_NAME +"." + ArticlesTable.COLUMN_NAME_CONTENT +         " AS "+ ArticlesTable.TABLE_NAME + "_" + ArticlesTable.COLUMN_NAME_CONTENT + ", \n" +
 
-                ImagesTable.TABLE_NAME + "." + ImagesTable._ID +                        " AS "+ ImagesTable.TABLE_NAME + ImagesTable._ID + ", \n" +
-                ImagesTable.TABLE_NAME + "." + ImagesTable.COLUMN_NAME_ARTICLE_ID +     " AS "+ ImagesTable.TABLE_NAME + "_" + ImagesTable.COLUMN_NAME_ARTICLE_ID + ", \n" +
-                ImagesTable.TABLE_NAME + "." + ImagesTable.COLUMN_NAME_URL +            " AS "+ ImagesTable.TABLE_NAME + "_" + ImagesTable.COLUMN_NAME_URL + ", \n" +
-                ImagesTable.TABLE_NAME + "." + ImagesTable.COLUMN_NAME_PATH +           " AS "+ ImagesTable.TABLE_NAME + "_" + ImagesTable.COLUMN_NAME_PATH + ", \n" +
-                ImagesTable.TABLE_NAME + "." + ImagesTable.COLUMN_NAME_WIDTH +          " AS "+ ImagesTable.TABLE_NAME + "_" + ImagesTable.COLUMN_NAME_WIDTH + ", \n" +
-                ImagesTable.TABLE_NAME + "." + ImagesTable.COLUMN_NAME_HEIGHT +         " AS "+ ImagesTable.TABLE_NAME + "_" + ImagesTable.COLUMN_NAME_HEIGHT + ", \n" +
-                ImagesTable.TABLE_NAME + "." + ImagesTable.COLUMN_NAME_TYPE +           " AS "+ ImagesTable.TABLE_NAME + "_" + ImagesTable.COLUMN_NAME_TYPE +
+                ImagesTable.TABLE_NAME + "." + ImagesTable._ID +                            " AS "+ ImagesTable.TABLE_NAME + ImagesTable._ID + ", \n" +
+                ImagesTable.TABLE_NAME + "." + ImagesTable.COLUMN_NAME_ARTICLE_ID +         " AS "+ ImagesTable.TABLE_NAME + "_" + ImagesTable.COLUMN_NAME_ARTICLE_ID + ", \n" +
+                ImagesTable.TABLE_NAME + "." + ImagesTable.COLUMN_NAME_URL +                " AS "+ ImagesTable.TABLE_NAME + "_" + ImagesTable.COLUMN_NAME_URL + ", \n" +
+                ImagesTable.TABLE_NAME + "." + ImagesTable.COLUMN_NAME_PATH +               " AS "+ ImagesTable.TABLE_NAME + "_" + ImagesTable.COLUMN_NAME_PATH + ", \n" +
+                ImagesTable.TABLE_NAME + "." + ImagesTable.COLUMN_NAME_WIDTH +              " AS "+ ImagesTable.TABLE_NAME + "_" + ImagesTable.COLUMN_NAME_WIDTH + ", \n" +
+                ImagesTable.TABLE_NAME + "." + ImagesTable.COLUMN_NAME_HEIGHT +             " AS "+ ImagesTable.TABLE_NAME + "_" + ImagesTable.COLUMN_NAME_HEIGHT + ", \n" +
+                ImagesTable.TABLE_NAME + "." + ImagesTable.COLUMN_NAME_TYPE +               " AS "+ ImagesTable.TABLE_NAME + "_" + ImagesTable.COLUMN_NAME_TYPE +
 
                 " \nFROM " +        SourcesTable.TABLE_NAME +
                 " \nLEFT JOIN " +   ArticlesTable.TABLE_NAME +
@@ -182,7 +184,8 @@ class DbManager extends SQLiteOpenHelper {
                 String sourceIcon = getString(cursor, SourcesTable.TABLE_NAME + "_" + SourcesTable.COLUMN_NAME_ICON_URL);
                 String sourceIconFile = getString(cursor, SourcesTable.TABLE_NAME + "_" + SourcesTable.COLUMN_NAME_ICON_PATH);
                 String sourceLink = getString(cursor, SourcesTable.TABLE_NAME + "_" + SourcesTable.COLUMN_NAME_WEBSITE);
-                MainActivity.sources.add(new Source(context, sourceUrl, sourceTitle, sourceLink, sourceIcon, sourceIconFile, sourceDbId));
+                long sourceUpdateFrequency = getLong(cursor, SourcesTable.TABLE_NAME + "_" + SourcesTable.COLUMN_NAME_UPDATE_FREQUENCY);
+                MainActivity.sources.add(new Source(context, sourceUrl, sourceTitle, sourceLink, sourceIcon, sourceIconFile, sourceDbId, sourceUpdateFrequency));
             }
 
             long articleDbId = getLong(cursor, ArticlesTable.TABLE_NAME + ArticlesTable._ID);
@@ -238,17 +241,6 @@ class DbManager extends SQLiteOpenHelper {
 
 
     // LOADING METHODS
-
-    long[] getSourceIds(){
-        Cursor cursor = db.query(SourcesTable.TABLE_NAME, new String[]{SourcesTable._ID}, null, null, null, null, null);
-        long[] sourceIds = new long[cursor.getCount()];
-        int i = 0;
-        while (cursor.moveToNext()){
-            sourceIds[i++] = getLong(cursor, SourcesTable._ID);
-        }
-        cursor.close();
-        return sourceIds;
-    }
 
     HashSet<String> getExistingArticleLinks(){
         HashSet<String> links = new HashSet<>();
@@ -329,6 +321,7 @@ class DbManager extends SQLiteOpenHelper {
         static final String COLUMN_NAME_WEBSITE = "website";
         static final String COLUMN_NAME_LAST_MODIFIED = "last_modified";
         static final String COLUMN_NAME_ETAG = "etag";
+        static final String COLUMN_NAME_UPDATE_FREQUENCY = "update_frequency";
     }
 
     class ArticlesTable implements BaseColumns {
