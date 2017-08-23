@@ -212,7 +212,6 @@ class DbManager extends SQLiteOpenHelper {
                 Article article = MainActivity.articles.getByDbId(imageArticleId);
                 if (imageIndex == Image.TYPE_HEADER) {
                     article.header = new Image(Image.TYPE_HEADER, imageDbId, imageUrl, imagePath, imageWidth, imageHeight);
-                    article.getImage(null, Image.TYPE_HEADER);
                 } else {
                     Image image = new Image(Image.TYPE_INLINE, imageDbId, imageUrl, imagePath, imageWidth, imageHeight);
                     if (article.inlineImages == null) article.inlineImages = new ArrayList<>();
