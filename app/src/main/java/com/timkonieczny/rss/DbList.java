@@ -33,6 +33,11 @@ class DbList<T extends DbRow> extends ArrayList<T> {
         return null;
     }
 
+    public T remove(int i){
+        dbIds.remove(this.get(i).dbId);
+        return super.remove(i);
+    }
+
     void removeByDbId(Long dbId){
         for(int i = 0; i < this.size(); i++){
             if(this.get(i).dbId == dbId){

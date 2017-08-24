@@ -27,4 +27,10 @@ class SourcesList extends DbList<Source> {
     boolean containsRssUrl(String rssUrl){
         return rssUrls.contains(rssUrl);
     }
+
+    @Override
+    void removeByDbId(Long dbId){
+        rssUrls.remove(this.getByDbId(dbId).rssUrl);
+        super.removeByDbId(dbId);
+    }
 }
