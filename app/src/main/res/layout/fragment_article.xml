@@ -9,7 +9,6 @@
         tools:context="com.timkonieczny.rss.ArticleFragment">
         <ImageView
             android:id="@+id/article_header"
-            android:transitionName="headerImage"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:adjustViewBounds="true"

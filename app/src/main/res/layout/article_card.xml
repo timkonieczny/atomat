@@ -20,7 +20,6 @@
         android:scaleType="centerCrop"
         android:adjustViewBounds="true"
         android:tintMode="src_atop"
-        android:transitionName="headerImage1"
         android:contentDescription="@string/header_image_descriptor"/>
 
     <LinearLayout
@@ -37,7 +36,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="top"
-            android:text="The Verge -  All Posts"
+            android:text="@string/debug_source_title"
             android:textColor="@android:color/white"
             android:textSize="14sp"
             android:drawablePadding="16dp" />
@@ -51,7 +50,7 @@
 
             <TextView
                 android:id="@+id/article_title"
-                android:text="Android O is supposed to make Android updates arrive faster"
+                android:text="@string/debug_title"
                 android:textColor="@android:color/white"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -60,7 +59,7 @@
                 android:textSize="24sp" />
             <TextView
                 android:id="@+id/article_author"
-                android:text="Andrew Liptak"
+                android:text="@string/debug_author"
                 android:textColor="@android:color/white"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

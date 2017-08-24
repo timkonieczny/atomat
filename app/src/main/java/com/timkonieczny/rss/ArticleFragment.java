@@ -40,7 +40,7 @@ public class ArticleFragment extends Fragment implements ArticleChangedListener,
     private Article article;
 
     private TextView sourceTitleTextView, contentTextView;
-    private ImageView headerImageView;
+    ImageView headerImageView;
 
     private SpannableStringBuilder spannableStringBuilder;
     private ImageSpan[] imageSpans;
@@ -74,7 +74,10 @@ public class ArticleFragment extends Fragment implements ArticleChangedListener,
         ((TextView) view.findViewById(R.id.article_title)).setText(article.title);
         ((TextView) view.findViewById(R.id.article_author)).setText(article.author);
         sourceTitleTextView.setText(article.source.title);
+
         headerImageView.setImageDrawable(article.getImage(this, Image.TYPE_HEADER));
+        headerImageView.setTransitionName(article.dbId + "_header");
+
         sourceTitleTextView.setCompoundDrawablesWithIntrinsicBounds(article.source.getIconDrawable(this), null, null, null);
         contentTextView = (TextView)view.findViewById(R.id.article_content);
 

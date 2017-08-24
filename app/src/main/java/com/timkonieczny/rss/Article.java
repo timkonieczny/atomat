@@ -4,7 +4,6 @@ import android.app.FragmentManager;
 import android.content.ContentValues;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
-import android.view.View;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -15,7 +14,7 @@ class Article extends DbRow implements ImageListener{
     String title, author, content;
     private String link;
     Source source;
-    View.OnClickListener onClickListener;
+    ArticleOnClickListener onClickListener;
     private ArticleChangedListener articleChangedListener;
 
     Image header;

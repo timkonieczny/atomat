@@ -7,6 +7,7 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.transition.Fade;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -44,6 +45,8 @@ public class OverviewFragment
         if(MainActivity.articles == null) MainActivity.articles = new DbList<>();
 
         feedAdapter = new FeedAdapter();
+        setEnterTransition(new Fade());
+        setExitTransition(new Fade());
     }
 
     @Override

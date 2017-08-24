@@ -22,12 +22,14 @@ class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ArticleCardViewHolder
     public void onBindViewHolder(ArticleCardViewHolder holder, int position) {
         Article article = MainActivity.articles.get(position);
 
+        article.onClickListener.sharedElement = holder.articleHeader;
         holder.cardView.setOnClickListener(article.onClickListener);
 
         holder.sourceTitle.setText(article.source.title);
         holder.sourceTitle.setCompoundDrawablesWithIntrinsicBounds(article.source.getIconDrawable(this), null, null, null);
         holder.articleTitle.setText(article.title);
         holder.articleAuthor.setText(article.author);
+        holder.articleHeader.setTransitionName(article.dbId + "_header");
         holder.articleHeader.setImageDrawable(article.getImage(this, Image.TYPE_HEADER));
 
         if(article.header.palette!=null) {
