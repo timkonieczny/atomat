@@ -9,6 +9,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.AppCompatDelegate;
@@ -26,7 +27,8 @@ public class MainActivity extends AppCompatActivity
     protected static DbList<Article> articles = null;
     protected static SourcesList sources = null;
 
-    protected static ActionBarDrawerToggle toggle;
+    private ActionBarDrawerToggle toggle;
+
     protected static boolean goToSettings = false;
     protected static boolean isFragmentSelected = false;
 
@@ -35,6 +37,7 @@ public class MainActivity extends AppCompatActivity
     private OverviewFragment overviewFragment = null;
     private SourcesFragment sourcesFragment = null;
     private SettingsFragment settingsFragment = null;
+    private ArticleFragment articleFragment = null;
 
     protected static int viewWidth;
 
@@ -147,7 +150,9 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onClick(View view) {
         long dbId = (long)view.getTag();
-        ArticleFragment articleFragment = new ArticleFragment();
+
+        if(articleFragment == null) articleFragment = new ArticleFragment();
+
         Bundle args = new Bundle();
         args.putLong("dbId", dbId);
 
@@ -168,5 +173,21 @@ public class MainActivity extends AppCompatActivity
                 .replace(R.id.fragment_container, articleFragment)
                 .addToBackStack(null)
                 .commit();
+
+        toggle.setDrawerIndicatorEnabled(false);
+        ActionBar actionBar = getSupportActionBar();
+        if(actionBar!=null) getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        toggle.setToolbarNavigationClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+                toggle.setDrawerIndicatorEnabled(true);
+                toggle.setToolbarNavigationClickListener(null);
+                onBackPressed();
+            }
+        });
+
+        toggle.syncState();
     }
 }

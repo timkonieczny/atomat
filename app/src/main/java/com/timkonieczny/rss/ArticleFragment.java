@@ -59,12 +59,6 @@ public class ArticleFragment extends Fragment implements ArticleChangedListener,
     public void onViewCreated(final View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-
-        /*MainActivity.toggle.setDrawerIndicatorEnabled(false);
-        ((AppCompatActivity)getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        ((AppCompatActivity)getActivity()).getSupportActionBar().setHomeButtonEnabled(true);
-        MainActivity.toggle.syncState();*/
-
         ActionBar actionBar = ((MainActivity)getActivity()).getSupportActionBar();
         if(actionBar!=null) actionBar.setTitle(article.title);
 
