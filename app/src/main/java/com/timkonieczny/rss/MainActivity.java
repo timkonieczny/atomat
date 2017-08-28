@@ -1,7 +1,9 @@
 package com.timkonieczny.rss;
 
+import android.animation.ObjectAnimator;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.graphics.Color;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -9,10 +11,10 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.AppCompatDelegate;
+import android.support.v7.graphics.drawable.DrawerArrowDrawable;
 import android.support.v7.widget.Toolbar;
 import android.transition.Slide;
 import android.transition.Transition;
@@ -27,7 +29,9 @@ public class MainActivity extends AppCompatActivity
     protected static DbList<Article> articles = null;
     protected static SourcesList sources = null;
 
-    private ActionBarDrawerToggle toggle;
+    private DrawerArrowDrawable drawerArrow;
+    private DrawerLayout drawer;
+    private Toolbar toolbar;
 
     protected static boolean goToSettings = false;
     protected static boolean isFragmentSelected = false;
@@ -54,14 +58,21 @@ public class MainActivity extends AppCompatActivity
             getWindowManager().getDefaultDisplay().getSize(size);
             viewWidth = size.x;
 
-            Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+            toolbar = (Toolbar) findViewById(R.id.toolbar);
             setSupportActionBar(toolbar);
 
-            DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-            toggle = new ActionBarDrawerToggle(
+            drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+            ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                     this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
             drawer.addDrawerListener(toggle);
             toggle.syncState();
+
+
+            drawerArrow = new DrawerArrowDrawable(this);
+            drawerArrow.setColor(Color.WHITE);
+
+            toolbar.setNavigationIcon(drawerArrow);
+
 
             NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
             navigationView.setNavigationItemSelectedListener(this);
@@ -90,12 +101,19 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
             super.onBackPressed();
         }
+
+        ObjectAnimator.ofFloat(drawerArrow, "progress", 0).start();
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                drawer.openDrawer(GravityCompat.START);
+            }
+        });
     }
 
     @Override
@@ -174,20 +192,13 @@ public class MainActivity extends AppCompatActivity
                 .addToBackStack(null)
                 .commit();
 
-        toggle.setDrawerIndicatorEnabled(false);
-        ActionBar actionBar = getSupportActionBar();
-        if(actionBar!=null) getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
-        toggle.setToolbarNavigationClickListener(new View.OnClickListener() {
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
-                getSupportActionBar().setDisplayHomeAsUpEnabled(false);
-                toggle.setDrawerIndicatorEnabled(true);
-                toggle.setToolbarNavigationClickListener(null);
+            public void onClick(View view) {
                 onBackPressed();
             }
         });
 
-        toggle.syncState();
+        ObjectAnimator.ofFloat(drawerArrow, "progress", 1).start();
     }
 }
