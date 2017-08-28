@@ -12,6 +12,12 @@ import android.widget.TextView;
 class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ArticleCardViewHolder>
         implements ArticleChangedListener, SourceChangedListener {
 
+    private View.OnClickListener onClickListener;
+
+    FeedAdapter(View.OnClickListener onClickListener){
+        this.onClickListener = onClickListener;
+    }
+
     @Override
     public ArticleCardViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.article_card, parent, false);
@@ -22,7 +28,9 @@ class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ArticleCardViewHolder
     public void onBindViewHolder(ArticleCardViewHolder holder, int position) {
         Article article = MainActivity.articles.get(position);
 
-        article.onClickListener.sharedElement = holder.articleHeader;
+        article.onClickListener = onClickListener;
+
+        holder.cardView.setTag(article.dbId);
         holder.cardView.setOnClickListener(article.onClickListener);
 
         holder.sourceTitle.setText(article.source.title);

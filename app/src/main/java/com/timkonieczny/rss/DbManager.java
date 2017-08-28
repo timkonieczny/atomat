@@ -1,6 +1,5 @@
 package com.timkonieczny.rss;
 
-import android.app.FragmentManager;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -134,7 +133,7 @@ class DbManager extends SQLiteOpenHelper {
         return db.insert(table, null, contentValues);
     }
 
-    void load(Context context, FragmentManager fragmentManager, long articleLifetime){
+    void load(Context context, long articleLifetime){
         getDb();
 
         // get valid articles
@@ -197,7 +196,7 @@ class DbManager extends SQLiteOpenHelper {
                 long articlePublished = getLong(cursor, ArticlesTable.TABLE_NAME + "_" + ArticlesTable.COLUMN_NAME_PUBLISHED);
                 String articleContent = getString(cursor, ArticlesTable.TABLE_NAME + "_" + ArticlesTable.COLUMN_NAME_CONTENT);
                 Source source = MainActivity.sources.getByDbId(articleSourceId);
-                MainActivity.articles.add(new Article(context, fragmentManager, articleTitle, articleAuthor, articleLink, articlePublished, articleContent, source, articleDbId));
+                MainActivity.articles.add(new Article(context, articleTitle, articleAuthor, articleLink, articlePublished, articleContent, source, articleDbId));
             }
 
             long imageDbId = getLong(cursor, ImagesTable.TABLE_NAME + ImagesTable._ID);

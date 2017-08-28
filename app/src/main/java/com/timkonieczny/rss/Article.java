@@ -1,9 +1,9 @@
 package com.timkonieczny.rss;
 
-import android.app.FragmentManager;
 import android.content.ContentValues;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.view.View;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -14,7 +14,7 @@ class Article extends DbRow implements ImageListener{
     String title, author, content;
     private String link;
     Source source;
-    ArticleOnClickListener onClickListener;
+    View.OnClickListener onClickListener;
     private ArticleChangedListener articleChangedListener;
 
     Image header;
@@ -22,13 +22,12 @@ class Article extends DbRow implements ImageListener{
 
     private Context context;
 
-    Article(Context context, FragmentManager fragmentManager,
+    Article(Context context,
             String title, String author, String link, long published, String content,
             Source source, long dbId){
 
         header = new Image(Image.TYPE_HEADER);
         this.context = context;
-        this.onClickListener = new ArticleOnClickListener(this, fragmentManager);
         this.title = title;
         this.author = author;
         this.link = link;

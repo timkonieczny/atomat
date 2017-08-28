@@ -1,6 +1,5 @@
 package com.timkonieczny.rss;
 
-import android.app.FragmentManager;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
@@ -12,20 +11,14 @@ import java.io.IOException;
 class Feed extends AsyncTask<Void, Boolean, Boolean> implements DbOpenListener{
 
     private Context context;
-    private FragmentManager fragmentManager;
     private FeedListener feedListener;
     private SourceUpdater sourceUpdater;
 
     private String newSource;
 
-    Feed(Context context, FeedListener feedListener, FragmentManager fragmentManager){
-        this(context, feedListener, fragmentManager, null);
-    }
-
-    Feed(Context context, FeedListener feedListener, FragmentManager fragmentManager, String newSource){
+    Feed(Context context, FeedListener feedListener, String newSource){
         this.context = context;
         this.feedListener = feedListener;
-        this.fragmentManager = fragmentManager;
         this.newSource = newSource;
         sourceUpdater = new SourceUpdater();
         (new DbOpenTask(MainActivity.dbManager, this)).execute();
@@ -44,7 +37,7 @@ class Feed extends AsyncTask<Void, Boolean, Boolean> implements DbOpenListener{
                 .getString("pref_sync", "1209600"))*1000;
 
         int before = MainActivity.articles.size();
-        MainActivity.dbManager.load(context, fragmentManager, articleLifetime);
+        MainActivity.dbManager.load(context, articleLifetime);
         publishProgress(before != MainActivity.articles.size());
 
         before = MainActivity.articles.size();
@@ -58,7 +51,7 @@ class Feed extends AsyncTask<Void, Boolean, Boolean> implements DbOpenListener{
             e.printStackTrace();
         }
 
-        MainActivity.dbManager.load(context, fragmentManager, articleLifetime);
+        MainActivity.dbManager.load(context, articleLifetime);
 
         return before != MainActivity.articles.size();
     }

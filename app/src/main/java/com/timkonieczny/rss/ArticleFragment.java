@@ -51,7 +51,7 @@ public class ArticleFragment extends Fragment implements ArticleChangedListener,
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        article = MainActivity.articles.get(getArguments().getInt("index"));
+        article = MainActivity.articles.getByDbId(getArguments().getLong("dbId"));
         return inflater.inflate(R.layout.fragment_article, container, false);
     }
 

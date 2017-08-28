@@ -13,10 +13,15 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.Toolbar;
+import android.transition.Slide;
+import android.transition.Transition;
+import android.transition.TransitionInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ImageView;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener, View.OnClickListener {
 
     protected static DbList<Article> articles = null;
     protected static SourcesList sources = null;
@@ -137,5 +142,31 @@ public class MainActivity extends AppCompatActivity
                 configBefore == configAfter &&
                         (delegateBefore == AppCompatDelegate.MODE_NIGHT_AUTO ||
                                 delegateAfter == AppCompatDelegate.MODE_NIGHT_AUTO);
+    }
+
+    @Override
+    public void onClick(View view) {
+        long dbId = (long)view.getTag();
+        ArticleFragment articleFragment = new ArticleFragment();
+        Bundle args = new Bundle();
+        args.putLong("dbId", dbId);
+
+        articleFragment.setArguments(args);
+
+        ImageView sharedElement = (ImageView) view.findViewById(R.id.article_header);
+
+        Transition transition = TransitionInflater.from(sharedElement.getContext()).inflateTransition(R.transition.article_header_transition);
+        articleFragment.setSharedElementEnterTransition(transition);
+        articleFragment.setSharedElementReturnTransition(transition);
+        articleFragment.setEnterTransition(new Slide());
+        articleFragment.setExitTransition(new Slide());
+        sharedElement.clearColorFilter();
+
+        getFragmentManager()
+                .beginTransaction()
+                .addSharedElement(sharedElement, dbId + "_header")
+                .replace(R.id.fragment_container, articleFragment)
+                .addToBackStack(null)
+                .commit();
     }
 }

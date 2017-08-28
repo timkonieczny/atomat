@@ -44,7 +44,7 @@ public class OverviewFragment
         if(MainActivity.sources == null) MainActivity.sources = new SourcesList();
         if(MainActivity.articles == null) MainActivity.articles = new DbList<>();
 
-        feedAdapter = new FeedAdapter();
+        feedAdapter = new FeedAdapter((View.OnClickListener)getActivity());
         setEnterTransition(new Fade());
         setExitTransition(new Fade());
     }
@@ -97,6 +97,6 @@ public class OverviewFragment
 
     public void updateFeed(){
         // TODO: The Verge: Feed only contains article previews. But ID is also a feed URL containing full articles.
-        new Feed(getContext(), this, getFragmentManager());
+        new Feed(getContext(), this, null);
     }
 }
