@@ -111,6 +111,7 @@ class DbManager extends SQLiteOpenHelper {
     }
 
     long insertImage(ContentValues values){
+        getDb();
         return insertRow(ImagesTable.TABLE_NAME, values);
     }
 
@@ -227,6 +228,7 @@ class DbManager extends SQLiteOpenHelper {
     // UPDATING METHODS
 
     void deleteSource(Source source){
+        getDb();
         db.delete(SourcesTable.TABLE_NAME, SourcesTable._ID + " = ?", new String[]{String.valueOf(source.dbId)});
     }
 

@@ -1,7 +1,6 @@
 package com.timkonieczny.rss;
 
 import android.os.AsyncTask;
-import android.util.Log;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -18,7 +17,6 @@ class BackgroundFeedTask extends AsyncTask<Void, Void, Void>{
 
     @Override
     protected Void doInBackground(Void... v) {
-        Log.d("BackgroundFeedTask", "running...");
         SourceUpdater sourceUpdater = new SourceUpdater(dbManager);
 
         try {

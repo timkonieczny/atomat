@@ -35,7 +35,7 @@ class Image extends DbRow{
         this.type = type;
     }
 
-    Drawable getDrawable(Context context, ImageListener imageListener, String fileNameSeed, int index){
+    Drawable getDrawable(Context context, ImageListener imageListener, String fileNameSeed, int index, long parentDbId){
         if(drawable != null){
             return drawable;
         }else if(this.fileName !=null){
@@ -43,7 +43,7 @@ class Image extends DbRow{
             return drawable;
         }else if(url != null){
             if(imageTask == null) {
-                imageTask = new ImageTask(context, index, generateFileName(fileNameSeed));
+                imageTask = new ImageTask(context, index, generateFileName(fileNameSeed), parentDbId);
                 imageTask.execute(this);
             }
             imageTask.imageListener = imageListener;

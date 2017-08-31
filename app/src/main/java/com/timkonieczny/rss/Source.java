@@ -28,7 +28,7 @@ class Source extends DbRow implements ImageListener, PopupMenu.OnMenuItemClickLi
 
     Drawable getIconDrawable(SourceChangedListener sourceChangedListener){
         this.sourceChangedListener = sourceChangedListener;
-        return icon.getDrawable(context, this, title, Image.TYPE_ICON);
+        return icon.getDrawable(context, this, title, Image.TYPE_ICON, dbId);
     }
 
     private void destroy(){
@@ -40,7 +40,9 @@ class Source extends DbRow implements ImageListener, PopupMenu.OnMenuItemClickLi
             }
 
         icon.destroy(context);
-        MainActivity.dbManager.deleteSource(this);
+        DbManager dbManager = new DbManager(context);
+        dbManager.deleteSource(this);
+        dbManager.close();
         MainActivity.sources.removeByDbId(dbId);
         if(sourceChangedListener!=null) sourceChangedListener.onSourceChanged(this);
     }
@@ -57,10 +59,6 @@ class Source extends DbRow implements ImageListener, PopupMenu.OnMenuItemClickLi
 
     @Override
     public void onImageLoaded(int index) {
-        // save icon file name in db
-        MainActivity.dbManager.updateValue(DbManager.SourcesTable.TABLE_NAME,
-                DbManager.SourcesTable.COLUMN_NAME_ICON_PATH, icon.fileName,
-                DbManager.SourcesTable.COLUMN_NAME_URL, rssUrl);
         sourceChangedListener.onSourceChanged(this);
     }
 

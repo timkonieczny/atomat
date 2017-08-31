@@ -40,8 +40,6 @@ public class MainActivity extends AppCompatActivity
     protected static boolean goToSettings = false;
     protected static boolean isFragmentSelected = false;
 
-    protected static DbManager dbManager;
-
     private OverviewFragment overviewFragment = null;
     private SourcesFragment sourcesFragment = null;
     private SettingsFragment settingsFragment = null;
@@ -81,8 +79,6 @@ public class MainActivity extends AppCompatActivity
             NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
             navigationView.setNavigationItemSelectedListener(this);
 
-            dbManager = new DbManager(this);
-
             if (!isFragmentSelected) {
                 if (goToSettings) {
                     onNavigationItemSelected(navigationView.getMenu().findItem(R.id.nav_preferences));
@@ -101,7 +97,6 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if(dbManager.db != null) dbManager.db.close();
     }
 
     @Override

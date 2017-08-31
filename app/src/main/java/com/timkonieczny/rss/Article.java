@@ -1,6 +1,5 @@
 package com.timkonieczny.rss;
 
-import android.content.ContentValues;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.view.View;
@@ -39,8 +38,8 @@ class Article extends DbRow implements ImageListener{
 
     Drawable getImage(ArticleChangedListener articleChangedListener, int index){
         this.articleChangedListener = articleChangedListener;
-        if(index == Image.TYPE_HEADER) return header.getDrawable(context, this, title, index);
-        else return inlineImages.get(index).getDrawable(context, this, title, index);
+        if(index == Image.TYPE_HEADER) return header.getDrawable(context, this, title, index, dbId);
+        else return inlineImages.get(index).getDrawable(context, this, title, index, dbId);
     }
 
     void destroy(){
@@ -64,21 +63,6 @@ class Article extends DbRow implements ImageListener{
 
     @Override
     public void onImageLoaded(int index) {
-        Image image;
-        if(index == Image.TYPE_HEADER) image = header;
-        else image = inlineImages.get(index);
-
-        ContentValues values = new ContentValues();
-        values.put(DbManager.ImagesTable.COLUMN_NAME_PATH, image.fileName);
-        values.put(DbManager.ImagesTable.COLUMN_NAME_WIDTH, image.width);
-        values.put(DbManager.ImagesTable.COLUMN_NAME_HEIGHT, image.height);
-        if(index == Image.TYPE_HEADER) MainActivity.dbManager.updateImage(dbId, index, values); // header image exists in db already
-        else{
-            values.put(DbManager.ImagesTable.COLUMN_NAME_TYPE, index);
-            values.put(DbManager.ImagesTable.COLUMN_NAME_ARTICLE_ID, dbId);
-            values.put(DbManager.ImagesTable.COLUMN_NAME_URL, image.url);
-            image.dbId = MainActivity.dbManager.insertImage(values);                            // inline image does not exist yet
-        }
         if (articleChangedListener != null) articleChangedListener.onArticleChanged(this, index);
     }
 }

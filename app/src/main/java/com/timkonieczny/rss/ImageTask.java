@@ -1,5 +1,6 @@
 package com.timkonieczny.rss;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -16,11 +17,13 @@ class ImageTask extends AsyncTask<Image, Void, Void> {
     ImageListener imageListener;
     private int index;
     private String fileName;
+    private long parentDbId;
 
-    ImageTask(Context context, int index, String fileName){
+    ImageTask(Context context, int index, String fileName, long parentDbId){
         this.index = index;
         this.context = context;
         this.fileName = fileName;
+        this.parentDbId = parentDbId;
     }
 
     @Override
@@ -33,6 +36,7 @@ class ImageTask extends AsyncTask<Image, Void, Void> {
             images[0].fileName = fileName;
             images[0].width = bitmap.getWidth();
             images[0].height = bitmap.getHeight();
+            saveImagePathInDb(parentDbId, images[0]);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -49,5 +53,31 @@ class ImageTask extends AsyncTask<Image, Void, Void> {
         FileOutputStream fileOutputStream = context.openFileOutput(fileName, Context.MODE_PRIVATE);
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fileOutputStream);
         fileOutputStream.close();
+    }
+
+    private void saveImagePathInDb(long parentDbId, Image image){
+        DbManager dbManager = new DbManager(context);
+        if(index == Image.TYPE_ICON){
+            dbManager.updateValue(DbManager.SourcesTable.TABLE_NAME,
+                    DbManager.SourcesTable.COLUMN_NAME_ICON_PATH, image.fileName,
+                    DbManager.SourcesTable._ID, String.valueOf(parentDbId));
+        }else if(index == Image.TYPE_HEADER){
+            ContentValues values = new ContentValues();
+            values.put(DbManager.ImagesTable.COLUMN_NAME_PATH, image.fileName);
+            values.put(DbManager.ImagesTable.COLUMN_NAME_WIDTH, image.width);
+            values.put(DbManager.ImagesTable.COLUMN_NAME_HEIGHT, image.height);
+            dbManager.updateImage(parentDbId, index, values); // header image exists in db already
+        }else if(index == Image.TYPE_INLINE){
+            ContentValues values = new ContentValues();
+            values.put(DbManager.ImagesTable.COLUMN_NAME_PATH, image.fileName);
+            values.put(DbManager.ImagesTable.COLUMN_NAME_WIDTH, image.width);
+            values.put(DbManager.ImagesTable.COLUMN_NAME_HEIGHT, image.height);
+
+            values.put(DbManager.ImagesTable.COLUMN_NAME_TYPE, index);
+            values.put(DbManager.ImagesTable.COLUMN_NAME_ARTICLE_ID, parentDbId);
+            values.put(DbManager.ImagesTable.COLUMN_NAME_URL, image.url);
+            image.dbId = dbManager.insertImage(values);
+        }
+        dbManager.close();
     }
 }
