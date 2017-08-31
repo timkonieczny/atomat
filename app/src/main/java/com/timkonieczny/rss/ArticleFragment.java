@@ -88,47 +88,50 @@ public class ArticleFragment extends Fragment implements ArticleChangedListener,
     private void setInlineUrls(){
         ArrayList<URLSpan> links = new ArrayList<>(Arrays.asList(
                 spannableStringBuilder.getSpans(0, spannableStringBuilder.length(), URLSpan.class)));
-        URLSpan link;
-        // remove links from images
-        int j0 = 0;
-        for(int i = 0; i < links.size(); i++){
-            link = links.get(i);
-            for (int j = j0; j < imageSpans.length; j++){
-                if(spannableStringBuilder.getSpanStart(imageSpans[j]) >= spannableStringBuilder.getSpanStart(link) &&
-                spannableStringBuilder.getSpanEnd(imageSpans[j])<= spannableStringBuilder.getSpanEnd(link)){
-                    spannableStringBuilder.removeSpan(link);
-                    links.remove(i);
-                    i--;
-                    j0 = j+1;
-                    break;
+        if(links.size() > 0) {
+            URLSpan link;
+            // remove links from images
+            int j0 = 0;
+            for (int i = 0; i < links.size(); i++) {
+                link = links.get(i);
+                for (int j = j0; j < imageSpans.length; j++) {
+                    if (spannableStringBuilder.getSpanStart(imageSpans[j]) >= spannableStringBuilder.getSpanStart(link) &&
+                            spannableStringBuilder.getSpanEnd(imageSpans[j]) <= spannableStringBuilder.getSpanEnd(link)) {
+                        spannableStringBuilder.removeSpan(link);
+                        links.remove(i);
+                        i--;
+                        j0 = j + 1;
+                        break;
+                    }
                 }
             }
+            // make links clickable
+            List<Bundle> likelyUrls = new ArrayList<>(links.size() - 1);
+            Uri mostLikelyUrl = null;
+            for (int i = 0; i < links.size(); i++) {
+                link = links.get(i);
+                final Uri linkUri = Uri.parse(link.getURL());
+                spannableStringBuilder.setSpan(
+                        new ClickableSpan() {
+                            public void onClick(View view) {
+                                customTabsIntent.launchUrl(view.getContext(), linkUri);
+                            }
+                        },
+                        spannableStringBuilder.getSpanStart(link),
+                        spannableStringBuilder.getSpanEnd(link),
+                        spannableStringBuilder.getSpanFlags(link)
+                );
+                spannableStringBuilder.removeSpan(link);
+                if (i < links.size() - 1) {
+                    Bundle bundle = new Bundle();
+                    bundle.putParcelable(CustomTabsService.KEY_URL, linkUri);
+                    likelyUrls.add(bundle);
+                } else mostLikelyUrl = linkUri;
+            }
+            if (links.size() > 0)
+                CustomTabsClient.bindCustomTabsService(getContext(), "com.android.chrome",
+                        getCustomTabsServiceConnection(mostLikelyUrl, likelyUrls));
         }
-        // make links clickable
-        List<Bundle> likelyUrls = new ArrayList<>(links.size() - 1);
-        Uri mostLikelyUrl = null;
-        for(int i = 0; i < links.size(); i++) {
-            link = links.get(i);
-            final Uri linkUri = Uri.parse(link.getURL());
-            spannableStringBuilder.setSpan(
-                    new ClickableSpan() {
-                        public void onClick(View view) {
-                            customTabsIntent.launchUrl(view.getContext(),linkUri);
-                        }
-                    },
-                    spannableStringBuilder.getSpanStart(link),
-                    spannableStringBuilder.getSpanEnd(link),
-                    spannableStringBuilder.getSpanFlags(link)
-            );
-            spannableStringBuilder.removeSpan(link);
-            if(i<links.size()-1){
-                Bundle bundle = new Bundle();
-                bundle.putParcelable(CustomTabsService.KEY_URL, linkUri);
-                likelyUrls.add(bundle);
-            }else mostLikelyUrl = linkUri;
-        }
-        if(links.size()>0) CustomTabsClient.bindCustomTabsService(getContext(), "com.android.chrome",
-                    getCustomTabsServiceConnection(mostLikelyUrl, likelyUrls));
     }
 
     private void setInlineImages(){
