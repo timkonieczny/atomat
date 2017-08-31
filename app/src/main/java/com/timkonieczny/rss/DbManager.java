@@ -66,8 +66,7 @@ class DbManager extends SQLiteOpenHelper {
                 SourcesTable.COLUMN_NAME_ICON_PATH +            " TEXT, " +
                 SourcesTable.COLUMN_NAME_WEBSITE +              " TEXT, " +
                 SourcesTable.COLUMN_NAME_LAST_MODIFIED +        " TEXT, " +
-                SourcesTable.COLUMN_NAME_ETAG +                 " TEXT, " +
-                SourcesTable.COLUMN_NAME_UPDATE_FREQUENCY +     " INTEGER DEFAULT 21600000)");  // 6 hours
+                SourcesTable.COLUMN_NAME_ETAG +                 " TEXT)");
 
         db.execSQL("CREATE TABLE " + ArticlesTable.TABLE_NAME + " ( " +
                 ArticlesTable._ID +                             " INTEGER PRIMARY KEY, " +
@@ -149,7 +148,6 @@ class DbManager extends SQLiteOpenHelper {
                 SourcesTable.TABLE_NAME + "." + SourcesTable.COLUMN_NAME_ICON_URL +         " AS "+ SourcesTable.TABLE_NAME + "_" + SourcesTable.COLUMN_NAME_ICON_URL + ", \n" +
                 SourcesTable.TABLE_NAME + "." + SourcesTable.COLUMN_NAME_ICON_PATH +        " AS "+ SourcesTable.TABLE_NAME + "_" + SourcesTable.COLUMN_NAME_ICON_PATH + ", \n" +
                 SourcesTable.TABLE_NAME + "." + SourcesTable.COLUMN_NAME_WEBSITE +          " AS "+ SourcesTable.TABLE_NAME + "_" + SourcesTable.COLUMN_NAME_WEBSITE + ", \n" +
-                SourcesTable.TABLE_NAME + "." + SourcesTable.COLUMN_NAME_UPDATE_FREQUENCY + " AS "+ SourcesTable.TABLE_NAME + "_" + SourcesTable.COLUMN_NAME_UPDATE_FREQUENCY + ", \n" +
 
                 ArticlesTable.TABLE_NAME +"." + ArticlesTable._ID +                         " AS "+ ArticlesTable.TABLE_NAME + ArticlesTable._ID + ", \n" +
                 ArticlesTable.TABLE_NAME +"." + ArticlesTable.COLUMN_NAME_URL +             " AS "+ ArticlesTable.TABLE_NAME + "_" + ArticlesTable.COLUMN_NAME_URL + ", \n" +
@@ -183,8 +181,7 @@ class DbManager extends SQLiteOpenHelper {
                 String sourceIcon = getString(cursor, SourcesTable.TABLE_NAME + "_" + SourcesTable.COLUMN_NAME_ICON_URL);
                 String sourceIconFile = getString(cursor, SourcesTable.TABLE_NAME + "_" + SourcesTable.COLUMN_NAME_ICON_PATH);
                 String sourceLink = getString(cursor, SourcesTable.TABLE_NAME + "_" + SourcesTable.COLUMN_NAME_WEBSITE);
-                long sourceUpdateFrequency = getLong(cursor, SourcesTable.TABLE_NAME + "_" + SourcesTable.COLUMN_NAME_UPDATE_FREQUENCY);
-                MainActivity.sources.add(new Source(context, sourceUrl, sourceTitle, sourceLink, sourceIcon, sourceIconFile, sourceDbId, sourceUpdateFrequency));
+                MainActivity.sources.add(new Source(context, sourceUrl, sourceTitle, sourceLink, sourceIcon, sourceIconFile, sourceDbId));
             }
 
             long articleDbId = getLong(cursor, ArticlesTable.TABLE_NAME + ArticlesTable._ID);
@@ -250,19 +247,21 @@ class DbManager extends SQLiteOpenHelper {
         return links;
     }
 
-    String[] getSourceInfo(long dbId) {
+    String[][] getSourceInfos() {
         Cursor cursor = db.query(SourcesTable.TABLE_NAME,
-                new String[]{SourcesTable.COLUMN_NAME_LAST_MODIFIED,
+                new String[]{SourcesTable._ID,
+                        SourcesTable.COLUMN_NAME_LAST_MODIFIED,
                         SourcesTable.COLUMN_NAME_ETAG,
                         SourcesTable.COLUMN_NAME_URL},
-                SourcesTable._ID + "=?", new String[]{String.valueOf(dbId)},
-                null, null, null);
-        String[] values = null;
-        if (cursor.moveToFirst()) {
-            values = new String[]{getString(cursor, SourcesTable.COLUMN_NAME_URL),
-                    getString(cursor, SourcesTable.COLUMN_NAME_LAST_MODIFIED),
-                    getString(cursor, SourcesTable.COLUMN_NAME_ETAG),
-            };
+                null, null,null, null, null);
+        String[][] values = new String[cursor.getCount()][4];
+        int i = 0;
+        while (cursor.moveToNext()) {
+            values[i][0] = getString(cursor, SourcesTable._ID);
+            values[i][1] = getString(cursor, SourcesTable.COLUMN_NAME_URL);
+            values[i][2] = getString(cursor, SourcesTable.COLUMN_NAME_LAST_MODIFIED);
+            values[i][3] = getString(cursor, SourcesTable.COLUMN_NAME_ETAG);
+            i++;
         }
         cursor.close();
         return values;
@@ -319,7 +318,6 @@ class DbManager extends SQLiteOpenHelper {
         static final String COLUMN_NAME_WEBSITE = "website";
         static final String COLUMN_NAME_LAST_MODIFIED = "last_modified";
         static final String COLUMN_NAME_ETAG = "etag";
-        static final String COLUMN_NAME_UPDATE_FREQUENCY = "update_frequency";
     }
 
     class ArticlesTable implements BaseColumns {

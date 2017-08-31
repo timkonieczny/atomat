@@ -16,6 +16,7 @@ class Feed extends AsyncTask<Void, Boolean, Boolean> implements DbOpenListener{
 
     private String newSource;
 
+
     Feed(Context context, FeedListener feedListener, String newSource){
         this.context = context;
         this.feedListener = feedListener;
@@ -34,7 +35,7 @@ class Feed extends AsyncTask<Void, Boolean, Boolean> implements DbOpenListener{
 
         long articleLifetime = Integer.parseInt(PreferenceManager
                 .getDefaultSharedPreferences(context)
-                .getString("pref_sync", "1209600"))*1000;
+                .getString("pref_cleanup", "1209600"))*1000;
 
         int before = MainActivity.articles.size();
         MainActivity.dbManager.load(context, articleLifetime);
@@ -42,11 +43,10 @@ class Feed extends AsyncTask<Void, Boolean, Boolean> implements DbOpenListener{
 
         before = MainActivity.articles.size();
         try {
-            for (int i = 0; i < MainActivity.sources.size(); i++) {
-                sourceUpdater.parse(MainActivity.sources.get(i).dbId, null);
-                MainActivity.sources.get(i).rescheduleBackgroundUpdate();
-            }
-            if (newSource != null) sourceUpdater.parse(Source.DEFAULT_DB_ID, newSource);
+            if(newSource == null)
+                sourceUpdater.parseAll();
+            else
+                sourceUpdater.parse(DbRow.DEFAULT_DB_ID, newSource, null, null, true);
         } catch (XmlPullParserException | IOException e) {
             e.printStackTrace();
         }

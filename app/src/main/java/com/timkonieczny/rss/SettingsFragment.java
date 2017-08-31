@@ -43,17 +43,20 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        if(key.equals("pref_day_night_theme") || key.equals("pref_theme_dark"))
-            if(isAdded()) {
+        if(key.equals("pref_day_night_theme") || key.equals("pref_theme_dark")) {
+            if (isAdded()) {
                 // clean up current fragment
                 this.sharedPreferences.unregisterOnSharedPreferenceChangeListener(this);
                 MainActivity.goToSettings = true;
                 MainActivity.isFragmentSelected = false;
                 getActivity().recreate();
-            }else{
+            } else {
                 // clean up obsolete references.
                 // https://stackoverflow.com/questions/26849905/fragments-not-destroyed-when-recreate-activity
                 this.sharedPreferences.unregisterOnSharedPreferenceChangeListener(this);
             }
+        }else if(key.equals("pref_frequency")){
+            ((MainActivity)getActivity()).rescheduleBackgroundUpdate();
+        }
     }
 }

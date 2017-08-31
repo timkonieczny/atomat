@@ -8,28 +8,37 @@
         <item>false</item>
         <item>true</item>
     </string-array>
-    <string-array name="pref_sync_keys">
-        <item>@string/pref_sync_option_1w</item>
-        <item>@string/pref_sync_option_2w</item>
-        <item>@string/pref_sync_option_3w</item>
-        <item>@string/pref_sync_option_1m</item>
-        <item>@string/pref_sync_option_2m</item>
+    <string-array name="pref_cleanup_keys">
+        <item>@string/pref_cleanup_1w</item>
+        <item>@string/pref_cleanup_2w</item>
+        <item>@string/pref_cleanup_3w</item>
+        <item>@string/pref_cleanup_1m</item>
+        <item>@string/pref_cleanup_2m</item>
     </string-array>
     <!--time in seconds-->
-    <string-array name="pref_sync_values">
+    <string-array name="pref_cleanup_values">
         <item>604800</item>
         <item>1209600</item>
         <item>1814400</item>
         <item>2592000</item>
         <item>5184000</item>
     </string-array>
-    <string-array name="update_freq_values">
-        <item>@string/update_freq_1h</item>
-        <item>@string/update_freq_2h</item>
-        <item>@string/update_freq_3h</item>
-        <item>@string/update_freq_6h</item>
-        <item>@string/update_freq_12h</item>
-        <item>@string/update_freq_24h</item>
-        <item>@string/update_freq_15m</item>
+    <string-array name="pref_frequency_keys">
+        <item>@string/pref_frequency_1h</item>
+        <item>@string/pref_frequency_2h</item>
+        <item>@string/pref_frequency_3h</item>
+        <item>@string/pref_frequency_6h</item>
+        <item>@string/pref_frequency_12h</item>
+        <item>@string/pref_frequency_24h</item>
+        <item>@string/pref_frequency_15m</item>
+    </string-array>
+    <string-array name="pref_frequency_values">
+        <item>3600000</item>
+        <item>7200000</item>
+        <item>10800000</item>
+        <item>21600000</item>
+        <item>43200000</item>
+        <item>86400000</item>
+        <item>900000</item>
     </string-array>
 </resources>

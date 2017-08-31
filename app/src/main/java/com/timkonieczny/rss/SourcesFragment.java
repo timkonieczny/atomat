@@ -56,7 +56,7 @@ public class SourcesFragment extends Fragment implements FeedListener{
         if(actionBar!=null) actionBar.setTitle(R.string.title_fragment_sources);
 
         GridView gridView = (GridView) view.findViewById(R.id.sources_grid);
-        sourcesAdapter = new SourcesAdapter(getContext(), getFragmentManager());
+        sourcesAdapter = new SourcesAdapter(getContext());
         gridView.setAdapter(sourcesAdapter);
 
         fab = (FloatingActionButton) view.findViewById(R.id.add_source_fab);

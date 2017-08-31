@@ -26,15 +26,24 @@
 
     <PreferenceCategory
         android:title="@string/pref_sync_category_title"
-        android:key="pref_theme_category">
+        android:key="pref_sync_category">
 
         <ListPreference
-            android:key="pref_sync"
-            android:title="@string/pref_sync_set"
-            android:summary="@string/pref_sync_set_summary"
-            android:dialogTitle="@string/pref_sync_set"
-            android:entries="@array/pref_sync_keys"
-            android:entryValues="@array/pref_sync_values"
+            android:key="pref_frequency"
+            android:title="@string/pref_frequency_title"
+            android:summary="@string/pref_frequency_summary"
+            android:dialogTitle="@string/pref_frequency_dialog_title"
+            android:entries="@array/pref_frequency_keys"
+            android:entryValues="@array/pref_frequency_values"
+            android:defaultValue="7200000" />
+
+        <ListPreference
+            android:key="pref_cleanup"
+            android:title="@string/pref_cleanup_title"
+            android:summary="@string/pref_cleanup_summary"
+            android:dialogTitle="@string/pref_cleanup_dialog_title"
+            android:entries="@array/pref_cleanup_keys"
+            android:entryValues="@array/pref_cleanup_values"
             android:defaultValue="1209600" />
 
     </PreferenceCategory>

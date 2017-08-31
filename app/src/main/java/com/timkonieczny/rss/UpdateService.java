@@ -11,7 +11,7 @@ public class UpdateService extends JobService {
             protected void onPostExecute(Void aVoid){
                 jobFinished(jobParameters, false);
             }
-        }.execute(jobParameters.getExtras().getLong("dbId"));
+        }.execute();
         return true;
     }
 

@@ -1,6 +1,7 @@
 package com.timkonieczny.rss;
 
 import android.content.ContentValues;
+import android.util.Log;
 import android.util.Xml;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -24,14 +25,11 @@ class SourceUpdater {
 
     private SimpleDateFormat[] dateFormats;
     private Pattern imgWithWhitespacePattern, imgPattern, stylePattern;
-    private boolean isNewSource;
     private XmlPullParser parser;
     private ContentValues sourceContentValues;
     private ArrayList<ContentValues> newArticles;
     private ArrayList<ContentValues> newImages;
     private HashSet<String> existingLinks;
-    private String lastModified, eTag;
-
 
     private HashSet<String> feedTags;
     private HashSet<String> feedTitleTags;
@@ -68,17 +66,15 @@ class SourceUpdater {
         }
     }
 
-    void parse(long dbId, String url)
-            throws XmlPullParserException, IOException {
-        isNewSource = url!=null;
 
-        if(!isNewSource) {
-            String[] sourceInfo = MainActivity.dbManager.getSourceInfo(dbId);
-            url = sourceInfo[0];
-            lastModified = sourceInfo[1];
-            eTag = sourceInfo[2];
+    void parseAll() throws XmlPullParserException, IOException {
+        String[][] sources = MainActivity.dbManager.getSourceInfos();
+        for (String[] source : sources) {
+            parse(Long.parseLong(source[0]), source[1], source[2], source[3], false);
         }
+    }
 
+    void parse(long dbId, String url, String lastModified, String eTag, boolean isNewSource) throws XmlPullParserException, IOException {
 
         HttpURLConnection connection = (HttpURLConnection) (new URL(url)).openConnection();
         connection.setReadTimeout(10000);
@@ -98,8 +94,6 @@ class SourceUpdater {
 
                 sourceContentValues = new ContentValues();
 
-                if(isNewSource) sourceContentValues.put(DbManager.SourcesTable.COLUMN_NAME_URL, url);
-
                 sourceContentValues.put(DbManager.SourcesTable.COLUMN_NAME_LAST_MODIFIED, lastModified);
                 sourceContentValues.put(DbManager.SourcesTable.COLUMN_NAME_ETAG, eTag);
 
@@ -110,10 +104,12 @@ class SourceUpdater {
                         continue;
                     }
                     if(feedTags.contains(parser.getName())){
-                        readFeed(parser);
+                        readFeed(parser, isNewSource);
 
-                        if(isNewSource)
+                        if(isNewSource){
+                            sourceContentValues.put(DbManager.SourcesTable.COLUMN_NAME_URL, url);
                             dbId = MainActivity.dbManager.insertRow(DbManager.SourcesTable.TABLE_NAME, sourceContentValues);
+                        }
 
                         MainActivity.dbManager.bulkInsertArticles(newArticles, newImages, dbId);
                         break;
@@ -126,7 +122,7 @@ class SourceUpdater {
         connection.disconnect();
     }
 
-    private void readFeed(XmlPullParser parser) throws XmlPullParserException, IOException {
+    private void readFeed(XmlPullParser parser, boolean isNewSource) throws XmlPullParserException, IOException {
 
         String title;
         String iconUrl;

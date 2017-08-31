@@ -29,7 +29,6 @@
 
     <!-- url options entries -->
     <string name="delete_source_menu_option">Delete source</string>
-    <string name="update_frequency_source_menu_option">Edit update frequency</string>
 
     <!-- strings related to settings -->
     <string name="pref_theme_category_title">Theme</string>
@@ -39,21 +38,24 @@
     <string name="pref_theme_option_light_theme">Light Theme</string>
     <string name="pref_theme_option_dark_theme">Dark Theme</string>
     <string name="pref_sync_category_title">Synchronization</string>
-    <string name="pref_sync_set_summary">Delete stories older than %s</string>
-    <string name="pref_sync_set">Auto Cleanup</string>
-    <string name="pref_sync_set_dialog">Delete stories older than</string>
-    <string name="pref_sync_option_1w">1 week</string>
-    <string name="pref_sync_option_2w">2 weeks</string>
-    <string name="pref_sync_option_3w">3 weeks</string>
-    <string name="pref_sync_option_1m">1 month</string>
-    <string name="pref_sync_option_2m">2 months</string>
-    <string name="update_freq_1h">Every hour</string>
-    <string name="update_freq_2h">Every 2 hours</string>
-    <string name="update_freq_3h">Every 3 hours</string>
-    <string name="update_freq_6h">Every 6 hours</string>
-    <string name="update_freq_12h">Every 12 hours</string>
-    <string name="update_freq_24h">Every 24 hours</string>
-    <string name="update_freq_15m">Every 15 minutes</string>    <!-- TODO: Remove 15 minutes -->
+    <string name="pref_cleanup_summary">Delete stories older than %s</string>
+    <string name="pref_frequency_summary">Update sources %s</string>
+    <string name="pref_cleanup_title">Auto Cleanup</string>
+    <string name="pref_frequency_title">Update Frequency</string>
+    <string name="pref_cleanup_dialog_title">Delete stories older than</string>
+    <string name="pref_frequency_dialog_title">Update sources</string>
+    <string name="pref_cleanup_1w">1 week</string>
+    <string name="pref_cleanup_2w">2 weeks</string>
+    <string name="pref_cleanup_3w">3 weeks</string>
+    <string name="pref_cleanup_1m">1 month</string>
+    <string name="pref_cleanup_2m">2 months</string>
+    <string name="pref_frequency_1h">every hour</string>
+    <string name="pref_frequency_2h">every 2 hours</string>
+    <string name="pref_frequency_3h">every 3 hours</string>
+    <string name="pref_frequency_6h">every 6 hours</string>
+    <string name="pref_frequency_12h">every 12 hours</string>
+    <string name="pref_frequency_24h">every 24 hours</string>
+    <string name="pref_frequency_15m">every 15 minutes</string>    <!-- TODO: Remove 15 minutes -->
     <string name="cancel">Cancel</string>
     <string name="ok">OK</string>
 

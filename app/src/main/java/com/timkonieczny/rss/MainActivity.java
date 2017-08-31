@@ -1,6 +1,10 @@
 package com.timkonieczny.rss;
 
 import android.animation.ObjectAnimator;
+import android.app.job.JobInfo;
+import android.app.job.JobScheduler;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Color;
@@ -90,6 +94,7 @@ public class MainActivity extends AppCompatActivity
                 }
                 isFragmentSelected = true;
             }
+            rescheduleBackgroundUpdate();
         }
     }
 
@@ -200,5 +205,24 @@ public class MainActivity extends AppCompatActivity
         });
 
         ObjectAnimator.ofFloat(drawerArrow, "progress", 1).start();
+    }
+
+    void rescheduleBackgroundUpdate(){
+
+        int jobId = 4701147;
+
+        JobScheduler jobScheduler = (JobScheduler) getSystemService(Context.JOB_SCHEDULER_SERVICE);
+        if(jobScheduler.getPendingJob(jobId) != null) jobScheduler.cancel(jobId);
+
+
+        int updateFrequency = Integer.parseInt(PreferenceManager
+                .getDefaultSharedPreferences(this)
+                .getString("pref_frequency", "7200000"));
+
+        JobInfo.Builder builder = new JobInfo.Builder(jobId, new ComponentName(this, UpdateService.class));
+        builder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY);
+        builder.setPeriodic(updateFrequency);
+        builder.setPersisted(true);
+        jobScheduler.schedule(builder.build());
     }
 }
