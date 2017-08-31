@@ -1,7 +1,6 @@
 package com.timkonieczny.rss;
 
 import android.content.ContentValues;
-import android.util.Log;
 import android.util.Xml;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -23,6 +22,7 @@ import java.util.regex.Pattern;
 
 class SourceUpdater {
 
+    private DbManager dbManager;
     private SimpleDateFormat[] dateFormats;
     private Pattern imgWithWhitespacePattern, imgPattern, stylePattern;
     private XmlPullParser parser;
@@ -43,7 +43,8 @@ class SourceUpdater {
     private HashSet<String> entryLinkTags;
     private HashSet<String> entryAuthorTags;
 
-    SourceUpdater() {
+    SourceUpdater(DbManager dbManager) {
+        this.dbManager = dbManager;
 
         initializeTagDictionaries();
         imgWithWhitespacePattern = Pattern.compile("\\A\\s*<img(.*?)/>\\s*");  // <imgPattern ... /> at beginning of input, including trailing whitespaces
@@ -68,7 +69,7 @@ class SourceUpdater {
 
 
     void parseAll() throws XmlPullParserException, IOException {
-        String[][] sources = MainActivity.dbManager.getSourceInfos();
+        String[][] sources = dbManager.getSourceInfos();
         for (String[] source : sources) {
             parse(Long.parseLong(source[0]), source[1], source[2], source[3], false);
         }
@@ -108,10 +109,10 @@ class SourceUpdater {
 
                         if(isNewSource){
                             sourceContentValues.put(DbManager.SourcesTable.COLUMN_NAME_URL, url);
-                            dbId = MainActivity.dbManager.insertRow(DbManager.SourcesTable.TABLE_NAME, sourceContentValues);
+                            dbId = dbManager.insertRow(DbManager.SourcesTable.TABLE_NAME, sourceContentValues);
                         }
 
-                        MainActivity.dbManager.bulkInsertArticles(newArticles, newImages, dbId);
+                        dbManager.bulkInsertArticles(newArticles, newImages, dbId);
                         break;
                     }
                 }
@@ -126,7 +127,7 @@ class SourceUpdater {
 
         String title;
         String iconUrl;
-        existingLinks = MainActivity.dbManager.getExistingArticleLinks();
+        existingLinks = dbManager.getExistingArticleLinks();
 
         if(feedTags.contains(parser.getName())) {
             parser.require(XmlPullParser.START_TAG, null, parser.getName());

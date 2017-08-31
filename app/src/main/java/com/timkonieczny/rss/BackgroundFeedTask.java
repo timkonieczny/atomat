@@ -10,9 +10,16 @@ import java.io.IOException;
 
 class BackgroundFeedTask extends AsyncTask<Void, Void, Void>{
 
+    private DbManager dbManager;
+
+    BackgroundFeedTask(DbManager dbManager){
+        this.dbManager = dbManager;
+    }
+
     @Override
     protected Void doInBackground(Void... v) {
-        SourceUpdater sourceUpdater = new SourceUpdater();
+        Log.d("BackgroundFeedTask", "running...");
+        SourceUpdater sourceUpdater = new SourceUpdater(dbManager);
 
         try {
             sourceUpdater.parseAll();
@@ -21,5 +28,11 @@ class BackgroundFeedTask extends AsyncTask<Void, Void, Void>{
         }
 
         return null;
+    }
+
+    @Override
+    protected void onPostExecute(Void aVoid) {
+        super.onPostExecute(aVoid);
+        dbManager.close();
     }
 }

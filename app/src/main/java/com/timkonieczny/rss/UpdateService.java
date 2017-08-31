@@ -6,7 +6,7 @@ import android.app.job.JobService;
 public class UpdateService extends JobService {
     @Override
     public boolean onStartJob(final JobParameters jobParameters) {
-        new BackgroundFeedTask(){
+        new BackgroundFeedTask(new DbManager(getApplicationContext())){
             @Override
             protected void onPostExecute(Void aVoid){
                 jobFinished(jobParameters, false);

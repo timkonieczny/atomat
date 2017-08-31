@@ -46,7 +46,7 @@ class DbManager extends SQLiteOpenHelper {
     }
 
     // retrieves db if it exists (onCreate() not called), otherwise creates it (onCreate() called).
-    void getDb(){
+    private void getDb(){
         if(db == null){
             db = getWritableDatabase();
             db.execSQL("PRAGMA foreign_keys = ON");
@@ -248,6 +248,7 @@ class DbManager extends SQLiteOpenHelper {
     }
 
     String[][] getSourceInfos() {
+        getDb();
         Cursor cursor = db.query(SourcesTable.TABLE_NAME,
                 new String[]{SourcesTable._ID,
                         SourcesTable.COLUMN_NAME_LAST_MODIFIED,

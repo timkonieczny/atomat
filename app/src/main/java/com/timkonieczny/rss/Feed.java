@@ -8,11 +8,12 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 
-class Feed extends AsyncTask<Void, Boolean, Boolean> implements DbOpenListener{
+class Feed extends AsyncTask<Void, Boolean, Boolean> {
 
     private Context context;
     private FeedListener feedListener;
     private SourceUpdater sourceUpdater;
+    private DbManager dbManager;
 
     private String newSource;
 
@@ -21,13 +22,8 @@ class Feed extends AsyncTask<Void, Boolean, Boolean> implements DbOpenListener{
         this.context = context;
         this.feedListener = feedListener;
         this.newSource = newSource;
-        sourceUpdater = new SourceUpdater();
-        (new DbOpenTask(MainActivity.dbManager, this)).execute();
-    }
-
-    @Override
-    public void onDbOpened() {
-        this.execute();
+        dbManager = new DbManager(context);
+        sourceUpdater = new SourceUpdater(dbManager);
     }
 
     @Override
@@ -38,7 +34,7 @@ class Feed extends AsyncTask<Void, Boolean, Boolean> implements DbOpenListener{
                 .getString("pref_cleanup", "1209600"))*1000;
 
         int before = MainActivity.articles.size();
-        MainActivity.dbManager.load(context, articleLifetime);
+        dbManager.load(context, articleLifetime);
         publishProgress(before != MainActivity.articles.size());
 
         before = MainActivity.articles.size();
@@ -51,7 +47,7 @@ class Feed extends AsyncTask<Void, Boolean, Boolean> implements DbOpenListener{
             e.printStackTrace();
         }
 
-        MainActivity.dbManager.load(context, articleLifetime);
+        dbManager.load(context, articleLifetime);
 
         return before != MainActivity.articles.size();
     }
@@ -65,6 +61,7 @@ class Feed extends AsyncTask<Void, Boolean, Boolean> implements DbOpenListener{
     @Override
     protected void onPostExecute(Boolean hasNewArticles) {
         super.onPostExecute(hasNewArticles);
+        dbManager.close();
         feedListener.onFeedUpdated(hasNewArticles, true);
     }
 }
