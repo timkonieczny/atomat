@@ -56,9 +56,6 @@ class SourceUpdater {
                 new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX", Locale.US)
         };
 
-        newArticles = new ArrayList<>();
-        newImages = new ArrayList<>();
-
         parser = Xml.newPullParser();
         try {
             parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
@@ -76,6 +73,9 @@ class SourceUpdater {
     }
 
     void parse(long dbId, String url, String lastModified, String eTag, boolean isNewSource) throws XmlPullParserException, IOException {
+
+        newArticles = new ArrayList<>();
+        newImages = new ArrayList<>();
 
         HttpURLConnection connection = (HttpURLConnection) (new URL(url)).openConnection();
         connection.setReadTimeout(10000);

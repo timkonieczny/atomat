@@ -16,7 +16,7 @@ class DbManager extends SQLiteOpenHelper {
 
     private static final String DB_NAME = "atomat.db";
     private static final int DB_VERSION = 1;
-    SQLiteDatabase db = null;
+    private SQLiteDatabase db = null;
 
     private Comparator<Article> descending = new Comparator<Article>() {
         @Override
