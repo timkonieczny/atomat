@@ -7,6 +7,7 @@
     <string name="cancel_adding_source">cancel adding source</string>
     <string name="action_settings">Settings</string>
     <string name="source_options_image_descriptor">source options</string>
+    <string name="info_icon_image_descriptor">info icon</string>
 
     <!-- activity / fragment names -->
     <string name="title_activity_main">Atomat</string>
@@ -26,6 +27,8 @@
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="creating_source_loading">Creating source</string>
+    <string name="article_loading_failed_message">Unfortunately, some stories could not be loaded.</string>
+    <string name="learn_more">Learn More</string>
 
     <!-- url options entries -->
     <string name="delete_source_menu_option">Delete source</string>

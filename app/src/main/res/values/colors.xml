@@ -7,4 +7,5 @@
     <color name="colorWhite">#FFFFFF</color>
     <color name="colorCircularReveal">@color/cardview_light_background</color>
     <color name="colorBorderlessButton">#212121</color>
+    <color name="colorText">#000000</color>
 </resources>

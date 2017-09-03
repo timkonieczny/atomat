@@ -9,46 +9,65 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ArticleCardViewHolder>
+class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.CardViewHolder>
         implements ArticleChangedListener, SourceChangedListener {
 
     private View.OnClickListener onClickListener;
+    private static final int VIEW_TYPE_ARTICLE = 0;
+    private static final int VIEW_TYPE_MISSING_ARTICLES = 1;
 
     FeedAdapter(View.OnClickListener onClickListener){
         this.onClickListener = onClickListener;
     }
 
     @Override
-    public ArticleCardViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.article_card, parent, false);
-        return new ArticleCardViewHolder(itemView);
+    public CardViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        switch (viewType){
+            case VIEW_TYPE_ARTICLE:
+                return new ArticleCardViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.article_card, parent, false));
+            case VIEW_TYPE_MISSING_ARTICLES:
+                return new CardViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.articles_missing_card, parent, false));
+            default:
+                return null;
+        }
     }
 
     @Override
-    public void onBindViewHolder(ArticleCardViewHolder holder, int position) {
-        Article article = MainActivity.articles.get(position);
+    public void onBindViewHolder(CardViewHolder holder, int position) {
+        if(getItemViewType(position) == VIEW_TYPE_ARTICLE) {
+            Article article = MainActivity.articles.get(position);
 
-        article.onClickListener = onClickListener;
+            article.onClickListener = onClickListener;
+            ArticleCardViewHolder articleCardViewHolder = (ArticleCardViewHolder)holder;
 
-        holder.cardView.setTag(article.dbId);
-        holder.cardView.setOnClickListener(article.onClickListener);
+            articleCardViewHolder.cardView.setTag(article.dbId);
+            articleCardViewHolder.cardView.setOnClickListener(article.onClickListener);
 
-        holder.sourceTitle.setText(article.source.title);
-        holder.sourceTitle.setCompoundDrawablesWithIntrinsicBounds(article.source.getIconDrawable(this), null, null, null);
-        holder.articleTitle.setText(article.title);
-        holder.articleAuthor.setText(article.author);
-        holder.articleHeader.setTransitionName(article.dbId + "_header");
-        holder.articleHeader.setImageDrawable(article.getImage(this, Image.TYPE_HEADER));
+            articleCardViewHolder.sourceTitle.setText(article.source.title);
+            articleCardViewHolder.sourceTitle.setCompoundDrawablesWithIntrinsicBounds(article.source.getIconDrawable(this), null, null, null);
+            articleCardViewHolder.articleTitle.setText(article.title);
+            articleCardViewHolder.articleAuthor.setText(article.author);
+            articleCardViewHolder.articleHeader.setTransitionName(article.dbId + "_header");
+            articleCardViewHolder.articleHeader.setImageDrawable(article.getImage(this, Image.TYPE_HEADER));
 
-        if(article.header.palette!=null) {
-            int color = article.header.palette.getDarkVibrantColor(Color.DKGRAY);
-            holder.articleHeader.setColorFilter(Color.argb(128, Color.red(color), Color.green(color), Color.blue(color)));
+            if (article.header.palette != null) {
+                int color = article.header.palette.getDarkVibrantColor(Color.DKGRAY);
+                articleCardViewHolder.articleHeader.setColorFilter(Color.argb(128, Color.red(color), Color.green(color), Color.blue(color)));
+            }
+        }else if(getItemViewType(position) == VIEW_TYPE_MISSING_ARTICLES){
+            holder.sourceTitle.setText(MainActivity.articles.get(position).source.title);
         }
     }
 
     @Override
     public int getItemCount() {
         return MainActivity.articles.size();
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+//        return VIEW_TYPE_MISSING_ARTICLES;          // TODO: return correct type
+        return VIEW_TYPE_ARTICLE;
     }
 
     @Override
@@ -65,19 +84,27 @@ class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ArticleCardViewHolder
         notifyDataSetChanged();
     }
 
-    static class ArticleCardViewHolder extends RecyclerView.ViewHolder{
+    static class CardViewHolder extends RecyclerView.ViewHolder{
+
+        TextView sourceTitle;
+
+        CardViewHolder(View itemView) {
+            super(itemView);
+            sourceTitle = (TextView) itemView.findViewById(R.id.source_title);
+        }
+    }
+
+    private class ArticleCardViewHolder extends CardViewHolder{
 
         CardView cardView;
 
-        TextView sourceTitle,
-                articleTitle,
+        TextView articleTitle,
                 articleAuthor;
         ImageView articleHeader;
 
         ArticleCardViewHolder(View itemView) {
             super(itemView);
             cardView = (CardView)itemView.findViewById(R.id.card_view);
-            sourceTitle = (TextView) itemView.findViewById(R.id.source_title);
             articleTitle = (TextView) itemView.findViewById(R.id.article_title);
             articleAuthor = (TextView) itemView.findViewById(R.id.article_author);
             articleHeader = (ImageView) itemView.findViewById(R.id.article_header);
