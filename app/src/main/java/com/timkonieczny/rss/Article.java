@@ -13,6 +13,7 @@ class Article extends DbRow implements ImageListener{
     String title, author, content;
     private String link;
     Source source;
+    boolean isPlaceholder;
     View.OnClickListener onClickListener;
     private ArticleChangedListener articleChangedListener;
 
@@ -23,7 +24,7 @@ class Article extends DbRow implements ImageListener{
 
     Article(Context context,
             String title, String author, String link, long published, String content,
-            Source source, long dbId){
+            Source source, long dbId, boolean isPlaceholder){
 
         header = new Image(Image.TYPE_HEADER);
         this.context = context;
@@ -34,6 +35,7 @@ class Article extends DbRow implements ImageListener{
         this.content = content;
         this.source = source;
         this.dbId = dbId;
+        this.isPlaceholder = isPlaceholder;
     }
 
     Drawable getImage(ArticleChangedListener articleChangedListener, int index){

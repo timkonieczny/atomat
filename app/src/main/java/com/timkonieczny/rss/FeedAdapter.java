@@ -1,6 +1,7 @@
 package com.timkonieczny.rss;
 
 import android.graphics.Color;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -26,7 +27,7 @@ class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.CardViewHolder>
             case VIEW_TYPE_ARTICLE:
                 return new ArticleCardViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.article_card, parent, false));
             case VIEW_TYPE_MISSING_ARTICLES:
-                return new CardViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.articles_missing_card, parent, false));
+                return new PlaceholderCardViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.articles_missing_card, parent, false));
             default:
                 return null;
         }
@@ -66,8 +67,8 @@ class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.CardViewHolder>
 
     @Override
     public int getItemViewType(int position) {
-//        return VIEW_TYPE_MISSING_ARTICLES;          // TODO: return correct type
-        return VIEW_TYPE_ARTICLE;
+        if(MainActivity.articles.get(position).isPlaceholder) return VIEW_TYPE_MISSING_ARTICLES;
+        else return VIEW_TYPE_ARTICLE;
     }
 
     @Override
@@ -91,6 +92,26 @@ class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.CardViewHolder>
         CardViewHolder(View itemView) {
             super(itemView);
             sourceTitle = (TextView) itemView.findViewById(R.id.source_title);
+        }
+    }
+
+    private class PlaceholderCardViewHolder extends CardViewHolder{
+
+        PlaceholderCardViewHolder(View itemView) {
+            super(itemView);
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(itemView.getContext());
+            builder.setTitle(R.string.missing_articles_dialog_title)
+                    .setMessage(R.string.missing_articles_dialog_content)
+                    .setPositiveButton(R.string.ok, null);
+            final AlertDialog dialog = builder.create();
+
+            itemView.findViewById(R.id.loading_failed_learn_more).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    dialog.show();
+                }
+            });
         }
     }
 

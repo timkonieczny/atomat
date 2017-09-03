@@ -1,6 +1,7 @@
 package com.timkonieczny.rss;
 
 import android.content.ContentValues;
+import android.util.Log;
 import android.util.Xml;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -30,6 +31,8 @@ class SourceUpdater {
     private ArrayList<ContentValues> newArticles;
     private ArrayList<ContentValues> newImages;
     private HashSet<String> existingLinks;
+    private boolean hasOverlappingArticles;
+    private long oldestArticleDate;
 
     private HashSet<String> feedTags;
     private HashSet<String> feedTitleTags;
@@ -76,6 +79,8 @@ class SourceUpdater {
 
         newArticles = new ArrayList<>();
         newImages = new ArrayList<>();
+        hasOverlappingArticles = false;
+        oldestArticleDate = -1;
 
         HttpURLConnection connection = (HttpURLConnection) (new URL(url)).openConnection();
         connection.setReadTimeout(10000);
@@ -110,6 +115,13 @@ class SourceUpdater {
                         if(isNewSource){
                             sourceContentValues.put(DbManager.SourcesTable.COLUMN_NAME_URL, url);
                             dbId = dbManager.insertRow(DbManager.SourcesTable.TABLE_NAME, sourceContentValues);
+                        }else if (!hasOverlappingArticles){
+                            ContentValues contentValues = new ContentValues();
+                            contentValues.put(DbManager.ArticlesTable.COLUMN_NAME_IS_PLACEHOLDER, true);
+                            contentValues.put(DbManager.ArticlesTable.COLUMN_NAME_PUBLISHED, oldestArticleDate-1);
+                            contentValues.put(DbManager.ArticlesTable.COLUMN_NAME_SOURCE_ID, dbId);
+                            newArticles.add(contentValues);
+                            newImages.add(null);
                         }
 
                         dbManager.bulkInsertArticles(newArticles, newImages, dbId);
@@ -204,6 +216,8 @@ class SourceUpdater {
                     i++;
                 }
                 if(date != null) published = String.valueOf(date.getTime());
+                if(oldestArticleDate == -1 || date.getTime() < oldestArticleDate)
+                    oldestArticleDate = date.getTime();
             }else{
                 skip(parser);
             }
@@ -222,6 +236,8 @@ class SourceUpdater {
                 headerValues.put(DbManager.ImagesTable.COLUMN_NAME_TYPE, Image.TYPE_HEADER);
                 newImages.add(headerValues);
             } else newImages.add(null);
+        }else{
+            hasOverlappingArticles = true;
         }
     }
 

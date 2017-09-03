@@ -76,6 +76,7 @@ class DbManager extends SQLiteOpenHelper {
                 ArticlesTable.COLUMN_NAME_AUTHOR +              " TEXT, " +
                 ArticlesTable.COLUMN_NAME_PUBLISHED +           " INTEGER, " +
                 ArticlesTable.COLUMN_NAME_CONTENT +             " TEXT, " +
+                ArticlesTable.COLUMN_NAME_IS_PLACEHOLDER +      " INTEGER DEFAULT 0, " +
                 "FOREIGN KEY (" + ArticlesTable.COLUMN_NAME_SOURCE_ID + ") " +
                 "REFERENCES " + SourcesTable.TABLE_NAME + "(" + SourcesTable._ID + ") " +
                 "ON DELETE CASCADE)");
@@ -157,6 +158,7 @@ class DbManager extends SQLiteOpenHelper {
                 ArticlesTable.TABLE_NAME +"." + ArticlesTable.COLUMN_NAME_AUTHOR +          " AS "+ ArticlesTable.TABLE_NAME + "_" + ArticlesTable.COLUMN_NAME_AUTHOR + ", \n" +
                 ArticlesTable.TABLE_NAME +"." + ArticlesTable.COLUMN_NAME_PUBLISHED +       " AS "+ ArticlesTable.TABLE_NAME + "_" + ArticlesTable.COLUMN_NAME_PUBLISHED + ", \n" +
                 ArticlesTable.TABLE_NAME +"." + ArticlesTable.COLUMN_NAME_CONTENT +         " AS "+ ArticlesTable.TABLE_NAME + "_" + ArticlesTable.COLUMN_NAME_CONTENT + ", \n" +
+                ArticlesTable.TABLE_NAME +"." + ArticlesTable.COLUMN_NAME_IS_PLACEHOLDER +  " AS "+ ArticlesTable.TABLE_NAME + "_" + ArticlesTable.COLUMN_NAME_IS_PLACEHOLDER + ", \n" +
 
                 ImagesTable.TABLE_NAME + "." + ImagesTable._ID +                            " AS "+ ImagesTable.TABLE_NAME + ImagesTable._ID + ", \n" +
                 ImagesTable.TABLE_NAME + "." + ImagesTable.COLUMN_NAME_ARTICLE_ID +         " AS "+ ImagesTable.TABLE_NAME + "_" + ImagesTable.COLUMN_NAME_ARTICLE_ID + ", \n" +
@@ -187,6 +189,7 @@ class DbManager extends SQLiteOpenHelper {
 
             long articleDbId = getLong(cursor, ArticlesTable.TABLE_NAME + ArticlesTable._ID);
             if (!MainActivity.articles.containsDbId(articleDbId)) {
+                boolean isPlaceholder = getBoolean(cursor, ArticlesTable.TABLE_NAME + "_" + ArticlesTable.COLUMN_NAME_IS_PLACEHOLDER);
                 String articleLink = getString(cursor, ArticlesTable.TABLE_NAME + "_" + ArticlesTable.COLUMN_NAME_URL);
                 long articleSourceId = getLong(cursor, ArticlesTable.TABLE_NAME + "_" + ArticlesTable.COLUMN_NAME_SOURCE_ID);
                 String articleTitle = getString(cursor, ArticlesTable.TABLE_NAME + "_" + ArticlesTable.COLUMN_NAME_TITLE);
@@ -194,7 +197,7 @@ class DbManager extends SQLiteOpenHelper {
                 long articlePublished = getLong(cursor, ArticlesTable.TABLE_NAME + "_" + ArticlesTable.COLUMN_NAME_PUBLISHED);
                 String articleContent = getString(cursor, ArticlesTable.TABLE_NAME + "_" + ArticlesTable.COLUMN_NAME_CONTENT);
                 Source source = MainActivity.sources.getByDbId(articleSourceId);
-                MainActivity.articles.add(new Article(context, articleTitle, articleAuthor, articleLink, articlePublished, articleContent, source, articleDbId));
+                MainActivity.articles.add(new Article(context, articleTitle, articleAuthor, articleLink, articlePublished, articleContent, source, articleDbId, isPlaceholder));
             }
 
             long imageDbId = getLong(cursor, ImagesTable.TABLE_NAME + ImagesTable._ID);
@@ -282,6 +285,10 @@ class DbManager extends SQLiteOpenHelper {
         return cursor.getInt(cursor.getColumnIndexOrThrow(column));
     }
 
+    private boolean getBoolean(Cursor cursor, String column){
+        return cursor.getInt(cursor.getColumnIndexOrThrow(column)) == 1;
+    }
+
     @Override
     public String toString(){
         String debug = super.toString() + "\n";
@@ -331,6 +338,7 @@ class DbManager extends SQLiteOpenHelper {
         static final String COLUMN_NAME_AUTHOR = "author";
         static final String COLUMN_NAME_PUBLISHED = "published";
         static final String COLUMN_NAME_CONTENT = "content";
+        static final String COLUMN_NAME_IS_PLACEHOLDER = "is_placeholder";
     }
 
     class ImagesTable implements BaseColumns {
