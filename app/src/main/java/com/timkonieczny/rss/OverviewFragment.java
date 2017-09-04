@@ -25,7 +25,8 @@ public class OverviewFragment
     SwipeRefreshLayout swipeRefreshLayout;
     Snackbar noUpdatesSnackbar;
 
-    boolean isInitialRefreshDone = false;
+    int currentOrientation;
+    boolean cancelRefresh = false;
 
     // Required empty public constructor
     public OverviewFragment() {}
@@ -51,12 +52,7 @@ public class OverviewFragment
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_overview, container, false);
-    }
-
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState){
-        super.onViewCreated(view, savedInstanceState);
+        View view = inflater.inflate(R.layout.fragment_overview, container, false);
         ActionBar actionBar = ((MainActivity)getActivity()).getSupportActionBar();
         if(actionBar!=null) actionBar.setTitle(R.string.title_fragment_articles);
 
@@ -69,10 +65,26 @@ public class OverviewFragment
 
         noUpdatesSnackbar = Snackbar.make(view, getResources().getString(R.string.no_updates_snackbar), Snackbar.LENGTH_SHORT);
 
-        if(!isInitialRefreshDone) {
+        currentOrientation = getResources().getConfiguration().orientation;
+        cancelRefresh = savedInstanceState != null && savedInstanceState.getInt("orientation") != currentOrientation;
+
+        return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if(!cancelRefresh){
             swipeRefreshLayout.setRefreshing(true);
             updateFeed();
         }
+        cancelRefresh = false;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putInt("orientation", currentOrientation);
+        super.onSaveInstanceState(outState);
     }
 
     @Override
@@ -88,7 +100,6 @@ public class OverviewFragment
     @Override
     public void onFeedUpdated(boolean hasNewArticles, boolean isUpdateComplete) {
         if(isUpdateComplete) {
-            isInitialRefreshDone = true;
             if (hasNewArticles) feedAdapter.notifyDataSetChanged();
             else noUpdatesSnackbar.show();
             swipeRefreshLayout.setRefreshing(false);
