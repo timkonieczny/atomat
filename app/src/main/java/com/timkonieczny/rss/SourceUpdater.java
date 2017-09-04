@@ -1,7 +1,6 @@
 package com.timkonieczny.rss;
 
 import android.content.ContentValues;
-import android.util.Log;
 import android.util.Xml;
 
 import org.xmlpull.v1.XmlPullParser;

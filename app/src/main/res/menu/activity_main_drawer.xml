@@ -16,13 +16,4 @@
             android:title="@string/nav_settings_title" />
     </group>
 
-    <!--<item android:title="Settings">
-        <menu>
-            <item
-                android:id="@+id/nav_preferences"
-                android:icon="@drawable/ic_settings_black_24dp"
-                android:title="Preferences" />
-        </menu>
-    </item>-->
-
 </menu>
