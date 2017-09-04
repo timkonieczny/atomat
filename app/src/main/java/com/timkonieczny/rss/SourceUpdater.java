@@ -49,13 +49,14 @@ class SourceUpdater {
         this.dbManager = dbManager;
 
         initializeTagDictionaries();
-        imgWithWhitespacePattern = Pattern.compile("\\A\\s*<img(.*?)/>\\s*");  // <imgPattern ... /> at beginning of input, including trailing whitespaces
-        imgPattern = Pattern.compile("<img(?:.*?)src=\"(.*?)\"(?:.*?)/>"); // src attribute of <imgPattern ... />
+        imgWithWhitespacePattern = Pattern.compile("\\A\\s*<img(.*?)>\\s*");  // <imgPattern ... /> at beginning of input, including trailing whitespaces
+        imgPattern = Pattern.compile("<img(?:.*?)src=\"(.*?)\"(?:.*?)>"); // src attribute of <imgPattern ... />
         stylePattern = Pattern.compile("<style>(?:.*?)</style>"); // src attribute of <imgPattern ... />
         dateFormats = new SimpleDateFormat[]{
                 new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ssX", Locale.US),
                 new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ssz", Locale.US),
-                new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX", Locale.US)
+                new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX", Locale.US),
+                new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX", Locale.US)
         };
 
         parser = Xml.newPullParser();
