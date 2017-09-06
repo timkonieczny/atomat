@@ -125,7 +125,7 @@ public class OverviewFragment
             }
         }else if(hasNewArticles) feedAdapter.notifyDataSetChanged();
         swipeRefreshLayout.setRefreshing(false);
-        ((MainActivity)getActivity()).isActivityResumed = false;
+        if(getActivity()!=null) ((MainActivity)getActivity()).isActivityResumed = false;
     }
 
     public void updateFeed(){

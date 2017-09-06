@@ -48,6 +48,7 @@ public class MainActivity extends AppCompatActivity
     protected static int viewWidth;
 
     boolean isActivityResumed = true;
+    boolean isDrawerToggleArrow = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,6 +78,18 @@ public class MainActivity extends AppCompatActivity
 
             toolbar.setNavigationIcon(drawerArrow);
 
+            if(savedInstanceState!=null) {
+                isDrawerToggleArrow = savedInstanceState.getBoolean("isDrawerToggleArrow");
+                if(isDrawerToggleArrow) {
+                    drawerArrow.setProgress(1f);
+                    toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            onBackPressed();
+                        }
+                    });
+                }
+            }
 
             NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
             navigationView.setNavigationItemSelectedListener(this);
@@ -97,6 +110,12 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putBoolean("isDrawerToggleArrow", isDrawerToggleArrow);
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
         isActivityResumed = true;
@@ -111,6 +130,7 @@ public class MainActivity extends AppCompatActivity
         }
 
         ObjectAnimator.ofFloat(drawerArrow, "progress", 0).start();
+        isDrawerToggleArrow = false;
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -206,6 +226,7 @@ public class MainActivity extends AppCompatActivity
         });
 
         ObjectAnimator.ofFloat(drawerArrow, "progress", 1).start();
+        isDrawerToggleArrow = true;
     }
 
     void rescheduleBackgroundUpdate(){
