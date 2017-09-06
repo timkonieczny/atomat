@@ -45,7 +45,7 @@ public class ArticleFragment extends Fragment implements ArticleChangedListener,
     private SpannableStringBuilder spannableStringBuilder;
     private ImageSpan[] imageSpans;
     private CustomTabsIntent customTabsIntent;
-
+    private CustomTabsServiceConnection customTabsServiceConnection;
 
     public ArticleFragment() {}
 
@@ -83,6 +83,12 @@ public class ArticleFragment extends Fragment implements ArticleChangedListener,
         contentTextView.setText(spannableStringBuilder);
         contentTextView.setMovementMethod(LinkMovementMethod.getInstance());
         // TODO: Handle non-image media
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if(customTabsServiceConnection != null) getContext().unbindService(customTabsServiceConnection);
     }
 
     private void setInlineUrls(){
@@ -128,9 +134,11 @@ public class ArticleFragment extends Fragment implements ArticleChangedListener,
                     likelyUrls.add(bundle);
                 } else mostLikelyUrl = linkUri;
             }
-            if (links.size() > 0)
+            if (links.size() > 0) {
+                customTabsServiceConnection = getCustomTabsServiceConnection(mostLikelyUrl, likelyUrls);
                 CustomTabsClient.bindCustomTabsService(getContext(), "com.android.chrome",
-                        getCustomTabsServiceConnection(mostLikelyUrl, likelyUrls));
+                        customTabsServiceConnection);
+            }
         }
     }
 
