@@ -44,6 +44,7 @@ class SourceUpdater {
     private HashSet<String> entryContentTags;
     private HashSet<String> entryLinkTags;
     private HashSet<String> entryAuthorTags;
+    private HashSet<String> authorNameTags;
 
     SourceUpdater(DbManager dbManager) {
         this.dbManager = dbManager;
@@ -161,10 +162,17 @@ class SourceUpdater {
                         iconUrl = readTag(parser, name);
                         sourceContentValues.put(DbManager.SourcesTable.COLUMN_NAME_ICON_URL, iconUrl);
                     } else if (feedLinkTags.contains(name)) {
-                        String linkUrl = parser.getAttributeValue(null, "href");
-                        if(linkUrl!=null) parser.next();
-                        else linkUrl = readTag(parser, name);
-                        sourceContentValues.put(DbManager.SourcesTable.COLUMN_NAME_WEBSITE, linkUrl);
+                        String linkUrl = null;
+                        if(parser.getAttributeValue(null, "rel")!=null && parser.getAttributeValue(null, "rel").equals("alternate"))
+                            linkUrl = parser.getAttributeValue(null, "href");
+                        if(linkUrl!=null)
+                            parser.next();
+                        else{
+                            linkUrl = readTag(parser, name);
+                        }
+                        if(linkUrl!=null && !linkUrl.equals("")) {
+                            sourceContentValues.put(DbManager.SourcesTable.COLUMN_NAME_WEBSITE, linkUrl);
+                        }
                     }else{
                         skip(parser);
                     }
@@ -181,7 +189,7 @@ class SourceUpdater {
         String title = "null";
         String content = "null";
         String headerUri = null;
-        String link = "null";
+        String link = null;
         String author = "null";
         String published = "";
 
@@ -201,9 +209,17 @@ class SourceUpdater {
                 content = imgWithWhitespacePattern.matcher(content).replaceFirst("");
                 content = stylePattern.matcher(content).replaceAll("");
             }else if(entryLinkTags.contains(name)){
-                link = parser.getAttributeValue(null, "href");
-                if(link!=null) parser.next();
-                else link = readTag(parser, name);
+                if(link == null) {
+                    if (parser.getAttributeValue(null, "rel")!=null && parser.getAttributeValue(null, "rel").equals("alternate"))
+                        link = parser.getAttributeValue(null, "href");
+                    if (link != null)
+                        parser.next();
+                    else
+                        link = readTag(parser, name);
+                    if(link.equals("")) link = null;
+                }else{
+                    parser.next();
+                }
             }else if(entryAuthorTags.contains(name)){
                 author = readAuthors(parser);
             }else if(entryPublishedTags.contains(name)){
@@ -267,9 +283,9 @@ class SourceUpdater {
                 if(parser.getEventType() == XmlPullParser.TEXT && !parser.getText().trim().equals("")) {
                     result += parser.getText();
                 }
-                continue;
-            }
-            result+=readTag(parser, "name");
+            }else if(authorNameTags.contains(parser.getName())){
+                result+=readTag(parser, parser.getName());
+            }else skip(parser);
         }
         parser.require(XmlPullParser.END_TAG, null, parser.getName());
         return result.replaceAll("/(, )\\Z/", "");
@@ -307,6 +323,7 @@ class SourceUpdater {
         entryContentTags = createHashSet("content", "content:encoded");
         entryLinkTags = createHashSet("link");
         entryAuthorTags = createHashSet("author", "dc:creator");
+        authorNameTags = createHashSet("name");
     }
 
     private HashSet<String> createHashSet(String... strings){

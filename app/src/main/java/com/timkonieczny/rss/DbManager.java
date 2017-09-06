@@ -188,36 +188,38 @@ class DbManager extends SQLiteOpenHelper {
             }
 
             long articleDbId = getLong(cursor, ArticlesTable.TABLE_NAME + ArticlesTable._ID);
-            if (!MainActivity.articles.containsDbId(articleDbId)) {
-                boolean isPlaceholder = getBoolean(cursor, ArticlesTable.TABLE_NAME + "_" + ArticlesTable.COLUMN_NAME_IS_PLACEHOLDER);
-                String articleLink = getString(cursor, ArticlesTable.TABLE_NAME + "_" + ArticlesTable.COLUMN_NAME_URL);
-                long articleSourceId = getLong(cursor, ArticlesTable.TABLE_NAME + "_" + ArticlesTable.COLUMN_NAME_SOURCE_ID);
-                String articleTitle = getString(cursor, ArticlesTable.TABLE_NAME + "_" + ArticlesTable.COLUMN_NAME_TITLE);
-                String articleAuthor = getString(cursor, ArticlesTable.TABLE_NAME + "_" + ArticlesTable.COLUMN_NAME_AUTHOR);
-                long articlePublished = getLong(cursor, ArticlesTable.TABLE_NAME + "_" + ArticlesTable.COLUMN_NAME_PUBLISHED);
-                String articleContent = getString(cursor, ArticlesTable.TABLE_NAME + "_" + ArticlesTable.COLUMN_NAME_CONTENT);
-                Source source = MainActivity.sources.getByDbId(articleSourceId);
-                MainActivity.articles.add(new Article(context, articleTitle, articleAuthor, articleLink, articlePublished, articleContent, source, articleDbId, isPlaceholder));
-            }
+            if(articleDbId != 0) {      // If source has no articles default article id and null for the other columns is returned
+                if (!MainActivity.articles.containsDbId(articleDbId)) {
+                    boolean isPlaceholder = getBoolean(cursor, ArticlesTable.TABLE_NAME + "_" + ArticlesTable.COLUMN_NAME_IS_PLACEHOLDER);
+                    String articleLink = getString(cursor, ArticlesTable.TABLE_NAME + "_" + ArticlesTable.COLUMN_NAME_URL);
+                    long articleSourceId = getLong(cursor, ArticlesTable.TABLE_NAME + "_" + ArticlesTable.COLUMN_NAME_SOURCE_ID);
+                    String articleTitle = getString(cursor, ArticlesTable.TABLE_NAME + "_" + ArticlesTable.COLUMN_NAME_TITLE);
+                    String articleAuthor = getString(cursor, ArticlesTable.TABLE_NAME + "_" + ArticlesTable.COLUMN_NAME_AUTHOR);
+                    long articlePublished = getLong(cursor, ArticlesTable.TABLE_NAME + "_" + ArticlesTable.COLUMN_NAME_PUBLISHED);
+                    String articleContent = getString(cursor, ArticlesTable.TABLE_NAME + "_" + ArticlesTable.COLUMN_NAME_CONTENT);
+                    Source source = MainActivity.sources.getByDbId(articleSourceId);
+                    MainActivity.articles.add(new Article(context, articleTitle, articleAuthor, articleLink, articlePublished, articleContent, source, articleDbId, isPlaceholder));
+                }
 
-            long imageDbId = getLong(cursor, ImagesTable.TABLE_NAME + ImagesTable._ID);
-            if(imageDbId != 0) {
-                int imageArticleId = getInt(cursor, ImagesTable.TABLE_NAME + "_" + ImagesTable.COLUMN_NAME_ARTICLE_ID);
-                String imageUrl = getString(cursor, ImagesTable.TABLE_NAME + "_" + ImagesTable.COLUMN_NAME_URL);
-                String imagePath = getString(cursor, ImagesTable.TABLE_NAME + "_" + ImagesTable.COLUMN_NAME_PATH);
-                int imageWidth = getInt(cursor, ImagesTable.TABLE_NAME + "_" + ImagesTable.COLUMN_NAME_WIDTH);
-                int imageHeight = getInt(cursor, ImagesTable.TABLE_NAME + "_" + ImagesTable.COLUMN_NAME_HEIGHT);
-                int imageIndex = getInt(cursor, ImagesTable.TABLE_NAME + "_" + ImagesTable.COLUMN_NAME_TYPE);
+                long imageDbId = getLong(cursor, ImagesTable.TABLE_NAME + ImagesTable._ID);
+                if (imageDbId != 0) {
+                    int imageArticleId = getInt(cursor, ImagesTable.TABLE_NAME + "_" + ImagesTable.COLUMN_NAME_ARTICLE_ID);
+                    String imageUrl = getString(cursor, ImagesTable.TABLE_NAME + "_" + ImagesTable.COLUMN_NAME_URL);
+                    String imagePath = getString(cursor, ImagesTable.TABLE_NAME + "_" + ImagesTable.COLUMN_NAME_PATH);
+                    int imageWidth = getInt(cursor, ImagesTable.TABLE_NAME + "_" + ImagesTable.COLUMN_NAME_WIDTH);
+                    int imageHeight = getInt(cursor, ImagesTable.TABLE_NAME + "_" + ImagesTable.COLUMN_NAME_HEIGHT);
+                    int imageIndex = getInt(cursor, ImagesTable.TABLE_NAME + "_" + ImagesTable.COLUMN_NAME_TYPE);
 
-                Article article = MainActivity.articles.getByDbId(imageArticleId);
-                if (imageIndex == Image.TYPE_HEADER) {
-                    article.header = new Image(Image.TYPE_HEADER, imageDbId, imageUrl, imagePath, imageWidth, imageHeight);
-                } else {
-                    Image image = new Image(Image.TYPE_INLINE, imageDbId, imageUrl, imagePath, imageWidth, imageHeight);
-                    if (article.inlineImages == null) article.inlineImages = new ArrayList<>();
-                    for (int i = article.inlineImages.size() + 1; i <= imageIndex + 1; i++)
-                        article.inlineImages.add(null);
-                    article.inlineImages.set(imageIndex, image);
+                    Article article = MainActivity.articles.getByDbId(imageArticleId);
+                    if (imageIndex == Image.TYPE_HEADER) {
+                        article.header = new Image(Image.TYPE_HEADER, imageDbId, imageUrl, imagePath, imageWidth, imageHeight);
+                    } else {
+                        Image image = new Image(Image.TYPE_INLINE, imageDbId, imageUrl, imagePath, imageWidth, imageHeight);
+                        if (article.inlineImages == null) article.inlineImages = new ArrayList<>();
+                        for (int i = article.inlineImages.size() + 1; i <= imageIndex + 1; i++)
+                            article.inlineImages.add(null);
+                        article.inlineImages.set(imageIndex, image);
+                    }
                 }
             }
         }
