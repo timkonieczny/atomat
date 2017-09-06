@@ -166,10 +166,13 @@ public class MainActivity extends AppCompatActivity
 
         if(articleFragment == null) articleFragment = new ArticleFragment();
 
-        Bundle args = new Bundle();
-        args.putLong("dbId", dbId);
-
-        articleFragment.setArguments(args);
+        if(articleFragment.getArguments() == null) {
+            Bundle args = new Bundle();
+            args.putLong("dbId", dbId);
+            articleFragment.setArguments(args);
+        }else{
+            articleFragment.getArguments().putLong("dbId", dbId);
+        }
 
         ImageView sharedElement = (ImageView) view.findViewById(R.id.article_header);
 
