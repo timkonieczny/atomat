@@ -17,10 +17,10 @@ class BackgroundFeedTask extends AsyncTask<Void, Void, Void>{
 
     @Override
     protected Void doInBackground(Void... v) {
-        SourceUpdater sourceUpdater = new SourceUpdater(dbManager);
+        AtomParser atomParser = new AtomParser(dbManager);
 
         try {
-            sourceUpdater.parseAll();
+            atomParser.parseAll();
         } catch (XmlPullParserException | IOException e) {
             e.printStackTrace();
         }

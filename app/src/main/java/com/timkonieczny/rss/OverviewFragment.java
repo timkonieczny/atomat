@@ -98,10 +98,22 @@ public class OverviewFragment
     }
 
     @Override
-    public void onFeedUpdated(boolean hasNewArticles, boolean isUpdateComplete) {
+    public void onFeedUpdated(boolean hasNewArticles, boolean isUpdateComplete, int errorCode) {
         if(isUpdateComplete) {
-            if (hasNewArticles) feedAdapter.notifyDataSetChanged();
-            else noUpdatesSnackbar.show();
+            switch (errorCode){
+                case AtomParser.SUCCESS:
+                    if (hasNewArticles) feedAdapter.notifyDataSetChanged();
+                    else noUpdatesSnackbar.show();
+                    break;
+                case AtomParser.ERROR_IO:
+                    if(getView()!=null)
+                        Snackbar.make(getView(), "Network Error", Snackbar.LENGTH_SHORT).show();
+                    break;
+                case AtomParser.ERROR_XML:
+                    if(getView()!=null)
+                        Snackbar.make(getView(), "RSS could not be read", Snackbar.LENGTH_SHORT).show();
+                    break;
+            }
             swipeRefreshLayout.setRefreshing(false);
         }else if(hasNewArticles) feedAdapter.notifyDataSetChanged();
     }

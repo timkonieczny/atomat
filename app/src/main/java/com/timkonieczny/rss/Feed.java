@@ -12,18 +12,21 @@ class Feed extends AsyncTask<Void, Boolean, Boolean> {
 
     private Context context;
     private FeedListener feedListener;
-    private SourceUpdater sourceUpdater;
+    private AtomParser atomParser;
     private DbManager dbManager;
 
     private String newSource;
+
+    private int errorCode;
 
 
     Feed(Context context, FeedListener feedListener, String newSource){
         this.context = context;
         this.feedListener = feedListener;
         this.newSource = newSource;
+        errorCode = AtomParser.SUCCESS;
         dbManager = new DbManager(context);
-        sourceUpdater = new SourceUpdater(dbManager);
+        atomParser = new AtomParser(dbManager);
     }
 
     @Override
@@ -40,10 +43,14 @@ class Feed extends AsyncTask<Void, Boolean, Boolean> {
         before = MainActivity.articles.size();
         try {
             if(newSource == null)
-                sourceUpdater.parseAll();
+                atomParser.parseAll();
             else
-                sourceUpdater.parse(DbRow.DEFAULT_DB_ID, newSource, null, null, true);
-        } catch (XmlPullParserException | IOException e) {
+                atomParser.parse(DbRow.DEFAULT_DB_ID, newSource, null, null, true);
+        } catch (XmlPullParserException e) {
+            errorCode = AtomParser.ERROR_XML;
+            e.printStackTrace();
+        } catch (IOException e) {
+            errorCode = AtomParser.ERROR_IO;
             e.printStackTrace();
         }
 
@@ -55,13 +62,13 @@ class Feed extends AsyncTask<Void, Boolean, Boolean> {
     @Override
     protected void onProgressUpdate(Boolean... hasNewArticles) {
         super.onProgressUpdate(hasNewArticles);
-        feedListener.onFeedUpdated(hasNewArticles[0], false);
+        feedListener.onFeedUpdated(hasNewArticles[0], false, errorCode);
     }
 
     @Override
     protected void onPostExecute(Boolean hasNewArticles) {
         super.onPostExecute(hasNewArticles);
         dbManager.close();
-        feedListener.onFeedUpdated(hasNewArticles, true);
+        feedListener.onFeedUpdated(hasNewArticles, true, errorCode);
     }
 }

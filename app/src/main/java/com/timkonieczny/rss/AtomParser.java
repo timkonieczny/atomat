@@ -20,7 +20,11 @@ import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-class SourceUpdater {
+class AtomParser {
+
+    static final int SUCCESS = 0;
+    static final int ERROR_IO = 1;
+    static final int ERROR_XML = 2;
 
     private DbManager dbManager;
     private SimpleDateFormat[] dateFormats;
@@ -46,7 +50,7 @@ class SourceUpdater {
     private HashSet<String> entryAuthorTags;
     private HashSet<String> authorNameTags;
 
-    SourceUpdater(DbManager dbManager) {
+    AtomParser(DbManager dbManager) {
         this.dbManager = dbManager;
 
         initializeTagDictionaries();

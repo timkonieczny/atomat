@@ -7,6 +7,7 @@ import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.ActionBar;
 import android.view.LayoutInflater;
@@ -81,27 +82,29 @@ public class SourcesFragment extends Fragment implements FeedListener{
             }
         });
 
-        final FeedListener feedListener = this;
         view.findViewById(R.id.add_source_button).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                urlTextInputLayout.setErrorEnabled(false);
-                String url = urlEditText.getText().toString().replaceAll(" ", "");
-                if(!url.equals("")) {
-                    if (!httpPattern.matcher(url).find()) url = "http://" + url;
-//                    if (URLUtil.isValidUrl(url) && xmlPattern.matcher(url).find()) {
-                    if (URLUtil.isValidUrl(url)) {
-                        if(MainActivity.sources.containsRssUrl(url))
-                            urlTextInputLayout.setError("This website is already in your sources");
-                        else {
-                            sourceInputLayout.setVisibility(View.GONE);
-                            sourceLoadingLayout.setVisibility(View.VISIBLE);
-                            new Feed(getContext(), feedListener, url).execute();
-                        }
-                    } else urlTextInputLayout.setError("Enter an URL that points to an XML file");
-                }else urlTextInputLayout.setError("Enter a valid URL");
+                addSource();
             }
         });
+    }
+
+    private void addSource(){
+        urlTextInputLayout.setErrorEnabled(false);
+        String url = urlEditText.getText().toString().replaceAll(" ", "");
+        if(!url.equals("")) {
+            if (!httpPattern.matcher(url).find()) url = "http://" + url;
+            if (URLUtil.isValidUrl(url)) {
+                if(MainActivity.sources.containsRssUrl(url))
+                    urlTextInputLayout.setError("This website is already in your sources");
+                else {
+                    sourceInputLayout.setVisibility(View.GONE);
+                    sourceLoadingLayout.setVisibility(View.VISIBLE);
+                    new Feed(getContext(), this, url).execute();
+                }
+            } else urlTextInputLayout.setError("Enter an URL that points to an XML file");
+        }else urlTextInputLayout.setError("Enter a valid URL");
     }
 
     void openCircularReveal(View view){
@@ -159,10 +162,31 @@ public class SourcesFragment extends Fragment implements FeedListener{
     }
 
     @Override
-    public void onFeedUpdated(boolean hasNewArticles, boolean isUpdateComplete) {
-        if(isUpdateComplete) {
-            closeCircularReveal(view);
-            sourcesAdapter.notifyDataSetChanged();
+    public void onFeedUpdated(boolean hasNewArticles, boolean isUpdateComplete, int errorCode) {
+        switch (errorCode){
+            case AtomParser.SUCCESS:
+                if(isUpdateComplete) {
+                    closeCircularReveal(view);
+                    sourcesAdapter.notifyDataSetChanged();
+                }
+                break;
+            case AtomParser.ERROR_IO:
+                if(getView()!=null) {
+                    Snackbar.make(getView(), "Network Error", Snackbar.LENGTH_LONG).setAction("retry", new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            addSource();
+                        }
+                    }).show();
+                }
+                sourceLoadingLayout.setVisibility(View.GONE);
+                sourceInputLayout.setVisibility(View.VISIBLE);
+                break;
+            case AtomParser.ERROR_XML:
+                urlTextInputLayout.setError("RSS format could not be read");
+                sourceLoadingLayout.setVisibility(View.GONE);
+                sourceInputLayout.setVisibility(View.VISIBLE);
+                break;
         }
     }
 }
