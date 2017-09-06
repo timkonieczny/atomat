@@ -107,15 +107,23 @@ public class OverviewFragment
                     break;
                 case AtomParser.ERROR_IO:
                     if(getView()!=null)
-                        Snackbar.make(getView(), "Network Error", Snackbar.LENGTH_SHORT).show();
+                        Snackbar.make(getView(), R.string.error_network, Snackbar.LENGTH_SHORT)
+                                .setAction(R.string.retry, new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        swipeRefreshLayout.setRefreshing(true);
+                                        updateFeed();
+                                    }
+                                })
+                                .show();
                     break;
                 case AtomParser.ERROR_XML:
                     if(getView()!=null)
-                        Snackbar.make(getView(), "RSS could not be read", Snackbar.LENGTH_SHORT).show();
+                        Snackbar.make(getView(), R.string.error_invalid_rss, Snackbar.LENGTH_SHORT).show();
                     break;
             }
-            swipeRefreshLayout.setRefreshing(false);
         }else if(hasNewArticles) feedAdapter.notifyDataSetChanged();
+        swipeRefreshLayout.setRefreshing(false);
     }
 
     public void updateFeed(){

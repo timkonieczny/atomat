@@ -64,6 +64,14 @@
     <string name="cancel">Cancel</string>
     <string name="ok">OK</string>
 
+    <!-- error strings -->
+    <string name="retry">Retry</string>
+    <string name="error_duplicate_source">This website is already in your sources</string>
+    <string name="error_no_xml">Enter an URL that points to an XML file</string>
+    <string name="error_invalid_url">Enter a valid URL</string>
+    <string name="error_network">No connection</string>
+    <string name="error_invalid_rss">RSS feed format could not be read</string>
+
     <!-- placeholder strings -->
     <!-- TODO: Remove placeholder strings -->
     <string name="debug_title">Android O is supposed to make Android updates arrive faster</string>

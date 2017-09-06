@@ -97,14 +97,14 @@ public class SourcesFragment extends Fragment implements FeedListener{
             if (!httpPattern.matcher(url).find()) url = "http://" + url;
             if (URLUtil.isValidUrl(url)) {
                 if(MainActivity.sources.containsRssUrl(url))
-                    urlTextInputLayout.setError("This website is already in your sources");
+                    urlTextInputLayout.setError(getResources().getString(R.string.error_duplicate_source));
                 else {
                     sourceInputLayout.setVisibility(View.GONE);
                     sourceLoadingLayout.setVisibility(View.VISIBLE);
                     new Feed(getContext(), this, url).execute();
                 }
-            } else urlTextInputLayout.setError("Enter an URL that points to an XML file");
-        }else urlTextInputLayout.setError("Enter a valid URL");
+            } else urlTextInputLayout.setError(getResources().getString(R.string.error_no_xml));
+        }else urlTextInputLayout.setError(getResources().getString(R.string.error_invalid_url));
     }
 
     void openCircularReveal(View view){
@@ -172,18 +172,19 @@ public class SourcesFragment extends Fragment implements FeedListener{
                 break;
             case AtomParser.ERROR_IO:
                 if(getView()!=null) {
-                    Snackbar.make(getView(), "Network Error", Snackbar.LENGTH_LONG).setAction("retry", new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            addSource();
-                        }
-                    }).show();
+                    Snackbar.make(getView(), R.string.error_network, Snackbar.LENGTH_LONG)
+                            .setAction(R.string.retry, new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    addSource();
+                                }
+                            }).show();
                 }
                 sourceLoadingLayout.setVisibility(View.GONE);
                 sourceInputLayout.setVisibility(View.VISIBLE);
                 break;
             case AtomParser.ERROR_XML:
-                urlTextInputLayout.setError("RSS format could not be read");
+                urlTextInputLayout.setError(getResources().getString(R.string.error_invalid_rss));
                 sourceLoadingLayout.setVisibility(View.GONE);
                 sourceInputLayout.setVisibility(View.VISIBLE);
                 break;
