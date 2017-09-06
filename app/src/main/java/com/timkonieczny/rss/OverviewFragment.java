@@ -66,7 +66,8 @@ public class OverviewFragment
         noUpdatesSnackbar = Snackbar.make(view, getResources().getString(R.string.no_updates_snackbar), Snackbar.LENGTH_SHORT);
 
         currentOrientation = getResources().getConfiguration().orientation;
-        cancelRefresh = savedInstanceState != null && savedInstanceState.getInt("orientation") != currentOrientation;
+
+        cancelRefresh = savedInstanceState != null && savedInstanceState.getInt("orientation") != currentOrientation || !((MainActivity)getActivity()).isActivityResumed;
 
         return view;
     }
@@ -124,6 +125,7 @@ public class OverviewFragment
             }
         }else if(hasNewArticles) feedAdapter.notifyDataSetChanged();
         swipeRefreshLayout.setRefreshing(false);
+        ((MainActivity)getActivity()).isActivityResumed = false;
     }
 
     public void updateFeed(){

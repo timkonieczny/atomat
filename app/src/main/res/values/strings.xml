@@ -21,13 +21,13 @@
     <string name="nav_settings_title">Settings</string>
 
     <!-- strings used in widgets -->
-    <string name="no_updates_snackbar">Sources are up-to-date.</string>
+    <string name="no_updates_snackbar">Sources are up-to-date</string>
     <string name="feed_url">Feed URL</string>
     <string name="add">Add</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="creating_source_loading">Creating source</string>
-    <string name="article_loading_failed_message">Some stories could not be fetched.</string>
+    <string name="article_loading_failed_message">Some stories could not be fetched</string>
     <string name="learn_more">Learn More</string>
     <string name="missing_articles_dialog_title">Why are not all stories displayed?</string>
     <string name="missing_articles_dialog_content">To fetch the latest stories from your sources, Atomat polls the respective RSS feeds at a certain update frequency. With each update a number of stories is fetched. This number is set by the news outlet. If too much time has passed since the last update, some articles might not appear in your feed. You can change the update frequency in the settings.</string>

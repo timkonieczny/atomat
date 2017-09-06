@@ -47,6 +47,8 @@ public class MainActivity extends AppCompatActivity
 
     protected static int viewWidth;
 
+    boolean isActivityResumed = true;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -92,6 +94,12 @@ public class MainActivity extends AppCompatActivity
             }
             rescheduleBackgroundUpdate();
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        isActivityResumed = true;
     }
 
     @Override
