@@ -5,6 +5,7 @@ import android.app.job.JobInfo;
 import android.app.job.JobScheduler;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Color;
@@ -13,6 +14,8 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.ActivityOptionsCompat;
+import android.support.v4.util.Pair;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -20,12 +23,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.graphics.drawable.DrawerArrowDrawable;
 import android.support.v7.widget.Toolbar;
-import android.transition.Slide;
-import android.transition.Transition;
-import android.transition.TransitionInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageView;
+
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, View.OnClickListener {
@@ -36,6 +37,7 @@ public class MainActivity extends AppCompatActivity
     private DrawerArrowDrawable drawerArrow;
     private DrawerLayout drawer;
     private Toolbar toolbar;
+    private View upButton;
 
     protected static boolean goToSettings = false;
     protected static boolean isFragmentSelected = false;
@@ -90,6 +92,11 @@ public class MainActivity extends AppCompatActivity
                     });
                 }
             }
+
+            ArrayList<View> views = new ArrayList<>();
+            findViewById(R.id.toolbar).findViewsWithText(views, getString(R.string.navigation_drawer_open), View.FIND_VIEWS_WITH_CONTENT_DESCRIPTION);
+            if(views.size() != 0) upButton = views.get(0); // TODO: check other strings too: close drawer, navigate up
+            upButton.setTransitionName("up_button");
 
             NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
             navigationView.setNavigationItemSelectedListener(this);
@@ -202,31 +209,21 @@ public class MainActivity extends AppCompatActivity
             articleFragment.getArguments().putLong("dbId", dbId);
         }
 
-        ImageView sharedElement = (ImageView) view.findViewById(R.id.article_header);
+        Intent intent = new Intent(this, ArticleActivity.class);
+        intent.putExtra("dbId", dbId);
+        Pair<View, String> p1 = Pair.create(upButton, "up_button");
+        Pair<View, String> p2 = Pair.create(findViewById(R.id.article_header), dbId + "_header");
 
-        Transition transition = TransitionInflater.from(sharedElement.getContext()).inflateTransition(R.transition.article_header_transition);
-        articleFragment.setSharedElementEnterTransition(transition);
-        articleFragment.setSharedElementReturnTransition(transition);
-        articleFragment.setEnterTransition(new Slide());
-        articleFragment.setExitTransition(new Slide());
-        sharedElement.clearColorFilter();
+        ActivityOptionsCompat options = ActivityOptionsCompat.
+                makeSceneTransitionAnimation(this, p1, p2);
+        int ARTICLE_ACTIVITY = 1;
+        startActivityForResult(intent, ARTICLE_ACTIVITY,options.toBundle());
+    }
 
-        getFragmentManager()
-                .beginTransaction()
-                .addSharedElement(sharedElement, dbId + "_header")
-                .replace(R.id.fragment_container, articleFragment)
-                .addToBackStack(null)
-                .commit();
-
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                onBackPressed();
-            }
-        });
-
-        ObjectAnimator.ofFloat(drawerArrow, "progress", 1).start();
-        isDrawerToggleArrow = true;
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        overviewFragment.cancelRefresh = true;
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     void rescheduleBackgroundUpdate(){
