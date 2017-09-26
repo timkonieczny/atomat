@@ -212,7 +212,7 @@ public class MainActivity extends AppCompatActivity
         Intent intent = new Intent(this, ArticleActivity.class);
         intent.putExtra("dbId", dbId);
         Pair<View, String> p1 = Pair.create(upButton, "up_button");
-        Pair<View, String> p2 = Pair.create(findViewById(R.id.article_header), dbId + "_header");
+        Pair<View, String> p2 = Pair.create(view.findViewById(R.id.article_header), dbId + "_header");
 
         ActivityOptionsCompat options = ActivityOptionsCompat.
                 makeSceneTransitionAnimation(this, p1, p2);
