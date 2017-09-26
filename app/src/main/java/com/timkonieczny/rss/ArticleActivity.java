@@ -93,7 +93,10 @@ public class ArticleActivity extends AppCompatActivity implements ArticleChanged
 
     @Override
     protected void onPause() {
-        if(customTabsServiceConnection != null) unbindService(customTabsServiceConnection);
+        if(customTabsServiceConnection != null){
+            unbindService(customTabsServiceConnection);
+            customTabsServiceConnection = null;
+        }
         super.onPause();
     }
 
