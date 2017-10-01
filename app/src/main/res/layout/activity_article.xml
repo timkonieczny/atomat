@@ -58,6 +58,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="16sp"
+                android:textColor="@color/bodyText"
                 android:drawablePadding="16dp"
                 android:text="@string/debug_source_title"/>
             <TextView
@@ -65,6 +66,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="24sp"
+                android:textColor="@color/bodyText"
                 android:layout_marginTop="14dp"
                 android:layout_marginBottom="14dp"
                 android:text="@string/debug_title" />
@@ -73,15 +75,16 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="16sp"
+                android:textColor="@color/bodyText"
                 android:text="@string/debug_author" />
             <TextView
                 android:id="@+id/article_content"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="16sp"
+                android:textColor="@color/bodyText"
                 android:layout_marginTop="16dp"
                 android:lineSpacingExtra="4sp"
-                android:textColor="@color/bodyText"
                 android:text="@string/debug_text"/>
         </LinearLayout>
 
