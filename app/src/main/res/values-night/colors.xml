@@ -2,5 +2,6 @@
 <resources>
     <color name="colorCircularReveal">@color/cardview_dark_background</color>
     <color name="colorBorderlessButton">#e5e5e5</color>
-    <color name="colorText">#FFFFFF</color>
+    <color name="bodyText">#E3E3E3</color>
+    <color name="captionText">#9B9B9B</color>
 </resources>

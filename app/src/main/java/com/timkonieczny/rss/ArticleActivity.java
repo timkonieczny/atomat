@@ -1,7 +1,6 @@
 package com.timkonieczny.rss;
 
 import android.content.ComponentName;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.customtabs.CustomTabsCallback;
@@ -126,8 +125,8 @@ public class ArticleActivity extends AppCompatActivity implements ArticleChanged
                     if(opening) startPosition = editable.length();
                     else{
                         endPosition = editable.length();    // 13sp = caption font size; 15sp = body font size
-                        editable.setSpan(new RelativeSizeSpan(13.0f/15), startPosition, endPosition, Spannable.SPAN_MARK_MARK); // TODO: apply caption color with respect to DayNight theme
-                        editable.setSpan(new ForegroundColorSpan(Color.parseColor("#616161")), startPosition, endPosition, Spannable.SPAN_MARK_MARK);
+                        editable.setSpan(new RelativeSizeSpan(13.0f/15), startPosition, endPosition, Spannable.SPAN_MARK_MARK);
+                        editable.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.captionText, getTheme())), startPosition, endPosition, Spannable.SPAN_MARK_MARK);
                     }
                 }
             }
