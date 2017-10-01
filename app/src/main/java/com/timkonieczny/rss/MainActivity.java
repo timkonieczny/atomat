@@ -15,7 +15,6 @@ import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityOptionsCompat;
-import android.support.v4.util.Pair;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -211,11 +210,10 @@ public class MainActivity extends AppCompatActivity
 
         Intent intent = new Intent(this, ArticleActivity.class);
         intent.putExtra("dbId", dbId);
-        Pair<View, String> p1 = Pair.create(upButton, "up_button");
-        Pair<View, String> p2 = Pair.create(view.findViewById(R.id.article_header), dbId + "_header");
 
-        ActivityOptionsCompat options = ActivityOptionsCompat.
-                makeSceneTransitionAnimation(this, p1, p2);
+        ActivityOptionsCompat options = ActivityOptionsCompat
+                .makeSceneTransitionAnimation(this, view.findViewById(R.id.article_header), dbId + "_header");
+
         int ARTICLE_ACTIVITY = 1;
         startActivityForResult(intent, ARTICLE_ACTIVITY,options.toBundle());
     }

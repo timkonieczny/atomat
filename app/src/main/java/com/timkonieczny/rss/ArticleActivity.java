@@ -23,9 +23,8 @@ import android.text.style.ForegroundColorSpan;
 import android.text.style.ImageSpan;
 import android.text.style.RelativeSizeSpan;
 import android.text.style.URLSpan;
-import android.util.Log;
+import android.transition.Transition;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -45,6 +44,7 @@ public class ArticleActivity extends AppCompatActivity implements ArticleChanged
     private CustomTabsIntent customTabsIntent;
     private CustomTabsServiceConnection customTabsServiceConnection;
     Article article;
+    Transition.TransitionListener transitionListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,21 +52,35 @@ public class ArticleActivity extends AppCompatActivity implements ArticleChanged
         setContentView(R.layout.activity_article);
         article = MainActivity.articles.getByDbId(getIntent().getExtras().getLong("dbId"));
 
+        transitionListener = new Transition.TransitionListener() {
+            @Override
+            public void onTransitionStart(Transition transition) {}
+
+            @Override
+            public void onTransitionEnd(Transition transition) {
+                ActionBar actionBar = getSupportActionBar();
+                if(actionBar!=null) actionBar.setDisplayHomeAsUpEnabled(true);
+                toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        onBackPressed();
+                    }
+                });
+            }
+
+            @Override
+            public void onTransitionCancel(Transition transition) {}
+
+            @Override
+            public void onTransitionPause(Transition transition) {}
+
+            @Override
+            public void onTransitionResume(Transition transition) {}
+        };
+
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        ActionBar actionBar = getSupportActionBar();
-        if(actionBar!=null) actionBar.setDisplayHomeAsUpEnabled(true);
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                onBackPressed();
-            }
-        });
-
-        ArrayList<View> views = new ArrayList<>();
-        findViewById(R.id.toolbar).findViewsWithText(views, getString(R.string.navigation_drawer_open), View.FIND_VIEWS_WITH_CONTENT_DESCRIPTION);
-        Log.d("ArticleActivity", ((ViewGroup)findViewById(R.id.toolbar)).getChildAt(1).getContentDescription()+""); // TODO: check if up button exists
-        ((ViewGroup)findViewById(R.id.toolbar)).getChildAt(1).setTransitionName("up_button");
+        getWindow().getSharedElementEnterTransition().addListener(transitionListener);
 
         headerImageView = (ImageView) findViewById(R.id.article_header);
         sourceTitleTextView = (TextView) findViewById(R.id.source_title);
