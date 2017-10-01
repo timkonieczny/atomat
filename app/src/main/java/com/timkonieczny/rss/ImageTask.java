@@ -67,7 +67,7 @@ class ImageTask extends AsyncTask<Image, Void, Void> {
             values.put(DbManager.ImagesTable.COLUMN_NAME_WIDTH, image.width);
             values.put(DbManager.ImagesTable.COLUMN_NAME_HEIGHT, image.height);
             dbManager.updateImage(parentDbId, index, values); // header image exists in db already
-        }else if(index == Image.TYPE_INLINE){
+        }else{
             ContentValues values = new ContentValues();
             values.put(DbManager.ImagesTable.COLUMN_NAME_PATH, image.fileName);
             values.put(DbManager.ImagesTable.COLUMN_NAME_WIDTH, image.width);
