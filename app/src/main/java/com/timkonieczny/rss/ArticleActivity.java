@@ -80,6 +80,8 @@ public class ArticleActivity extends AppCompatActivity implements ArticleChanged
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        ActionBar actionBar = getSupportActionBar();
+        if(actionBar!=null) actionBar.setDisplayShowTitleEnabled(false);
         getWindow().getSharedElementEnterTransition().addListener(transitionListener);
 
         headerImageView = (ImageView) findViewById(R.id.article_header);
