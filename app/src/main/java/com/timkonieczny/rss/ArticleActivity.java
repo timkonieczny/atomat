@@ -1,6 +1,7 @@
 package com.timkonieczny.rss;
 
 import android.content.ComponentName;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.customtabs.CustomTabsCallback;
@@ -91,6 +92,8 @@ public class ArticleActivity extends AppCompatActivity implements ArticleChanged
         sourceTitleTextView.setText(article.source.title);
 
         headerImageView.setImageDrawable(article.getImage(this, Image.TYPE_HEADER));
+        int color = article.header.palette.getDarkMutedColor(Color.DKGRAY);
+        headerImageView.setColorFilter(Color.argb(128, Color.red(color), Color.green(color), Color.blue(color)));
         headerImageView.setTransitionName(article.dbId + "_header");
 
         sourceTitleTextView.setCompoundDrawablesWithIntrinsicBounds(article.source.getIconDrawable(this), null, null, null);

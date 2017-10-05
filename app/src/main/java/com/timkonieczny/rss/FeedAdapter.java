@@ -52,7 +52,7 @@ class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.CardViewHolder>
             articleCardViewHolder.articleHeader.setImageDrawable(article.getImage(this, Image.TYPE_HEADER));
 
             if (article.header.palette != null) {
-                int color = article.header.palette.getDarkVibrantColor(Color.DKGRAY);
+                int color = article.header.palette.getDarkMutedColor(Color.DKGRAY);
                 articleCardViewHolder.articleHeader.setColorFilter(Color.argb(128, Color.red(color), Color.green(color), Color.blue(color)));
             }
         }else if(getItemViewType(position) == VIEW_TYPE_MISSING_ARTICLES){
