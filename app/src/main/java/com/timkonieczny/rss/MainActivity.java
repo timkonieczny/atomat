@@ -1,6 +1,8 @@
 package com.timkonieczny.rss;
 
 import android.animation.ObjectAnimator;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.app.job.JobInfo;
 import android.app.job.JobScheduler;
 import android.content.ComponentName;
@@ -101,6 +103,22 @@ public class MainActivity extends AppCompatActivity
 
             navigationView = (NavigationView) findViewById(R.id.nav_view);
             navigationView.setNavigationItemSelectedListener(this);
+
+            getFragmentManager().addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
+                @Override
+                public void onBackStackChanged() {
+                    FragmentManager fragmentManager = getFragmentManager();
+                    int backStackCount = fragmentManager.getBackStackEntryCount();
+                    if(backStackCount>0) {
+                        int menuId = Integer.parseInt(fragmentManager.getBackStackEntryAt(backStackCount - 1).getName());
+                        MenuItem menuItem = navigationView.getMenu().getItem(menuId);
+                        if(!menuItem.isChecked()) menuItem.setChecked(true);
+                    }else{  // menu entry for OverviewFragment is not added to BackStack
+                        MenuItem menuItem = navigationView.getMenu().getItem(0);
+                        if(!menuItem.isChecked()) menuItem.setChecked(true);
+                    }
+                }
+            });
         }
     }
 
@@ -135,7 +153,11 @@ public class MainActivity extends AppCompatActivity
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
-            super.onBackPressed();
+            if(sourcesFragment!=null && sourcesFragment.isAttached) { // handle circular reveal in SourcesFragment
+                if (sourcesFragment.onBackPressed()) {
+                    super.onBackPressed();
+                }
+            }else super.onBackPressed();
         }
 
         ObjectAnimator.ofFloat(drawerArrow, "progress", 0).start();
@@ -154,14 +176,20 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_news) {
+            FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
             if(overviewFragment == null) overviewFragment = new OverviewFragment();
-            getFragmentManager().beginTransaction().replace(R.id.fragment_container, overviewFragment).commit();
+            else fragmentTransaction.addToBackStack("0");  // don't add to BackStack on creation because there should always be one fragment attached
+            fragmentTransaction.replace(R.id.fragment_container, overviewFragment).commit();
         } else if (id == R.id.nav_sources) {
             if(sourcesFragment == null) sourcesFragment = new SourcesFragment();
-            getFragmentManager().beginTransaction().replace(R.id.fragment_container, sourcesFragment).commit();
+            FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
+            fragmentTransaction.addToBackStack("1");
+            fragmentTransaction.replace(R.id.fragment_container, sourcesFragment).commit();
         } else if (id == R.id.nav_preferences) {
             if(settingsFragment == null) settingsFragment = new SettingsFragment();
-            getFragmentManager().beginTransaction().replace(R.id.fragment_container, settingsFragment).commit();
+            FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
+            fragmentTransaction.addToBackStack("2");
+            fragmentTransaction.replace(R.id.fragment_container, settingsFragment).commit();
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

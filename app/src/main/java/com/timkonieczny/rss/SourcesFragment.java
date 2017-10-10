@@ -37,6 +37,8 @@ public class SourcesFragment extends Fragment implements FeedListener{
 
     private SourcesAdapter sourcesAdapter;
 
+    boolean isAttached;
+
     public SourcesFragment() {}
 
 
@@ -191,14 +193,24 @@ public class SourcesFragment extends Fragment implements FeedListener{
         }
     }
 
+    boolean onBackPressed(){
+        if(revealingView.getVisibility() == View.VISIBLE){
+            closeCircularReveal(revealingView);
+            return false;
+        }
+        return true;
+    }
+
     @Override
     public void onDetach() {
         super.onDetach();
+        isAttached = false;
         ((MainActivity)getActivity()).isAnyFragmentAttached = false;
     }
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
+        isAttached = true;
         ((MainActivity)getActivity()).isAnyFragmentAttached = true;
     }}
