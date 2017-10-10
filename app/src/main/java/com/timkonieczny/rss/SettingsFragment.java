@@ -1,6 +1,7 @@
 package com.timkonieczny.rss;
 
 
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceFragment;
@@ -58,5 +59,17 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
         }else if(key.equals("pref_frequency")){
             ((MainActivity)getActivity()).rescheduleBackgroundUpdate();
         }
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        ((MainActivity)getActivity()).isAnyFragmentAttached = false;
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        ((MainActivity)getActivity()).isAnyFragmentAttached = true;
     }
 }

@@ -1,6 +1,7 @@
 package com.timkonieczny.rss;
 
 import android.app.Fragment;
+import android.content.Context;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -131,5 +132,17 @@ public class OverviewFragment
     public void updateFeed(){
         // TODO: The Verge: Feed only contains article previews. But ID is also a feed URL containing full articles.
         new Feed(getContext(), this, null).execute();
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        ((MainActivity)getActivity()).isAnyFragmentAttached = false;
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        ((MainActivity)getActivity()).isAnyFragmentAttached = true;
     }
 }

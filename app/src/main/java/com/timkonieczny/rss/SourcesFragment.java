@@ -190,4 +190,15 @@ public class SourcesFragment extends Fragment implements FeedListener{
                 break;
         }
     }
-}
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        ((MainActivity)getActivity()).isAnyFragmentAttached = false;
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        ((MainActivity)getActivity()).isAnyFragmentAttached = true;
+    }}

@@ -37,6 +37,7 @@ public class MainActivity extends AppCompatActivity
     private DrawerLayout drawer;
     private Toolbar toolbar;
     private View upButton;
+    private NavigationView navigationView;
 
     protected static boolean goToSettings = false;
     protected static boolean isFragmentSelected = false;
@@ -50,6 +51,7 @@ public class MainActivity extends AppCompatActivity
 
     boolean isActivityResumed = true;
     boolean isDrawerToggleArrow = false;
+    boolean isAnyFragmentAttached;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,21 +99,8 @@ public class MainActivity extends AppCompatActivity
             if(views.size() != 0) upButton = views.get(0); // TODO: check other strings too: close drawer, navigate up
             upButton.setTransitionName("up_button");
 
-            NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+            navigationView = (NavigationView) findViewById(R.id.nav_view);
             navigationView.setNavigationItemSelectedListener(this);
-
-            if (!isFragmentSelected) {
-                if (goToSettings) {
-                    onNavigationItemSelected(navigationView.getMenu().findItem(R.id.nav_preferences));
-                    navigationView.getMenu().findItem(R.id.nav_preferences).setChecked(true);
-                    goToSettings = false;
-                } else {
-                    onNavigationItemSelected(navigationView.getMenu().findItem(R.id.nav_news));
-                    navigationView.getMenu().findItem(R.id.nav_news).setChecked(true);
-                }
-                isFragmentSelected = true;
-            }
-            rescheduleBackgroundUpdate();
         }
     }
 
@@ -124,6 +113,20 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
+
+        if (!isFragmentSelected||!isAnyFragmentAttached) {
+            if (goToSettings) {
+                onNavigationItemSelected(navigationView.getMenu().findItem(R.id.nav_preferences));
+                navigationView.getMenu().findItem(R.id.nav_preferences).setChecked(true);
+                goToSettings = false;
+            } else {
+                onNavigationItemSelected(navigationView.getMenu().findItem(R.id.nav_news));
+                navigationView.getMenu().findItem(R.id.nav_news).setChecked(true);
+            }
+            isFragmentSelected = true;
+        }
+        rescheduleBackgroundUpdate();
+
         isActivityResumed = true;
     }
 
