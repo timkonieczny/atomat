@@ -137,6 +137,14 @@ public class ArticleActivity extends AppCompatActivity implements ArticleChanged
     }
 
     private void setInlineUrls(){
+        findViewById(R.id.view_in_browser).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                customTabsIntent.launchUrl(view.getContext(), Uri.parse(article.link));
+            }
+        });
+
+
         ArrayList<URLSpan> links = new ArrayList<>(Arrays.asList(
                 spannableStringBuilder.getSpans(0, spannableStringBuilder.length(), URLSpan.class)));
         if(links.size() > 0) {
@@ -158,7 +166,6 @@ public class ArticleActivity extends AppCompatActivity implements ArticleChanged
             }
             // make links clickable
             List<Bundle> likelyUrls = new ArrayList<>(links.size() - 1);
-            Uri mostLikelyUrl = null;
             for (int i = 0; i < links.size(); i++) {
                 link = links.get(i);
                 final Uri linkUri = Uri.parse(link.getURL());
@@ -173,21 +180,19 @@ public class ArticleActivity extends AppCompatActivity implements ArticleChanged
                         spannableStringBuilder.getSpanFlags(link)
                 );
                 spannableStringBuilder.removeSpan(link);
-                if (i < links.size() - 1) {
-                    Bundle bundle = new Bundle();
-                    bundle.putParcelable(CustomTabsService.KEY_URL, linkUri);
-                    likelyUrls.add(bundle);
-                } else mostLikelyUrl = linkUri;
+                Bundle bundle = new Bundle();
+                bundle.putParcelable(CustomTabsService.KEY_URL, linkUri);
+                likelyUrls.add(bundle);
             }
             if (links.size() > 0) {
-                customTabsServiceConnection = getCustomTabsServiceConnection(mostLikelyUrl, likelyUrls);
+                customTabsServiceConnection = getCustomTabsServiceConnection(likelyUrls);
                 CustomTabsClient.bindCustomTabsService(this, "com.android.chrome",
                         customTabsServiceConnection);
             }
         }
     }
 
-    private CustomTabsServiceConnection getCustomTabsServiceConnection(final Uri mostLikelyUrl, final List<Bundle> likelyUrls){
+    private CustomTabsServiceConnection getCustomTabsServiceConnection(final List<Bundle> likelyUrls){
         return new CustomTabsServiceConnection() {
 
             private CustomTabsClient client;
@@ -198,7 +203,7 @@ public class ArticleActivity extends AppCompatActivity implements ArticleChanged
                 this.client = client;
                 this.client.warmup(0);
                 session = this.client.newSession(new CustomTabsCallback());
-                session.mayLaunchUrl(mostLikelyUrl, null, likelyUrls);  // TODO: Maybe loading too many links
+                session.mayLaunchUrl(Uri.parse(article.link), null, likelyUrls);  // TODO: Maybe loading too many links
 
                 customTabsIntent = (new CustomTabsIntent.Builder(session)).build();
             }

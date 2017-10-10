@@ -11,7 +11,7 @@ class Article extends DbRow implements ImageListener{
 
     Date published;
     String title, author, content;
-    private String link;
+    String link;
     Source source;
     boolean isPlaceholder;
     View.OnClickListener onClickListener;

@@ -86,6 +86,14 @@
                 android:layout_marginTop="16dp"
                 android:lineSpacingExtra="4sp"
                 android:text="@string/debug_text"/>
+            <Button
+                style="@style/Widget.AppCompat.Button.Colored"
+                android:id="@+id/view_in_browser"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/colorWhite"
+                android:text="@string/view_on_website"
+                android:layout_gravity="center_horizontal"/>
         </LinearLayout>
 
     </android.support.v4.widget.NestedScrollView>
