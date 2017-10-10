@@ -123,8 +123,8 @@ public class OverviewFragment
                         Snackbar.make(getView(), R.string.error_invalid_rss, Snackbar.LENGTH_SHORT).show();
                     break;
             }
+            swipeRefreshLayout.setRefreshing(false);
         }else if(hasNewArticles) feedAdapter.notifyDataSetChanged();
-        swipeRefreshLayout.setRefreshing(false);
         if(getActivity()!=null) ((MainActivity)getActivity()).isActivityResumed = false;
     }
 
