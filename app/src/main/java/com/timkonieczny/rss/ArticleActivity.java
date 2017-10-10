@@ -92,8 +92,10 @@ public class ArticleActivity extends AppCompatActivity implements ArticleChanged
         sourceTitleTextView.setText(article.source.title);
 
         headerImageView.setImageDrawable(article.getImage(this, Image.TYPE_HEADER));
-        int color = article.header.palette.getDarkMutedColor(Color.DKGRAY);
-        headerImageView.setColorFilter(Color.argb(128, Color.red(color), Color.green(color), Color.blue(color)));
+        if (article.header.palette != null) {
+            int color = article.header.palette.getDarkMutedColor(Color.DKGRAY);
+            headerImageView.setColorFilter(Color.argb(128, Color.red(color), Color.green(color), Color.blue(color)));
+        }
         headerImageView.setTransitionName(article.dbId + "_header");
 
         sourceTitleTextView.setCompoundDrawablesWithIntrinsicBounds(article.source.getIconDrawable(this), null, null, null);
@@ -255,7 +257,11 @@ public class ArticleActivity extends AppCompatActivity implements ArticleChanged
 
     @Override
     public void onArticleChanged(Article article, int flag) {
-        if(flag == Image.TYPE_HEADER) headerImageView.setImageDrawable(article.header.drawable);
+        if(flag == Image.TYPE_HEADER){
+            headerImageView.setImageDrawable(article.header.drawable);
+            int color = article.header.palette.getDarkMutedColor(Color.DKGRAY);
+            headerImageView.setColorFilter(Color.argb(128, Color.red(color), Color.green(color), Color.blue(color)));
+        }
         else {
             setInlineImage(flag);
             contentTextView.setText(spannableStringBuilder);
