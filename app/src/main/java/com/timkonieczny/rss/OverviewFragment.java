@@ -109,7 +109,7 @@ public class OverviewFragment
                     break;
                 case AtomParser.ERROR_IO:
                     if(getView()!=null)
-                        Snackbar.make(getView(), R.string.error_network, Snackbar.LENGTH_SHORT)
+                        Snackbar.make(getView(), R.string.error_network, Snackbar.LENGTH_LONG)
                                 .setAction(R.string.retry, new View.OnClickListener() {
                                     @Override
                                     public void onClick(View v) {
