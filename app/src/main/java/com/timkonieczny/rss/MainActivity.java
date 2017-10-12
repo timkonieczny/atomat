@@ -132,7 +132,7 @@ public class MainActivity extends AppCompatActivity
     protected void onResume() {
         super.onResume();
 
-        if (!isFragmentSelected||!isAnyFragmentAttached) {
+        if ((!isFragmentSelected||!isAnyFragmentAttached)&&navigationView!=null) {
             if (goToSettings) {
                 onNavigationItemSelected(navigationView.getMenu().findItem(R.id.nav_preferences));
                 navigationView.getMenu().findItem(R.id.nav_preferences).setChecked(true);
