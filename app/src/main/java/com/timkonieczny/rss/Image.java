@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.support.v7.graphics.Palette;
+import android.util.Log;
 
 import java.io.File;
 
@@ -43,7 +44,7 @@ class Image extends DbRow{
             return drawable;
         }else if(url != null){
             if(imageTask == null) {
-                imageTask = new ImageTask(context, index, generateFileName(fileNameSeed), parentDbId);
+                imageTask = new ImageTask(context, index, generateFileName(fileNameSeed, index), parentDbId);
                 imageTask.execute(this);
             }
             imageTask.imageListener = imageListener;
@@ -61,10 +62,11 @@ class Image extends DbRow{
         if(type!=TYPE_INLINE) palette = (new Palette.Builder(bitmap)).generate();
     }
 
-    private String generateFileName(String name){
+    private String generateFileName(String name, int index){
         String fileName = name.replaceAll("[^a-zA-Z_0-9]", "").toLowerCase();
         if(fileName.length()>10) fileName = fileName.substring(0, 10);
-        fileName += "_" + System.currentTimeMillis() + ".jpg";
+        fileName += "_" + index + "_" + System.currentTimeMillis() + ".jpg";
+        Log.d("Image", fileName);
         return fileName;
     }
 
