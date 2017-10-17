@@ -73,14 +73,16 @@ class AtomParser {
     }
 
 
-    void parseAll() throws XmlPullParserException, IOException {
+    int parseAll() throws XmlPullParserException, IOException {
+        int newArticles = 0;
         String[][] sources = dbManager.getSourceInfos();
         for (String[] source : sources) {
-            parse(Long.parseLong(source[0]), source[1], source[2], source[3], false);
+            newArticles += parse(Long.parseLong(source[0]), source[1], source[2], source[3], false);
         }
+        return newArticles;
     }
 
-    void parse(long dbId, String url, String lastModified, String eTag, boolean isNewSource) throws XmlPullParserException, IOException {
+    int parse(long dbId, String url, String lastModified, String eTag, boolean isNewSource) throws XmlPullParserException, IOException {
 
         newArticles = new ArrayList<>();
         newImages = new ArrayList<>();
@@ -138,6 +140,7 @@ class AtomParser {
         }
 
         connection.disconnect();
+        return newArticles.size();
     }
 
     private void readFeed(XmlPullParser parser, boolean isNewSource) throws XmlPullParserException, IOException {

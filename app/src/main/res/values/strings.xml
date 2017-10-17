@@ -73,6 +73,9 @@
     <string name="error_network">No connection</string>
     <string name="error_invalid_rss">RSS feed format could not be read</string>
 
+    <!-- notification strings -->
+    <string name="new_stories"> new stories</string>
+
     <!-- placeholder strings -->
     <!-- TODO: Remove placeholder strings -->
     <string name="debug_title">Android O is supposed to make Android updates arrive faster</string>

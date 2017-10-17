@@ -9,7 +9,7 @@ public class UpdateService extends JobService {
     // TODO: Delay UpdateService after manual refresh?
     @Override
     public boolean onStartJob(final JobParameters jobParameters) {
-        new BackgroundFeedTask(new DbManager(getApplicationContext())){
+        new BackgroundFeedTask(new DbManager(getApplicationContext()), getApplicationContext()){
             @Override
             protected void onPostExecute(Void aVoid){
                 jobFinished(jobParameters, false);
