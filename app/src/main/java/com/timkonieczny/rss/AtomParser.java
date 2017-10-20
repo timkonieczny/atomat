@@ -50,6 +50,9 @@ class AtomParser {
     private HashSet<String> entryAuthorTags;
     private HashSet<String> authorNameTags;
 
+    ArrayList<String> newStoriesTitles;
+    ArrayList<String> newArticlesSourcesTitles;
+
     AtomParser(DbManager dbManager) {
         this.dbManager = dbManager;
 
@@ -74,16 +77,22 @@ class AtomParser {
 
 
     int parseAll() throws XmlPullParserException, IOException {
-        int newArticles = 0;
+        int totalNewArticles = 0;
+        newArticlesSourcesTitles = new ArrayList<>();
         String[][] sources = dbManager.getSourceInfos();
         for (String[] source : sources) {
-            newArticles += parse(Long.parseLong(source[0]), source[1], source[2], source[3], false);
+            int newArticles = parse(Long.parseLong(source[0]), source[1], source[2], source[3], false);
+            if(newArticles > 0) {
+                totalNewArticles += newArticles;
+                newArticlesSourcesTitles.add(source[4]);
+            }
         }
-        return newArticles;
+        return totalNewArticles;
     }
 
     int parse(long dbId, String url, String lastModified, String eTag, boolean isNewSource) throws XmlPullParserException, IOException {
 
+        if(newStoriesTitles == null) newStoriesTitles = new ArrayList<>();
         newArticles = new ArrayList<>();
         newImages = new ArrayList<>();
         hasOverlappingArticles = false;
@@ -259,6 +268,7 @@ class AtomParser {
                 headerValues.put(DbManager.ImagesTable.COLUMN_NAME_TYPE, Image.TYPE_HEADER);
                 newImages.add(headerValues);
             } else newImages.add(null);
+            newStoriesTitles.add(title);
         }else{
             hasOverlappingArticles = true;
         }

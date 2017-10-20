@@ -260,15 +260,18 @@ class DbManager extends SQLiteOpenHelper {
                 new String[]{SourcesTable._ID,
                         SourcesTable.COLUMN_NAME_LAST_MODIFIED,
                         SourcesTable.COLUMN_NAME_ETAG,
-                        SourcesTable.COLUMN_NAME_URL},
-                null, null,null, null, null);
-        String[][] values = new String[cursor.getCount()][4];
+                        SourcesTable.COLUMN_NAME_URL,
+                        SourcesTable.COLUMN_NAME_TITLE
+                },
+                null, null, null, null, null);
+        String[][] values = new String[cursor.getCount()][5];
         int i = 0;
         while (cursor.moveToNext()) {
             values[i][0] = getString(cursor, SourcesTable._ID);
             values[i][1] = getString(cursor, SourcesTable.COLUMN_NAME_URL);
             values[i][2] = getString(cursor, SourcesTable.COLUMN_NAME_LAST_MODIFIED);
             values[i][3] = getString(cursor, SourcesTable.COLUMN_NAME_ETAG);
+            values[i][4] = getString(cursor, SourcesTable.COLUMN_NAME_TITLE);
             i++;
         }
         cursor.close();

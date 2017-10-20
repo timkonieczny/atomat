@@ -10,6 +10,8 @@ import android.os.Build;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.NotificationCompat;
 
+import java.util.ArrayList;
+
 public class NotificationHelper extends ContextWrapper {
 
     NotificationManager notificationManager;
@@ -29,12 +31,22 @@ public class NotificationHelper extends ContextWrapper {
         getNotificationManager().createNotificationChannel(notificationChannel);
     }
 
-    public NotificationCompat.Builder getNotification(String title, String body) {
-            return new NotificationCompat.Builder(getApplicationContext(), "default")
-                    .setContentTitle(title)
-                    .setContentText(body)
-                    .setSmallIcon(R.mipmap.ic_launcher)
-                    .setAutoCancel(true);
+    public NotificationCompat.Builder getNotification(String title, String body, int icon, ArrayList<String> inboxStyleLines) {
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(getApplicationContext(), "default")
+                .setContentTitle(title)
+                .setContentText(body)
+                .setSmallIcon(icon);
+//                .setLargeIcon(R.mipmap.ic_launcher)
+
+        NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle();
+        for(int i = 0; i < (inboxStyleLines.size() > 5 ? 5 : inboxStyleLines.size()); i++)
+            inboxStyle.addLine(inboxStyleLines.get(i));
+        if(inboxStyleLines.size()-5>0)
+            inboxStyle.setSummaryText("+" + (inboxStyleLines.size()-5) + " " + getResources().getString(R.string.more));
+        inboxStyle.setBigContentTitle(title);
+        notificationBuilder.setStyle(inboxStyle);
+
+        return notificationBuilder;
     }
 
     public void notify(NotificationCompat.Builder notification) {
